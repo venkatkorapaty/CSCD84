@@ -150,7 +150,6 @@ void traceBack(LList** end, int path[1024][2]) {
 	for (int j = 0; j < i; j++) {
 		x = reversePath[j]%size_X;;
 		y = reversePath[j]/size_Y;
-		fprintf(stderr, "path (%d, %d)\n", x, y);
 		path[i - j][0] = x;
 		path[i - j][1] = y;
 	}
@@ -373,8 +372,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			int yCord = curr->value / size_Y;
 			int catCheeseLoc = is_cat_or_cheese(xCord, yCord, cat_loc, cats, cheese_loc, cheeses);
 			if (catCheeseLoc == CHEESE) {
-				fprintf(stderr, "GOAL\n");
-				fprintf(stderr, "cheese is at (%d, %d)\n", cheese_loc[0][0], cheese_loc[0][1]);
 				LList** queRef2 = &curr;
 				traceBack(queRef2, path);
 			}
