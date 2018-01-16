@@ -74,7 +74,7 @@ void addList(LList** list, int value) {
 }
 
 LList* queuePop(LList** list) {
-	if (list == NULL) {
+	if ((*list) == NULL) {
 		return NULL;
 	}
 	LList* temp = *list;
@@ -92,7 +92,7 @@ LList* queuePop(LList** list) {
 void printQueue(LList** list) {
 	LList* temp = (*list);
 	if (temp == NULL) {
-		fprintf(stderr, "test!\n");
+		fprintf(stderr, "lsit is empty!\n");
 	} else {
 		int i = 0;
 		while (temp != NULL) {
@@ -286,6 +286,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	path[0][1]=mouse_loc[0][1];
 	path[1][0]=mouse_loc[0][0];
 	path[1][1]=mouse_loc[0][1];
+	/*
 	if (mode == 1) {
 		struct LList* queue = NULL;
 		LList** queRef = &queue;
@@ -296,9 +297,30 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		fprintf(stderr, "\n");
 		queuePop(queRef);
 		printQueue(queRef);
-	}
 
-	exit(1);
+		fprintf(stderr, "\n");
+		addList(queRef, 234);
+		printQueue(queRef);
+
+		fprintf(stderr, "\n");
+		queuePop(queRef);
+		printQueue(queRef);
+
+		fprintf(stderr, "\n");
+		queuePop(queRef);
+		printQueue(queRef);
+
+		fprintf(stderr, "\n");
+		queuePop(queRef);
+		printQueue(queRef);
+
+		fprintf(stderr, "\n");
+		queuePop(queRef);
+		printQueue(queRef);
+	}*/
+
+
+	//exit(1);
 	/*
 
 	path[0][0]=mouse_loc[0][0];
