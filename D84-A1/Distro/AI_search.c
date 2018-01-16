@@ -43,10 +43,10 @@
 ***********************************************************************/
 
 #include "AI_search.h"
+#include <unistd.h>
 
 typedef struct LList{
 	struct LList* next;
-
 	int value;
 };
 
@@ -70,6 +70,8 @@ void addList(LList** list, int value) {
 		}
 	}
 	temp->next = node;
+
+	
 
 }
 
@@ -321,13 +323,15 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 
 	//exit(1);
-	/*
+	
 
 	path[0][0]=mouse_loc[0][0];
 	path[0][1]=mouse_loc[0][1];
 	path[1][0]=mouse_loc[0][0];
 	path[1][1]=mouse_loc[0][1];
-	if (mode == 0) {
+
+	// BFS
+	if (mode == 1) {
 		int v = 1;
 		struct LList* queue;
 		int visited[1024];
@@ -338,71 +342,75 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			visited[i] = 0;
 		}
 
-		queue = (LList*)malloc(sizeof(LList));
-		queue->x = mouse_loc[0][0];
-		queue->y = mouse_loc[0][1];//visited[mouse_loc[0][0] + (mouse_loc[0][1]*size_X)];
-		queue->next = NULL;
+		LList** queRef = &queue;
+		addList(queRef, mouse_loc[0][0] + (size_Y * mouse_loc[0][1]));
 		int k = 0;
 		while (queue != NULL) {
 			k++;
 			fprintf(stderr, "ITER: %d\n", k);
-			LList** queRef = &queue;
 			LList* curr = queuePop(queRef);
+			int xCord = curr->value % size_X;
+			int yCord = curr->value / size_Y;
 			//fprintf(stderr, "test!\n");
-			visited[curr->x + (curr->y*size_X)] = 1;
-			visit_order[curr->x][curr->y] += v;
-			fprintf(stderr, "%d\n", visit_order[curr->x][curr->y]);
+			visited[xCord + (yCord*size_X)] = 1;
+			visit_order[xCord][yCord] += v;
+			fprintf(stderr, "%d\n", visit_order[xCord][yCord]);
 			v++;
-			// if (queue == NULL) {
-			// 	fprintf(stderr, "null!!\n");
-			// }
-			double *loc = gr[curr->x + (curr->y*size_X)];
+			double *loc = gr[xCord + (yCord*size_X)];
 			queRef = &queue;
-			if (loc[0] && !visited[(curr->x) + ((curr->y-1)*size_X)] && curr->y != 0) {
+			// sleep(1);
+			if (loc[0]  && yCord != 0) {
+				if (!visited[xCord + ((yCord - 1) * size_Y)]){
+					fprintf(stderr, "checking top x = %d and y = %d \n", xCord, yCord - 1);
+					addList(queRef, xCord + ((yCord-1)*size_X));
 
-				addList(queRef, curr->x, curr->y - 1);
-				int length = 0;
-				LList* t = queue;
-				while (t != NULL) {
-					length++;
-					fprintf(stderr, "x: %d, y: %d\n", t->x, t->y);
-					t = t->next;
+					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
+					if (catCheeseLoc == CHEESE) {
+						fprintf(stderr, "GOAL\n");
+						exit(1);
+					}
 				}
+				
+			}
+			if (loc[1] && xCord != 31) {
+				if (!visited[(xCord + 1) + ((yCord) * size_Y)] ) {
+					fprintf(stderr, "checking right of x = %d and y = %d \n", xCord + 1, yCord);
+					addList(queRef, (xCord+1) + (yCord*size_X));
+					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
+					if (catCheeseLoc == CHEESE) {
+						fprintf(stderr, "GOAL\n");
+						exit(1);
+					}
+				}
+			}
+			if (loc[2] && yCord != 31) {
+				if(!visited[xCord + ((yCord + 1) * size_Y)] ) {
+					fprintf(stderr, "checking bottom of x = %d and y = %d \n", xCord, yCord  + 1);
+					addList(queRef, xCord + ((yCord+1)*size_X));
+					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
+					if (catCheeseLoc == CHEESE) {
+						fprintf(stderr, "GOAL\n");
+						exit(1);
+					}
+				}
+			}
+			if (loc[3] && xCord != 0) {
+				if(!visited[(xCord - 1) + ((yCord) * size_Y)] ){
+					fprintf(stderr, "checking left of x = %d and y = %d \n", xCord - 1, yCord);
+					addList(queRef, (xCord-1) + (yCord*size_X));
+					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
+					if (catCheeseLoc == CHEESE) {
+						fprintf(stderr, "GOAL\n");
+						exit(1);
+					}
+				}
+			}
 
-				fprintf(stderr, "LENGTH: %d\n", length);
-				int catCheeseLoc = is_cat_or_cheese(curr->x, curr->y - 1, cat_loc, cats, cheese_loc, cheeses);
-				if (catCheeseLoc == CHEESE) {
-					fprintf(stderr, "GOAL\n");
-				}
-			}
-			if (loc[1] && !visited[(curr->x + 1) + ((curr->y)*size_X)] && curr->x != 31) {
-				addList(queRef, curr->x + 1, curr->y);
-				int catCheeseLoc = is_cat_or_cheese(curr->x + 1, curr->y, cat_loc, cats, cheese_loc, cheeses);
-				if (catCheeseLoc == CHEESE) {
-					fprintf(stderr, "GOAL\n");
-				}
-			}
-			if (loc[2] && !visited[(curr->x) + ((curr->y+1)*size_X)] && curr->y != 31) {
-				addList(queRef, curr->x, curr->y + 1);
-				int catCheeseLoc = is_cat_or_cheese(curr->x, curr->y + 1, cat_loc, cats, cheese_loc, cheeses);
-				if (catCheeseLoc == CHEESE) {
-					fprintf(stderr, "GOAL\n");
-				}
-			}
-			if (loc[3] && !visited[(curr->x - 1) + ((curr->y)*size_X)] && curr->x != 0) {
-				addList(queRef, curr->x - 1, curr->y);
-				int catCheeseLoc = is_cat_or_cheese(curr->x - 1, curr->y, cat_loc, cats, cheese_loc, cheeses);
-				if (catCheeseLoc == CHEESE) {
-					fprintf(stderr, "GOAL\n");
-				}
-			}
-
-			
+			printQueue(queRef);
 			free(curr);
 		}
 	}
-	*/
-
+	exit(1);
 	return;
 }
 
