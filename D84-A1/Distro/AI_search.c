@@ -87,6 +87,13 @@ LList* queuePop(LList** list) {
 	return temp;
 }
 
+void printQueue(LList** list) {
+	fprintf(stderr, "test1!\n");
+	if (list == NULL) {
+		fprintf(stderr, "test!\n");
+	}
+}
+
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
 	/*
 	  Return 0 for safe spot
@@ -98,7 +105,7 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 	int i = 0;
 	while (i < bound) {
 		if (i < cats && cat_loc[i][0] == x && cat_loc[i][1] == i) {
-			return 2;
+			return 2;fprintf(stderr, "test!\n");
 		}
 		if (i < cheeses && cheese_loc[i][0] == x && cheese_loc[i][1]) {
 			return 1;
@@ -170,7 +177,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	Arguments:
 			gr[graph_size][4]   - This is an adjacency list for the maze
 			path[graph_size][2] - An initially empty path for your code to fill.
-						In this case, empty means all entries are initially -1
+						In this case, empty means all entries are in
+		LList** queRef = &queue;
+		queue = (LList*)malloc(sizeof(LList));
+		printQueue(queRef);itially -1
 			visit_order[size_X][size_Y]	- An array in which your code will store the
 							*order* in which grid locations were 
 							visited during search. For example, while
@@ -206,7 +216,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							h = heuristic( x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses);
 
 	Return values:
-			Your search code will directly update data passed-in as arguments:
+			Your search code will directly update data passedfprintf(stderr, "test!\n");-in as arguments:
 
 			- path[graph_size][2]	: Your search code will update this array to contain the path from
 						the mouse to one of the cheese chunks. The order matters, so
@@ -233,7 +243,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				
 			That's that, now, implement your solution!
 	*/
-
 	/********************************************************************************************************
 	 * 
 	 * TO DO:	Implement code to carry out the different types of search depending on the
@@ -245,7 +254,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	*	    	  to inform your A* function somehow of what heuristic it's supposed to use.
 	*
 	*		Visiting Order: When adding the neighbours of a node to your list of candidates for
-	*				expansion, do so in the order top, right, bottom, left.
+	*				expansion, do so in the order top, right, bottom,
+		LList** queRef = &queue;
+		queue = (LList*)malloc(sizeof(LList));
+		printQueue(queRef); left.
 	*
 	*		NOTE: Your search functions should be smart enough to not choose a path that goes
 	*		      through a cat! this is easily done without any heuristics.
@@ -258,6 +270,17 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	********************************************************************************************************/
 
 	// Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
+
+
+	path[0][0]=mouse_loc[0][0];
+	path[0][1]=mouse_loc[0][1];
+	path[1][0]=mouse_loc[0][0];
+	path[1][1]=mouse_loc[0][1];
+	fprintf(stderr, "test!111 mode: %d\n", mode);
+	if (mode == 1) {
+		fprintf(stderr, "test!\n");
+	}
+	/*
 
 	path[0][0]=mouse_loc[0][0];
 	path[0][1]=mouse_loc[0][1];
@@ -337,6 +360,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			free(curr);
 		}
 	}
+	*/
 
 	return;
 }
