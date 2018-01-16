@@ -47,27 +47,29 @@
 typedef struct LList{
 	struct LList* next;
 
-	int x;
-	int y;
+	int value;
 };
 
-void addList(LList** list, int x, int y) {
+void addList(LList** list, int value) {
 	// initialize node to add
 	LList* node = (LList*)malloc(sizeof(LList));
-	node->x = x;
-	node->y = y;
-	fprintf(stderr, "ADDLIST:  x: %d, y: %d\n", node->x, node->y);
-	if (*list == NULL) {
-
+	node->value = value;
+	node->next = NULL;
+	LList* temp = *list;
+	if (temp == NULL) {
 		(*list) = node;
 		return;
 	}
-	// traverse to end of list
-	while((*list)->next != NULL) {
+	if (temp->next == NULL) {
+		temp->next = node;
+	} else {
+		// traverse to end of list
+		while(temp->next != NULL) {
 
-		*list = (*list)->next;
+			temp = temp->next;
+		}
 	}
-	(*list)->next = node;
+	temp->next = node;
 
 }
 
@@ -88,10 +90,18 @@ LList* queuePop(LList** list) {
 }
 
 void printQueue(LList** list) {
-	fprintf(stderr, "test1!\n");
-	if (list == NULL) {
+	LList* temp = (*list);
+	if (temp == NULL) {
 		fprintf(stderr, "test!\n");
+	} else {
+		int i = 0;
+		while (temp != NULL) {
+			fprintf(stderr, "index %d with value %d\n", i, temp->value);
+			i++;
+			temp = temp->next;
+		}
 	}
+	return;
 }
 
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
@@ -276,10 +286,19 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	path[0][1]=mouse_loc[0][1];
 	path[1][0]=mouse_loc[0][0];
 	path[1][1]=mouse_loc[0][1];
-	fprintf(stderr, "test!111 mode: %d\n", mode);
 	if (mode == 1) {
-		fprintf(stderr, "test!\n");
+		struct LList* queue = NULL;
+		LList** queRef = &queue;
+		addList(queRef, mouse_loc[0][0] + (32 * mouse_loc[0][1]));
+		addList(queRef, 101);
+		addList(queRef, 204);
+		printQueue(queRef);
+		fprintf(stderr, "\n");
+		queuePop(queRef);
+		printQueue(queRef);
 	}
+
+	exit(1);
 	/*
 
 	path[0][0]=mouse_loc[0][0];
