@@ -156,8 +156,22 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 	return 0;
 }
 
+int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
+	/*
+	*/
+	int i = 0;
+	while (i < cheeses) {
+		if (cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
+			fprintf(stderr, "found a cheese\n");
+			return i;
+		}
+		i++;
+	}
+	return -1;
+}
 
-static int traced[1024][2];
+
+static int traced[1034][2];
 static int indexed;
 
 void traceBack(LList** end, int path[1024][2]) {
@@ -186,11 +200,11 @@ void traceBack(LList** end, int path[1024][2]) {
 		path[j][1] = reversePath[0]/size_Y;
 	}
 
-	for (int j = 0; j < i; j++) {
+	for (int j = 0; j < i + 10; j++) {
 		traced[indexed + j][0] = path[j][0];
 		traced[indexed + j][1] = path[j][1];
 	}
-	indexed = indexed + i;
+	indexed = indexed + i + 10;
 	// exit(1);
 	
 
@@ -351,7 +365,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	* 
 	*		How you design your solution is up to you. But:
 	*
-	*		- Document your implementation by adding concise and clear comments in this file
+	*		- Document your implementation by addingarray concise and clear comments in this file
 	*		- Document your design (how you implemented the solution, and why) in the report
 	*
 	********************************************************************************************************/
@@ -426,6 +440,22 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	// fprintf(stderr, "during trace path second step is (%d, %d)\n", traced[1][0], traced[1][1]);
 	// BFS
 	if (mode == 0 || mode == 1) {
+		fprintf(stderr, "mouse coords (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
+		if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1)
+		|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1)
+		|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1)
+		||  (is_beside_cheese(mouse_loc[0][0] - 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1)) {
+			// memset(traced, 0, sizeof(array[0][0]) * 1034 * 2);
+
+			for(int j = 0; j < 2; j++)
+			{
+				for(int i = 0; i < 1034; i++)
+				{  
+					traced[i][j] = 0;
+				}
+			}
+			indexed = 0;
+		}
 		int v = 1;
 		struct LList* queue;
 		int visited[1024];
