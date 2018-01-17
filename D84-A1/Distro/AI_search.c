@@ -48,6 +48,7 @@
 typedef struct LList{
 	struct LList* next;
 	struct LList* prev;
+	struct LList* last;
 	int value;
 };
 
@@ -56,6 +57,7 @@ void addList(LList** list, int value, LList* prev) {
 	LList* node = (LList*)malloc(sizeof(LList));
 	node->value = value;
 	node->next = NULL;
+	node->last = NULL;
 	if (prev != NULL) {
 		node->prev = prev;
 	} else {
@@ -64,8 +66,10 @@ void addList(LList** list, int value, LList* prev) {
 	LList* temp = *list;
 	if (temp == NULL) {
 		(*list) = node;
+		node->last = node;
 		return;
 	}
+	temp->last = node;
 	if (temp->next == NULL) {
 		temp->next = node;
 	} else {
@@ -96,6 +100,26 @@ LList* queuePop(LList** list) {
 	temp->next = NULL;
 	return temp;
 }
+
+LList* stackPop(LList** list) {
+	if ((*list) == NULL) {
+		return NULL;
+	}
+	LList* temp = *list;
+
+	if (temp->next == NULL) {
+		*list = NULL;
+		return temp;
+	}
+	while (temp->next->next != NULL) {
+		temp = temp->next;
+	}
+	LList* ret = temp->next;
+	temp->next = NULL;
+	return ret;
+	
+}
+
 
 void printQueue(LList** list) {
 	LList* temp = (*list);
@@ -354,7 +378,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	path[0][1]=mouse_loc[0][1];
 
 	// BFS
-	if (mode == 1) {
+	if (mode == 1 || mode == 2) {
 		int v = 1;
 		struct LList* queue;
 		int visited[1024];
@@ -367,7 +391,14 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		int k = 0;
 		while (queue != NULL) {
 			k++;
-			LList* curr = queuePop(queRef);
+
+			LList* curr;
+			if (mode == 1) {
+				curr = queuePop(queRef);
+			}
+			if (mode == 2) {
+				curr = stackPop(queRef);
+			}
 			int xCord = curr->value % size_X;
 			int yCord = curr->value / size_Y;
 			//fprintf(stderr, "test!\n");
