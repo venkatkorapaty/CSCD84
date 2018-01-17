@@ -171,7 +171,7 @@ int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
 }
 
 
-static int traced[1034][2];
+static int traced[1044][2];
 static int indexed;
 
 void traceBack(LList** end, int path[1024][2]) {
@@ -200,11 +200,11 @@ void traceBack(LList** end, int path[1024][2]) {
 		path[j][1] = reversePath[0]/size_Y;
 	}
 
-	for (int j = 0; j < i + 10; j++) {
+	for (int j = 0; j < i + 20; j++) {
 		traced[indexed + j][0] = path[j][0];
 		traced[indexed + j][1] = path[j][1];
 	}
-	indexed = indexed + i + 10;
+	indexed = indexed + i + 20;
 	// exit(1);
 	
 
@@ -440,13 +440,13 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	// fprintf(stderr, "during trace path second step is (%d, %d)\n", traced[1][0], traced[1][1]);
 	// BFS
 	if (mode == 0 || mode == 1) {
-		fprintf(stderr, "mouse coords (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
-		if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1)
-		|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1)
-		|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1)
-		||  (is_beside_cheese(mouse_loc[0][0] - 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1)) {
+		int visited[1024];
+		if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][0])
+		|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][1])
+		|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][2])
+		||  (is_beside_cheese(mouse_loc[0][0] - 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1) && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][3]) {
 			// memset(traced, 0, sizeof(array[0][0]) * 1034 * 2);
-
+			fprintf(stderr, "resetting\n");
 			for(int j = 0; j < 2; j++)
 			{
 				for(int i = 0; i < 1034; i++)
@@ -454,11 +454,19 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					traced[i][j] = 0;
 				}
 			}
+
+			for(int j = 0; j < size_Y; j++)
+			{
+				for(int i = 0; i < size_X; i++)
+				{  
+					visited[i + (32*j)] = 0;
+				}
+			}
 			indexed = 0;
 		}
 		int v = 1;
 		struct LList* queue;
-		int visited[1024];
+		
 		for (int i = 0; i < graph_size; i++) {
 			visited[i] = 0;
 		}
