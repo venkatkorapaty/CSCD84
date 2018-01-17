@@ -177,6 +177,10 @@ void traceBack(LList** end, int path[1024][2]) {
 		path[i - j][0] = x;
 		path[i - j][1] = y;
 	}
+	for (int j = i; j < 1024; j++) {
+		path[j][0] = reversePath[0]%size_X;
+		path[j][1] = reversePath[0]/size_Y;
+	}
 	return;
 }
 
