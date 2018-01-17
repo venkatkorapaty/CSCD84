@@ -156,6 +156,10 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 	return 0;
 }
 
+
+static int traced[1024][2];
+static int indexed;
+
 void traceBack(LList** end, int path[1024][2]) {
 	int i = 0;
 	int reversePath[1024];
@@ -174,13 +178,26 @@ void traceBack(LList** end, int path[1024][2]) {
 	for (int j = 0; j < i; j++) {
 		x = reversePath[j]%size_X;;
 		y = reversePath[j]/size_Y;
-		path[i - j][0] = x;
-		path[i - j][1] = y;
+		path[i - j - 1][0] = x;
+		path[i - j - 1][1] = y;
 	}
-	for (int j = i; j < 1024; j++) {
+	for (int j = i; j < i + 20; j++) {
 		path[j][0] = reversePath[0]%size_X;
 		path[j][1] = reversePath[0]/size_Y;
 	}
+
+	for (int j = 0; j < i; j++) {
+		traced[indexed + j][0] = path[j][0];
+		traced[indexed + j][1] = path[j][1];
+	}
+	indexed = indexed + i;
+	// exit(1);
+	
+
+	// for (int j = 0; j < i; j++) {
+	// 	fprintf(stderr, "path (%d, %d)\n", path[j][0]	indexed = indexed + i + 20;, path[j][1]);
+	// }
+	// exit(1);
 	return;
 }
 
@@ -213,7 +230,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					v
 				node at (i,j+1)
 
-		The graph is theredore stored as an adjacency list with size 1024 x 4, with one row per node in the
+		The graph is there&& prevX != xCord && prevY != yCorddore stored as an adjacency list with size 1024 x 4, with one row per node in the
 		graph, and 4 columns corresponding to the weight of an edge linking the node with each of its 4
 		possible neighbours in the order towp, right, bottom, left (clockwise from top).
 
@@ -235,7 +252,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 		x = index % size_X		or in this case		x = index % 32
 		y = index / size_Y		or in this case		y = index / 32
-
+&& prevX != xCord && prevY != yCord
 		(all of the above are *integer* operations!)
 
 		A path is a sequence of (x,y) grid locations. We store it using an array of size	
@@ -244,7 +261,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 		Agent locations are coordinate pairs (x,y)	
 
-	Arguments:
+	Arguments:indexed
 			gr[graph_size][4]   - This is an adjacency list for the maze
 			path[graph_size][2] - An initially empty path for your code to fill.
 						In this case, empty means all entries are in
@@ -341,54 +358,94 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 	// Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 
-	/*
-	if (mode == 1) {
-		struct LList* queue = NULL;
-		LList** queRef = &queue;
-		addList(queRef, mouse_loc[0][0] + (32 * mouse_loc[0][1]));
-		addList(queRef, 101);
-		addList(queRef, 204);
-		printQueue(queRef);
-		fprintf(stderr, "\n");
-		queuePop(queRef);
-		printQueue(queRef);
+	
+	// if (mode == 1) {
+	// 	struct LList* queue = NULL;indexed
+	// 	LList** queRef = &queue;
+	// 	addList(queRef, mouse_loc[0][0] + (32 * mouse_loc[0][1]), NULL);
+	// 	addList(queRef, 101, NULL);
+	// 	addList(queRef, 204, NULL);
+	// 	printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	queuePop(queRef);
+	// 	printQueue(queRef);
 
-		fprintf(stderr, "\n");
-		addList(queRef, 234);
-		printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	addList(queRef, 234, NULL);
+	// 	printQueue(queRef);
 
-		fprintf(stderr, "\n");
-		queuePop(queRef);
-		printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	queuePop(queRef);
+	// 	printQueue(queRef);
 
-		fprintf(stderr, "\n");
-		queuePop(queRef);
-		printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	queuePop(queRef);
+	// 	printQueue(queRef);
 
-		fprintf(stderr, "\n");
-		queuePop(queRef);
-		printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	queuePop(queRef);
+	// 	printQueue(queRef);
 
-		fprintf(stderr, "\n");
-		queuePop(queRef);
-		printQueue(queRef);
-	}*/
+	// 	fprintf(stderr, "\n");
+	// 	queuePop(queRef);
+	// 	printQueue(queRef);
+
+	// 	addList(queRef, mouse_loc[0][0] + (32 * mouse_loc[0][1]), NULL);
+	// 	addList(queRef, 101, NULL);
+	// 	addList(queRef, 204, NULL);
+	// 	printQueue(queRef);
+	// 	fprintf(stderr, "\n");
+	// 	stackPop(queRef);
+	// 	printQueue(queRef);
+
+	// 	fprintf(stderr, "\n");
+	// 	addList(queRef, 234, NULL);
+	// 	printQueue(queRef);
+
+	// 	fprintf(stderr, "\n");
+	// 	stackPop(queRef);
+	// 	printQueue(queRef);
+
+	// 	fprintf(stderr, "\n");
+	// 	stackPop(queRef);
+	// 	printQueue(queRef);
+
+	// 	fprintf(stderr, "\n");
+	// 	stackPop(queRef);
+	// 	printQueue(queRef);
+
+	// 	fprintf(stderr, "\n");
+	// 	stackPop(queRef);
+	// 	printQueue(queRef);
+	// 	exit(1);
+	// }
 
 
 	//exit(1);
-	
 
-	path[0][0]=mouse_loc[0][0];
-	path[0][1]=mouse_loc[0][1];
-
+	// fprintf(stderr, "during trace path second step is (%d, %d)\n", traced[1][0], traced[1][1]);
 	// BFS
-	if (mode == 1 || mode == 2) {
+	if (mode == 0 || mode == 1) {
 		int v = 1;
 		struct LList* queue;
 		int visited[1024];
 		for (int i = 0; i < graph_size; i++) {
 			visited[i] = 0;
 		}
+
+
+		for (int i = 0; i < indexed; i++) {
+			int x = traced[i][0];
+			int y = traced[i][1];
+			
+			visited[x + (y*size_Y)] = 1;
+			if (x == mouse_loc[0][0] && y == mouse_loc[0][1]) {
+				indexed = i;
+				break;
+			}
+		}
+
+		visited[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)] = 0;
 
 		LList** queRef = &queue;
 		addList(queRef, mouse_loc[0][0] + (size_Y * mouse_loc[0][1]), NULL);
@@ -397,10 +454,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			k++;
 
 			LList* curr;
-			if (mode == 1) {
+			if (mode == 0) {
 				curr = queuePop(queRef);
 			}
-			if (mode == 2) {
+			else if (mode == 1) {
 				curr = stackPop(queRef);
 			}
 			int xCord = curr->value % size_X;
@@ -411,9 +468,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			v++;
 			double *loc = gr[xCord + (yCord*size_X)];
 			queRef = &queue;
-			
+			int found = 0;
 			if (loc[0]  && yCord != 0) {
 				if (!visited[xCord + ((yCord - 1) * size_Y)]){
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc == CHEESE) {
 						LList* node = (LList*)malloc(sizeof(LList));
@@ -430,7 +488,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				}
 			}
 			if (loc[1] && xCord != 31) {
-				if (!visited[(xCord + 1) + ((yCord) * size_Y)] ) {
+				if (!visited[(xCord + 1) + ((yCord) * size_Y)]) {
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc == CHEESE) {
 						LList* node = (LList*)malloc(sizeof(LList));
@@ -446,7 +505,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				}
 			}
 			if (loc[2] && yCord != 31) {
-				if(!visited[xCord + ((yCord + 1) * size_Y)] ) {
+				if(!visited[xCord + ((yCord + 1) * size_Y)]) {
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc == CHEESE) {
 						LList* node = (LList*)malloc(sizeof(LList));
@@ -463,7 +523,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				}
 			}
 			if (loc[3] && xCord != 0) {
-				if(!visited[(xCord - 1) + ((yCord) * size_Y)] ){
+				if(!visited[(xCord - 1) + ((yCord) * size_Y)]){
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc == CHEESE) {
 						LList* node = (LList*)malloc(sizeof(LList));
