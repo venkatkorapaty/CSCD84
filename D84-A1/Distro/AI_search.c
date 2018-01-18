@@ -174,6 +174,30 @@ int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
 // static int traced[1044][2];
 // static int indexed;
 
+void traceBack2(int visited[1024][2], int path[1024][2], int current) {
+	int i = 0;
+	int reversePath[1024];
+	
+	while (visited[current][1] != -1) {
+		reversePath[i] = current;
+		current = visited[current][1];
+	}
+
+
+	int x;
+	int y;
+	for (int j = 0; j < i; j++) {
+		x = reversePath[j]%size_X;;
+		y = reversePath[j]/size_Y;
+		path[i - j - 1][0] = x;
+		path[i - j - 1][1] = y;
+	}
+	for (int j = i; j < i + 20; j++) {
+		path[j][0] = reversePath[0]%size_X;
+		path[j][1] = reversePath[0]/size_Y;
+	}
+}
+
 void traceBack(LList** end, int path[1024][2]) {
 	int i = 0;
 	int reversePath[1024];
@@ -519,7 +543,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			// int yCord2 = curr->value / size_Y;
 			int xCord = current % size_X;
 			int yCord = current / size_Y;
-			fprintf(stderr, "checking values (%d, %d), and (%d, %d)\n", xCord, yCord, xCord2, yCord2);
+			// fprintf(stderr, "checking values (%d, %d), and (%d, %d)\n", xCord, yCord, xCord2, yCord2);
 			
 			
 			int catCheeseLoc = is_cat_or_cheese(xCord, yCord , cat_loc, cats, cheese_loc, cheeses);
@@ -527,6 +551,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				//trace backthe array
 				LList** queRef2 = &curr;
 				traceBack(queRef2, path);
+				// traceBack2(visited, path, current);
+
 				return;
 			}
 			//fprintf(stderr, "test!\n");
