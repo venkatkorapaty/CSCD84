@@ -551,6 +551,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				//trace backthe array
 				LList** queRef2 = &curr;
 				traceBack(queRef2, path);
+				//TODO fix traceback 2, then changed the while loop condition then we can erase the linked list stuff
 				// traceBack2(visited, path, current);
 
 				return;
