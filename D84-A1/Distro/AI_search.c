@@ -45,6 +45,7 @@
 #include "AI_search.h"
 #include <unistd.h>
 
+#pragma region dead code
 typedef struct LList{
 	struct LList* next;
 	struct LList* prev;
@@ -136,68 +137,6 @@ void printQueue(LList** list) {
 	return;
 }
 
-int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
-	/*
-	  Return 0 for safe spot
-	  1 if cheese is there
-	  2 if fur devil is there
-	*/
-	int bound = fmax(cats, cheeses);
-	int i = 0;
-	while (i < bound) {
-		if (i < cats && cat_loc[i][0] == x && cat_loc[i][1] == i == y) {
-			return 2;
-		}
-		if (i < cheeses && cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
-			return 1;
-		}
-		i++;
-	}
-	return 0;
-}
-
-int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
-	/*
-	*/
-	int i = 0;
-	while (i < cheeses) {
-		if (cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
-			fprintf(stderr, "found a cheese\n");
-			return i;
-		}
-		i++;
-	}
-	return -1;
-}
-
-
-// static int traced[1044][2];
-// static int indexed;
-
-void traceBack2(int visited[1024][2], int path[1024][2], int current) {
-	int i = 0;
-	int reversePath[1024];
-	
-	while (visited[current][1] != -1) {
-		reversePath[i] = current;
-		current = visited[current][1];
-	}
-
-
-	int x;
-	int y;
-	for (int j = 0; j < i; j++) {
-		x = reversePath[j]%size_X;;
-		y = reversePath[j]/size_Y;
-		path[i - j - 1][0] = x;
-		path[i - j - 1][1] = y;
-	}
-	for (int j = i; j < i + 20; j++) {
-		path[j][0] = reversePath[0]%size_X;
-		path[j][1] = reversePath[0]/size_Y;
-	}
-}
-
 void traceBack(LList** end, int path[1024][2]) {
 	int i = 0;
 	int reversePath[1024];
@@ -238,7 +177,83 @@ void traceBack(LList** end, int path[1024][2]) {
 	// exit(1);
 	return;
 }
+#pragma endregion
 
+int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
+	/*
+	  Return 0 for safe spot
+	  1 if cheese is there
+	  2 if fur devil is there
+	*/
+	int bound = fmax(cats, cheeses);
+	int i = 0;
+	while (i < bound) {
+		if (i < cats && cat_loc[i][0] == x && cat_loc[i][1] == y) {
+			return 2;
+		}
+		if (i < cheeses && cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
+			fprintf(stderr, "CHEESE LOCATION FOUND: (%d, %d)\n", x, y);
+			return 1;
+		}
+		i++;
+	}
+	return 0;
+}
+
+int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
+	/*
+	*/
+	int i = 0;
+	while (i < cheeses) {
+		if (cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
+			fprintf(stderr, "found a cheese\n");
+			return i;
+		}
+		i++;
+	}
+	return -1;
+}
+
+static int traced[1044][2];
+static int indexed;
+
+void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1][2]) {
+	int i = 0;
+	int reversePath[1024];
+
+	while (pred[current] != -1 ) {
+		reversePath[i] = current;
+		current = pred[current];
+		i++;
+	}
+
+	int x;
+	int y;
+	for (int j = 0; j < i; j++) {
+		x = reversePath[j]%size_X;
+		y = reversePath[j]/size_Y;
+		path[i - j][0] = x;
+		path[i - j][1] = y;
+	}
+	path[0][0] = mouse_loc[0][0];
+	path[0][1] = mouse_loc[0][1];
+
+	// for (int j = 0; j <= i; j++) {
+	// 	fprintf(stderr, "PATH: (%d, %d) \n", path[j][0], path[j][1]);
+	// }
+}
+
+int cmp_paths(int p1[graph_size][2], int p2[graph_size][2]) {
+	for (int i = 0; i < graph_size; i++) {
+		if (p1[i][0] != p2[i][0] || p1[i][1] != p2[i][1]) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+
+static int prevPath[1024][2];
 
 void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, int (*heuristic)(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4]))
 {
@@ -311,7 +326,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							visited during search. For example, while
 							doing BFS, the initial location is the
 							start location, it's visit order is 1.
-							Then the search would expand the immediate
+							Thenpath[0][0] = mouse_loc[0][0];
+		path[0][1] = mouse_loc[0][1]; the search would expand the immediate
 							neighbours of the initial node in some order,
 							these would get a visit order of 2, 3, 4, and
 							5 respectively, and so on.
@@ -374,7 +390,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	 *		mode.
 	*
 	*		You can do this by writing code within this single function (and being clever about it!)
-	*		Or, you can use this function as a wrapper that calls a different search function
+	*		Or, you can use this function as a wpath[0][0] = mouse_loc[0][0];
+		path[0][1] = mouse_loc[0][1];rapper that calls a different search function
 	*		 (BFS, DFS, A*) depending on the mode. Note that in the latter case, you will have
 	*	    	  to inform your A* function somehow of what heuristic it's supposed to use.
 	*
@@ -463,157 +480,176 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 	// fprintf(stderr, "during trace path second step is (%d, %d)\n", traced[1][0], traced[1][1]);
 	// BFS
+
+/*
+	if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][0])
+	|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][1])
+	|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][2])
+	||  (is_beside_cheese(mouse_loc[0][0] - 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1) && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][3]) {
+		// memset(traced, 0, sizeof(array[0][0]) * 1034 * 2);
+		fprintf(stderr, "resetting\n");
+		for(int j = 0; j < 2; j++)
+		{
+			for(int i = 0; i < 1034; i++)
+			{  
+				traced[i][j] = 0;
+			}
+		}
+
+		for(int j = 0; j < size_Y; j++)
+		{
+			for(int i = 0; i < size_X; i++)
+			{  
+				visited[i + (32*j)] = 0;
+			}
+		}
+		indexed = 0;
+	}
+	for (int i = 0; i < indexed; i++) {
+		int x = traced[i][0];
+		int y = traced[i][1];
+		
+		visited[x + (y*size_Y)] = 1;
+		if (x == mouse_loc[0][0] && y == mouse_loc[0][1]) {
+			indexed = i;
+			break;
+		}
+	}*/
+	fprintf(stderr, "MOUSE_LOC: (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
 	if (mode == 0 || mode == 1) {
-		int visited[1024][2];
+		int visited[graph_size];
+		int pred[graph_size];
 		
 		int v = 1;
 		struct LList* queue;
-		int queueMain[1024];
+		int queueMain[graph_size];
 		int queueIndex = 0;
 		int stackIndex = 0;
 		
 		for (int i = 0; i < graph_size; i++) {
-			for (int j = 0; j < 2; j++) {
-				if (j == 0) {
-					visited[i][j] = 0;
-				} else {
-					visited[i][j] = -1;
-				}
-			}
+			visited[i] = 0;
+			pred[i] = -1;
 		}
-
-/*
-		if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][0])
-		|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][1])
-		|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][2])
-		||  (is_beside_cheese(mouse_loc[0][0] - 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1) && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][3]) {
-			// memset(traced, 0, sizeof(array[0][0]) * 1034 * 2);
-			fprintf(stderr, "resetting\n");
-			for(int j = 0; j < 2; j++)
-			{
-				for(int i = 0; i < 1034; i++)
-				{  
-					traced[i][j] = 0;
-				}
-			}
-
-			for(int j = 0; j < size_Y; j++)
-			{
-				for(int i = 0; i < size_X; i++)
-				{  
-					visited[i + (32*j)] = 0;
-				}
-			}
-			indexed = 0;
-		}
-		for (int i = 0; i < indexed; i++) {
-			int x = traced[i][0];
-			int y = traced[i][1];
-			
-			visited[x + (y*size_Y)] = 1;
-			if (x == mouse_loc[0][0] && y == mouse_loc[0][1]) {
-				indexed = i;
-				break;
-			}
-		}*/
-
-		LList** queRef = &queue;
-		addList(queRef, mouse_loc[0][0] + (size_Y * mouse_loc[0][1]), NULL);
+		int found = 0;
+		int current;
 		queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
+		visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
 		stackIndex++;
-		int k = 0;
-		while (queue != NULL) {
-			k++;
+
+		while (queueIndex < stackIndex && cheeses > 0) {
+			// fprintf(stderr, "here1\n");
 
 			LList* curr;
-			int current;
+			
 			if (mode == 0) {
-				curr = queuePop(queRef);
 				current = queueMain[queueIndex];
 				queueIndex++;
 			}
 			else if (mode == 1) {
-				curr = stackPop(queRef);
 				current = queueMain[stackIndex - 1];
 				if (stackIndex != 0) {
 					stackIndex--;
 				}
 			}
-			// int xCord2 = curr->value % size_X;
-			// int yCord2 = curr->value / size_Y;
+
 			int xCord = current % size_X;
 			int yCord = current / size_Y;
 			// fprintf(stderr, "checking values (%d, %d), and (%d, %d)\n", xCord, yCord, xCord2, yCord2);
-			
-			
+			// fprintf(stderr, "here2\n");
+			//fprintf(stderr, "# OF CHEESE: %d\n", cheeses);
 			int catCheeseLoc = is_cat_or_cheese(xCord, yCord , cat_loc, cats, cheese_loc, cheeses);
 			if (catCheeseLoc == CHEESE) {
 				//trace backthe array
-				LList** queRef2 = &curr;
-				traceBack(queRef2, path);
-				//TODO fix traceback 2, then changed the while loop condition then we can erase the linked list stuff
-				// traceBack2(visited, path, current);
+				if (mouse_loc[0][0] == xCord && mouse_loc[0][1] == yCord) {
+					fprintf(stderr, "WE OUT HERE\n");
+					path[0][0] = mouse_loc[0][0];
+					path[0][1] = mouse_loc[0][1];
+					path[1][0] = mouse_loc[0][0];
+					path[1][1] = mouse_loc[0][1];
+				}
+				else {
+					traceBack2(pred, path, current, mouse_loc);
+				}
 
 				return;
 			}
-			//fprintf(stderr, "test!\n");
-			visited[xCord + (yCord*size_X)][0] = 1;
-			visit_order[xCord][yCord] += v;
+
+			visit_order[xCord][yCord] = v;
 			v++;
 			double *loc = gr[xCord + (yCord*size_X)];
-			queRef = &queue;
 			
-			
-			if (loc[0]  && yCord != 0) {
-				if (!visited[xCord + ((yCord - 1) * size_Y)][0]){
+			// fprintf(stderr, "here4\n");
+			if (loc[0]) {
+				// fprintf(stderr, "here5\n");
+				if (!visited[xCord + ((yCord - 1) * size_Y)]){
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						addList(queRef, xCord + ((yCord-1)*size_X), curr);
+						//addList(queRef, xCord + ((yCord-1)*size_X), curr);
 						queueMain[stackIndex] = xCord + ((yCord - 1) * size_Y);
-						visited[queueMain[stackIndex]][1] = current;
+						visited[queueMain[stackIndex]] = 1;
+						pred[queueMain[stackIndex]] = current;
 						stackIndex++;
 					}
+					
 				}
 			}
-			if (loc[1] && xCord != 31) {
-				if (!visited[(xCord + 1) + ((yCord) * size_Y)][0]) {
+			if (loc[1]) {
+				// fprintf(stderr, "here5\n");
+				if (!visited[(xCord + 1) + ((yCord) * size_Y)]) {
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						addList(queRef, (xCord+1) + (yCord*size_X), curr);
+						//addList(queRef, (xCord+1) + (yCord*size_X), curr);
 						queueMain[stackIndex] = (xCord+1) + (yCord*size_X);
-						visited[queueMain[stackIndex]][1] = current;
+						visited[queueMain[stackIndex]] = 1;
+						pred[queueMain[stackIndex]] = current;
 						stackIndex++;
 					}
+					
 				}
 			}
-			if (loc[2] && yCord != 31) {
-				if(!visited[xCord + ((yCord + 1) * size_Y)][0]) {
+			if (loc[2]) {
+				// fprintf(stderr, "here5\n");
+				if(!visited[xCord + ((yCord + 1) * size_Y)]) {
+					found =1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						addList(queRef, xCord + ((yCord+1)*size_X), curr);
+						//addList(queRef, xCord + ((yCord+1)*size_X), curr);
 						queueMain[stackIndex] = xCord + ((yCord+1)*size_X);
-						visited[queueMain[stackIndex]][1] = current;
+						visited[queueMain[stackIndex]] = 1;
+						pred[queueMain[stackIndex]] = current;
 						stackIndex++;
 					}
+					
 					
 				}
 			}
-			if (loc[3] && xCord != 0) {
-				if(!visited[(xCord - 1) + ((yCord) * size_Y)][0]){
+			if (loc[3]) {
+				// fprintf(stderr, "here5\n");
+				if(!visited[(xCord - 1) + ((yCord) * size_Y)]){
+					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					 if (catCheeseLoc != CAT) {
-						addList(queRef, (xCord-1) + (yCord*size_X), curr);
+						//addList(queRef, (xCord-1) + (yCord*size_X), curr);
 						queueMain[stackIndex] = (xCord-1) + (yCord*size_X);
-						visited[queueMain[stackIndex]][1] = current;
+						visited[queueMain[stackIndex]] = 1;
+						pred[queueMain[stackIndex]] = current;
 						stackIndex++;
 					}
-					
 				}
 			}
 
 		}
+
 	}
-	exit(1);
+	//exit(1);
+	//Couldn't find the cheese, accepting our fate
+	path[0][0] = mouse_loc[0][0];
+	path[0][1] = mouse_loc[0][1];
+	path[1][0] = mouse_loc[0][0];
+	path[1][1] = mouse_loc[0][1];
+	fprintf(stderr, "--------------------------------\n");
 	return;
 }
 
