@@ -200,11 +200,11 @@ void traceBack(LList** end, int path[1024][2]) {
 		path[j][1] = reversePath[0]/size_Y;
 	}
 
-	for (int j = 0; j < i + 20; j++) {
+	/*for (int j = 0; j < i + 20; j++) {
 		traced[indexed + j][0] = path[j][0];
 		traced[indexed + j][1] = path[j][1];
 	}
-	indexed = indexed + i + 20;
+	indexed = indexed + i + 20;*/
 	// exit(1);
 	
 
@@ -441,6 +441,15 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	// BFS
 	if (mode == 0 || mode == 1) {
 		int visited[1024];
+		
+		int v = 1;
+		struct LList* queue;
+		
+		for (int i = 0; i < graph_size; i++) {
+			visited[i] = 0;
+		}
+
+/*
 		if ((is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] - 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][0])
 		|| (is_beside_cheese(mouse_loc[0][0] + 1,  mouse_loc[0][1], cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][1])
 		|| (is_beside_cheese(mouse_loc[0][0],  mouse_loc[0][1] + 1, cheese_loc, cheeses) != -1 && gr[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)][2])
@@ -464,14 +473,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			indexed = 0;
 		}
-		int v = 1;
-		struct LList* queue;
-		
-		for (int i = 0; i < graph_size; i++) {
-			visited[i] = 0;
-		}
-
-
 		for (int i = 0; i < indexed; i++) {
 			int x = traced[i][0];
 			int y = traced[i][1];
@@ -481,9 +482,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				indexed = i;
 				break;
 			}
-		}
-
-		visited[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)] = 0;
+		}*/
 
 		LList** queRef = &queue;
 		addList(queRef, mouse_loc[0][0] + (size_Y * mouse_loc[0][1]), NULL);
@@ -500,61 +499,45 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			int xCord = curr->value % size_X;
 			int yCord = curr->value / size_Y;
+			
+			int catCheeseLoc = is_cat_or_cheese(xCord, yCord , cat_loc, cats, cheese_loc, cheeses);
+			if (catCheeseLoc == CHEESE) {
+				LList* node = (LList*)malloc(sizeof(LList));
+				node->value = xCord + ((yCord-1)*size_X);
+				node->next = NULL;
+				node->prev = curr;
+				LList** queRef2 = &node;
+				traceBack(queRef2, path);
+				return;
+			}
 			//fprintf(stderr, "test!\n");
 			visited[xCord + (yCord*size_X)] = 1;
 			visit_order[xCord][yCord] += v;
 			v++;
 			double *loc = gr[xCord + (yCord*size_X)];
 			queRef = &queue;
-			int found = 0;
+			
+			
 			if (loc[0]  && yCord != 0) {
 				if (!visited[xCord + ((yCord - 1) * size_Y)]){
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
-					if (catCheeseLoc == CHEESE) {
-						LList* node = (LList*)malloc(sizeof(LList));
-						node->value = xCord + ((yCord-1)*size_X);
-						node->next = NULL;
-						node->prev = curr;
-						LList** queRef2 = &node;
-
-						traceBack(queRef2, path);
-						return;
-					} else if (catCheeseLoc != CAT) {
+					if (catCheeseLoc != CAT) {
 						addList(queRef, xCord + ((yCord-1)*size_X), curr);
 					}
 				}
 			}
 			if (loc[1] && xCord != 31) {
 				if (!visited[(xCord + 1) + ((yCord) * size_Y)]) {
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
-					if (catCheeseLoc == CHEESE) {
-						LList* node = (LList*)malloc(sizeof(LList));
-						node->value = (xCord+1) + (yCord*size_X);
-						node->next = NULL;
-						node->prev = curr;
-						LList** queRef2 = &node;
-						traceBack(queRef2, path);
-						return;
-					} else if (catCheeseLoc != CAT) {
+					if (catCheeseLoc != CAT) {
 						addList(queRef, (xCord+1) + (yCord*size_X), curr);
 					}
 				}
 			}
 			if (loc[2] && yCord != 31) {
 				if(!visited[xCord + ((yCord + 1) * size_Y)]) {
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
-					if (catCheeseLoc == CHEESE) {
-						LList* node = (LList*)malloc(sizeof(LList));
-						node->value = xCord + ((yCord+1)*size_X);
-						node->next = NULL;
-						node->prev = curr;
-						LList** queRef2 = &node;
-						traceBack(queRef2, path);
-						return;
-					} else if (catCheeseLoc != CAT) {
+					if (catCheeseLoc != CAT) {
 						addList(queRef, xCord + ((yCord+1)*size_X), curr);
 					}
 					
@@ -562,17 +545,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			if (loc[3] && xCord != 0) {
 				if(!visited[(xCord - 1) + ((yCord) * size_Y)]){
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
-					if (catCheeseLoc == CHEESE) {
-						LList* node = (LList*)malloc(sizeof(LList));
-						node->value = (xCord-1) + (yCord*size_X);
-						node->next = NULL;
-						node->prev = curr;
-						LList** queRef2 = &node;
-						traceBack(queRef2, path);
-						return;
-					} else if (catCheeseLoc != CAT) {
+					 if (catCheeseLoc != CAT) {
 						addList(queRef, (xCord-1) + (yCord*size_X), curr);
 					}
 					
