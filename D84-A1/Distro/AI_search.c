@@ -45,140 +45,6 @@
 #include "AI_search.h"
 #include <unistd.h>
 
-#pragma region dead code
-typedef struct LList{
-	struct LList* next;
-	struct LList* prev;
-	struct LList* last;
-	int value;
-};
-
-void addList(LList** list, int value, LList* prev) {
-	// initialize node to add
-	LList* node = (LList*)malloc(sizeof(LList));
-	node->value = value;
-	node->next = NULL;
-	node->last = NULL;
-	if (prev != NULL) {
-		node->prev = prev;
-	} else {
-		node->prev = NULL;
-	}
-	LList* temp = *list;
-	if (temp == NULL) {
-		(*list) = node;
-		node->last = node;
-		return;
-	}
-	temp->last = node;
-	if (temp->next == NULL) {
-		temp->next = node;
-	} else {
-		// traverse to end of list
-		while(temp->next != NULL) {
-
-			temp = temp->next;
-		}
-	}
-	temp->next = node;
-
-	
-
-}
-
-LList* queuePop(LList** list) {
-	if ((*list) == NULL) {
-		return NULL;
-	}
-	LList* temp = *list;
-	if ((*list)->next != NULL) {
-		*list = (*list)->next;
-	}
-	else {
-		*list = NULL;
-	}
-
-	temp->next = NULL;
-	return temp;
-}
-
-LList* stackPop(LList** list) {
-	if ((*list) == NULL) {
-		return NULL;
-	}
-	LList* temp = *list;
-
-	if (temp->next == NULL) {
-		*list = NULL;
-		return temp;
-	}
-	while (temp->next->next != NULL) {
-		temp = temp->next;
-	}
-	LList* ret = temp->next;
-	temp->next = NULL;
-	return ret;
-	
-}
-
-
-void printQueue(LList** list) {
-	LList* temp = (*list);
-	if (temp == NULL) {
-		fprintf(stderr, "lsit is empty!\n");
-	} else {
-		int i = 0;
-		while (temp != NULL) {
-			fprintf(stderr, "index %d with value %d\n", i, temp->value);
-			i++;
-			temp = temp->next;
-		}
-	}
-	return;
-}
-
-void traceBack(LList** end, int path[1024][2]) {
-	int i = 0;
-	int reversePath[1024];
-	LList* temp = (*end);
-	if (temp == NULL) {
-		fprintf(stderr, "lsit is empty!\n");
-	} else {
-		while (temp != NULL) {
-			reversePath[i] = temp->value;
-			temp = temp->prev;
-			i++;
-		}
-	}
-	int x;
-	int y;
-	for (int j = 0; j < i; j++) {
-		x = reversePath[j]%size_X;;
-		y = reversePath[j]/size_Y;
-		path[i - j - 1][0] = x;
-		path[i - j - 1][1] = y;
-	}
-	for (int j = i; j < i + 20; j++) {
-		path[j][0] = reversePath[0]%size_X;
-		path[j][1] = reversePath[0]/size_Y;
-	}
-
-	/*for (int j = 0; j < i + 20; j++) {
-		traced[indexed + j][0] = path[j][0];
-		traced[indexed + j][1] = path[j][1];
-	}
-	indexed = indexed + i + 20;*/
-	// exit(1);
-	
-
-	// for (int j = 0; j < i; j++) {
-	// 	fprintf(stderr, "path (%d, %d)\n", path[j][0]	indexed = indexed + i + 20;, path[j][1]);
-	// }
-	// exit(1);
-	return;
-}
-#pragma endregion
-
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
 	/*
 	  Return 0 for safe spot
@@ -241,25 +107,75 @@ void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1]
 	// }
 }
 
-int cmp_paths(int p1[graph_size][2], int p2[graph_size][2]) {
-	for (int i = 0; i < graph_size; i++) {
-		if (p1[i][0] != p2[i][0] || p1[i][1] != p2[i][1]) {
-			return 0;
+void addHeap(int *heap, int weights[graph_size], int val, int size) {
+	int parent;
+
+	// heap[size] = loc;
+
+	while (size > 0) {
+		parent = (size - 1) / 2;
+		
+		if (weights[val] >= weights[heap[parent]]) {
+			heap[size] = val;
+			return;
 		}
+		heap[size] = heap[parent];
+		size = parent;
 	}
-	fprintf(stderr, "paths are same\n");
-	return 1;
+	heap[0] = val;
 }
 
-static int prevPath[1024][2];
-static int firstIter;
-static int prev_loc[2][2];
-
-void storePath(int path[1024][2]) {
-	for (int i = 0; i < 1024; i++) {
-		prevPath[i][0] = path[i][0];
-		prevPath[i][1] = path[i][1];
+void propagate(int *heap, int weights[graph_size], int node, int size) {
+	// lame case
+	if (size == 2) {
+		if (weights[heap[0]] > weights[heap[1]]) {
+			int temp = heap[0];
+			heap[0] = heap[1];
+			heap[1] = temp;
+		}
+		return;
 	}
+	int l = node*2 + 1;
+	int r = node*2 + 2;
+	int min = weights[heap[node]];
+	int mindex = node;
+
+	if (l < size - 1 && weights[heap[l]] < weights[heap[r]]) {
+		min = weights[heap[l]];
+		mindex = l;
+	}
+	if (r < size - 1 && weights[heap[r]] < weights[heap[mindex]]) {
+		min = weights[heap[r]];
+		mindex = r;
+	}
+	if (mindex != node) {
+		int temp = heap[node];
+		heap[node] = heap[mindex];
+		heap[mindex] = temp;
+		propagate(heap, weights, mindex, size);
+	}
+}
+
+int extract_min(int *heap, int weights[graph_size], int size) {
+	int min;
+	int last_elem;
+	if (size == 0) {
+		return -1;
+	}
+	if (size == 1) {
+		min = heap[0];
+		heap[0] = -1;
+		return min;
+	}
+
+	min = heap[0];
+	last_elem = heap[size - 1];
+	heap[0] = last_elem;
+	heap[size - 1] = -1;
+
+	propagate(heap, weights, 0, size - 1);
+
+	return min;
 }
 
 void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, int (*heuristic)(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4]))
@@ -412,100 +328,94 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	*
 	********************************************************************************************************/
 
-	// Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
+	int *heap = (int*)malloc(sizeof(int)*graph_size);
+	int weights[graph_size];
+	for (int i = 0; i < graph_size; i++) {
+		int x = i % size_X;
+		int y = i / size_Y;
+		weights[i] = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+		// fprintf(stderr, "WEIGHT (%d, %d): %d\n", x, y, weights[i]);
+	}
+
+	for (int i = 0; i < graph_size; i++) {
+		heap[i] = -1;
+	}
+	// fprintf(stderr, "SHOULD BE -1: %d\n", heap[0]);
+	// addHeap(heap, weights, 3, 0);
+	// fprintf(stderr, "SHOULD BE 3: %d\n", heap[0]);
+
+	// int extracted = extract_min(heap, weights, 1);
+	// fprintf(stderr, "SHOULD BE 3: %d\n", extracted);
+
+	// addHeap(heap, weights, 8, 0);
+	// addHeap(heap, weights, 3, 1);
+	// addHeap(heap, weights, 10, 2);
+	// addHeap(heap, weights, 5, 3);
+	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d, %d, %d)\n", weights[heap[0]], weights[heap[1]], weights[heap[2]], weights[heap[3]]);
+
+	// extracted = extract_min(heap, weights, 4);
+	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
+	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d, %d)\n", weights[heap[0]], weights[heap[1]], weights[heap[2]]);
+	// extracted = extract_min(heap, weights, 3);
+	// fprintf(stderr, "SHOULD BE 8: %d\n", weights[extracted]);
+	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d)\n", weights[heap[0]], weights[heap[1]]);
+	// extracted = extract_min(heap, weights, 2);
+	// fprintf(stderr, "SHOULD BE 9: %d\n", weights[extracted]);
+	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d)\n", weights[heap[0]]);
+	// extracted = extract_min(heap, weights, 1);
+	// fprintf(stderr, "SHOULD BE 10: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 0);
+	// fprintf(stderr, "SHOULD BE -1: %d\n", extracted);
+
+	// addHeap(heap, weights, 8, 0);
+	// addHeap(heap, weights, 3, 1);
+	// addHeap(heap, weights, 10, 2);
+	// addHeap(heap, weights, 5, 3);
+	// addHeap(heap, weights, 98, 4);
+	// addHeap(heap, weights, 435, 5);
+	// addHeap(heap, weights, 12, 6);
+	// addHeap(heap, weights, 345, 7);
+	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, ", weights[heap[0]]);
+	// fprintf(stderr, "%d, ", weights[heap[1]]);
+	// fprintf(stderr, "%d, ", weights[heap[2]]);
+	// fprintf(stderr, "%d, ", weights[heap[3]]);
+	// fprintf(stderr, "%d, ", weights[heap[4]]);
+	// fprintf(stderr, "%d, ", weights[heap[5]]);
+	// fprintf(stderr, "%d, ", weights[heap[6]]);
+	// fprintf(stderr, "%d)\n", weights[heap[7]]);
+
+	// extracted = extract_min(heap, weights, 8);
+	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 7);
+	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 6);
+	// fprintf(stderr, "SHOULD BE 8: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 5);
+	// fprintf(stderr, "SHOULD BE 9: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 4);
+	// fprintf(stderr, "SHOULD BE 10: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 3);
+	// fprintf(stderr, "SHOULD BE 12: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 2);
+	// fprintf(stderr, "SHOULD BE 17: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 1);
+	// fprintf(stderr, "SHOULD BE 23: %d\n", weights[extracted]);
+	// extracted = extract_min(heap, weights, 0);
+	// fprintf(stderr, "SHOULD BE -1: %d\n", extracted);
+
+
+	// exit(0);
+	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 	int visited[graph_size];
 	int pred[graph_size];
 	for (int i = 0; i < graph_size; i++) {
 		visited[i] = 0;
 		pred[i] = -1;
 	}
-	if (firstIter == 0 && mode == 1) {
-		firstIter = 1;
-		prev_loc[0][0] = mouse_loc[0][0];
-		prev_loc[0][1] = mouse_loc[0][1];
 
-		for (int i = 0; i < graph_size; i++) {
-			prevPath[i][0] = -1;
-			prevPath[i][1] = -1;
-		}
-	}
-	else if (firstIter == 1 && mode == 1) {
-		firstIter = 2;
-		prev_loc[1][0] = mouse_loc[0][0];
-		prev_loc[1][1] = mouse_loc[0][1];
-		// int loc_on_path = 0;
-
-		// for (int i = 0; i < graph_size; i++) {
-		// 	if (prevPath[i][0] == mouse_loc[0][0] && prevPath[i][1] == mouse_loc[0][1]) {
-		// 		// loc_on_path_x = path[i][0];
-		// 		// loc_on_path_y = path[i][1];
-		// 		fprintf(stderr, "HOW MANY MOVES TAKE: %d\n", i);
-		// 		loc_on_path = i;
-		// 		break;
-		// 	}
-		// }
-
-		// for (int i = 0; i < graph_size; i++) {
-		// 	if (prevPath[i + loc_on_path][0] != -1) {
-		// 		prevPath[i][0] = prevPath[i + loc_on_path][0];
-		// 		prevPath[i][1] = prevPath[i + loc_on_path][1];
-
-		// 		path[i][0] = prevPath[i + loc_on_path][0];
-		// 		path[i][1] = prevPath[i + loc_on_path][1];
-		// 	}
-		// 	else {
-		// 		prevPath[i][0] = -1;
-		// 		prevPath[i][1] = -1;
-		// 		path[i][0] = -1;
-		// 		path[i][1] = -1;
-		// 	}
-		// }
-
-		// //firstIter++;
-		// return;
-
-	} else if (mode == 1) {
-		firstIter++;
-
-		// update first location
-		if (firstIter % 2 == 0) {
-			prev_loc[0][0] = mouse_loc[0][0];
-			prev_loc[0][1] = mouse_loc[0][1];
-		}
-		// update second location
-		else {
-			prev_loc[1][0] = mouse_loc[0][0];
-			prev_loc[1][1] = mouse_loc[0][1];
-		}
-
-		// fprintf(stderr, "I: (%d, %d) | (%d, %d)\n", prev_loc[0][0], prev_loc[1][0], prev_loc[0][1], prev_loc[1][1]);
-		// if found loop
-		if (prev_loc[0][0] == mouse_loc[0][0] && prev_loc[0][1] == mouse_loc[0][1]) {
-			mouse_loc[0][0] = prev_loc[0][0];
-			mouse_loc[0][1] = prev_loc[0][1];
-			fprintf(stderr, "LOOP: (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
-			int first = 0;
-			int second = 0;
-			for (int i = 0; i < 30; i++) {
-				if (prevPath[i][0] == prev_loc[0][0] && prevPath[i][1] == prev_loc[0][1]){first = i;}
-				if (prevPath[i][0] == prev_loc[1][0] && prevPath[i][1] == prev_loc[1][1]){second = i;}	
-				// fprintf(stderr, "blah %d,  %d\n", prevPath[i][0], prevPath[i][1]);
-			}
-			fprintf(stderr, "first %d, second %d\n", first, second);
-			if (first != second) {
-				fprintf(stderr, "here\n");
-				for (int i = second; i < first; i++) {
-					int value = prevPath[i][0] + (size_Y * prevPath[i][1]);
-					fprintf(stderr, "marked (%d, %d) visited\n", prevPath[i][0], prevPath[i][1]);
-					visited[value] = 1;
-				}
-			}
-		}
-
-	}
 
 	// fprintf(stderr, "MOUSE_LOC: (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
-	if (mode == 0 || mode == 1) {
+	if (mode >= 0 && mode <= 3) {
 		
 		
 		
@@ -513,8 +423,27 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		int queueMain[graph_size];
 		int queueIndex = 0;
 		int stackIndex = 0;
-		
-		
+		int weights[graph_size];
+		if (mode == 2 || mode == 3 ) {
+			for (int i = 0; i < graph_size; i++) {
+				int x = i % size_X;
+				int y = i / size_Y;
+				if (mode == 2) {
+					weights[i] = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+				}
+				else {
+					weights[i] = H_cost_nokitty(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+				}
+			}
+
+			int *heap = (int*)malloc(sizeof(int)*graph_size);
+			for (int i = 0; i < graph_size; i++) {
+				heap[i] = -1;
+			}
+			addHeap(heap, weights, mouse_loc[0][0] + mouse_loc[0][1]*size_X, queueIndex);
+			queueIndex++;
+		}
+
 		int found = 0;
 		int current;
 		queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
@@ -523,8 +452,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 		while (queueIndex < stackIndex && cheeses > 0) {
 			// fprintf(stderr, "here1\n");
-
-			LList* curr;
 			
 			if (mode == 0) {
 				current = queueMain[queueIndex];
@@ -535,6 +462,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				if (stackIndex != 0) {
 					stackIndex--;
 				}
+			}
+			else if (mode == 2) {
+				current = extract_min(heap, weights, queueIndex);
+				queueIndex--;
 			}
 
 			int xCord = current % size_X;
@@ -555,48 +486,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				else {
 					traceBack2(pred, path, current, mouse_loc);
 				}
-
-				/*
-				if (mode == 1) {
-					if (prevPath[0][0] == -1) {
-						fprintf(stderr, "SHOULD ONLY HAPPEN ONCE\n");
-						storePath(path);
-					}
-					else {
-						if (!cmp_paths(prevPath, path)) {
-							fprintf(stderr, "replacing new path with old \n");
-							int loc_on_path = 0;
-							// int loc_on_path_y;
-
-							for (int i = 0; i < graph_size; i++) {
-								if (prevPath[i][0] == mouse_loc[0][0] && prevPath[i][1] == mouse_loc[0][1]) {
-									// loc_on_path_x = path[i][0];
-									// loc_on_path_y = path[i][1];
-									fprintf(stderr, "HOW MANY MOVES TAKE: %d\n", i);
-									loc_on_path = i;
-									break;
-								}
-							}
-
-							for (int i = 0; i < graph_size; i++) {
-								if (prevPath[i + loc_on_path][0] != -1) {
-									prevPath[i][0] = prevPath[i + loc_on_path][0];
-									prevPath[i][1] = prevPath[i + loc_on_path][1];
-								}
-								else {
-									prevPath[i][0] = -1;
-									prevPath[i][1] = -1;
-								}
-							}
-
-							// storePath(path);
-						}
-					}
-				}*/
-				if (mode == 1 && prevPath[0][0] == -1) {
-					firstIter = 1;
-					storePath(path);
-				}
  
 				return;
 			}
@@ -612,10 +501,16 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						queueMain[stackIndex] = xCord + ((yCord - 1) * size_Y);
-						visited[queueMain[stackIndex]] = 1;
-						pred[queueMain[stackIndex]] = current;
-						stackIndex++;
+						if (mode == 0 || mode == 1) {
+							queueMain[stackIndex] = xCord + ((yCord - 1) * size_Y);
+							visited[queueMain[stackIndex]] = 1;
+							pred[queueMain[stackIndex]] = current;
+							stackIndex++;
+						}
+						else {
+							addHeap(heap, weights, xCord + ((yCord - 1) * size_Y), queueIndex);
+							queueIndex++;
+						}
 					}
 					
 				}
@@ -625,10 +520,16 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						queueMain[stackIndex] = (xCord+1) + (yCord*size_X);
-						visited[queueMain[stackIndex]] = 1;
-						pred[queueMain[stackIndex]] = current;
-						stackIndex++;
+						if (mode == 0 || mode == 1) {
+							queueMain[stackIndex] = (xCord+1) + (yCord*size_X);
+							visited[queueMain[stackIndex]] = 1;
+							pred[queueMain[stackIndex]] = current;
+							stackIndex++;
+						}
+						else {
+							addHeap(heap, weights, (xCord+1) + yCord * size_X, queueIndex);
+							queueIndex++;
+						}
 					}
 					
 				}
@@ -638,10 +539,16 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					found =1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
-						queueMain[stackIndex] = xCord + ((yCord+1)*size_X);
-						visited[queueMain[stackIndex]] = 1;
-						pred[queueMain[stackIndex]] = current;
-						stackIndex++;
+						if (mode == 0 || mode == 1) {
+							queueMain[stackIndex] = xCord + ((yCord+1)*size_X);
+							visited[queueMain[stackIndex]] = 1;
+							pred[queueMain[stackIndex]] = current;
+							stackIndex++;
+						}
+						else {
+							addHeap(heap, weights, xCord + (yCord + 1) * size_X, queueIndex);
+							queueIndex++;
+						}
 					}
 					
 					
@@ -652,10 +559,16 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					 if (catCheeseLoc != CAT) {
-						queueMain[stackIndex] = (xCord-1) + (yCord*size_X);
-						visited[queueMain[stackIndex]] = 1;
-						pred[queueMain[stackIndex]] = current;
-						stackIndex++;
+						if (mode == 0 || mode == 1) {
+							queueMain[stackIndex] = (xCord-1) + (yCord*size_X);
+							visited[queueMain[stackIndex]] = 1;
+							pred[queueMain[stackIndex]] = current;
+							stackIndex++;
+						}
+						else {
+							addHeap(heap, weights, (xCord-1) + yCord * size_X, queueIndex);
+							queueIndex++;
+						}
 					}
 				}
 			}
@@ -664,13 +577,13 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 	}
 	//exit(1);
-	//Couldn't find the cheese, accepting our fate
+	//Couldn't find the cheese, accepting our fate from the devils of fur
 	path[0][0] = mouse_loc[0][0];
 	path[0][1] = mouse_loc[0][1];
 	path[1][0] = mouse_loc[0][0];
 	path[1][1] = mouse_loc[0][1];
 
-	fprintf(stderr, "--------------------------------\n");
+	// fprintf(stderr, "--------------------------------\n");
 	return;
 }
 
