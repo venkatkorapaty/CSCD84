@@ -423,6 +423,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		int queueMain[graph_size];
 		int queueIndex = 0;
 		int stackIndex = 0;
+		int *heap = (int*)malloc(sizeof(int)*graph_size);
 		int weights[graph_size];
 		if (mode == 2 || mode == 3 ) {
 			for (int i = 0; i < graph_size; i++) {
@@ -435,22 +436,26 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					weights[i] = H_cost_nokitty(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 				}
 			}
+			fprintf(stderr, "costs calculated\n");
 
-			int *heap = (int*)malloc(sizeof(int)*graph_size);
+			
 			for (int i = 0; i < graph_size; i++) {
 				heap[i] = -1;
 			}
 			addHeap(heap, weights, mouse_loc[0][0] + mouse_loc[0][1]*size_X, queueIndex);
+			fprintf(stderr, "heap first %d\n", heap[0]);
+			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
 			queueIndex++;
+		} else {
+			queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
+			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
+			stackIndex++;
 		}
 
-		int found = 0;
-		int current;
-		queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
-		visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
-		stackIndex++;
+		int current = -1;
+		
 
-		while (queueIndex < stackIndex && cheeses > 0) {
+		while ((((queueIndex < stackIndex)  && (mode == 1 || mode == 0)) || mode == 2 || mode == 3) && cheeses > 0) {
 			// fprintf(stderr, "here1\n");
 			
 			if (mode == 0) {
@@ -463,8 +468,9 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					stackIndex--;
 				}
 			}
-			else if (mode == 2) {
+			else if (mode == 2 || mode == 3) {
 				current = extract_min(heap, weights, queueIndex);
+				fprintf(stderr, "extracted %d, index %d\n", current, queueIndex);
 				queueIndex--;
 			}
 
@@ -498,7 +504,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			if (loc[0]) {
 				// fprintf(stderr, "here5\n");
 				if (!visited[xCord + ((yCord - 1) * size_Y)]){
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
 						if (mode == 0 || mode == 1) {
@@ -508,7 +513,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							stackIndex++;
 						}
 						else {
+							visited[xCord + ((yCord - 1) * size_Y)] = 1;
+							pred[xCord + ((yCord - 1) * size_Y)] = current;
 							addHeap(heap, weights, xCord + ((yCord - 1) * size_Y), queueIndex);
+							// fprintf(stderr, "adding %d to the heap\n", xCord + ((yCord - 1) * size_Y));
 							queueIndex++;
 						}
 					}
@@ -517,7 +525,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			if (loc[1]) {
 				if (!visited[(xCord + 1) + ((yCord) * size_Y)]) {
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
 						if (mode == 0 || mode == 1) {
@@ -527,7 +534,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							stackIndex++;
 						}
 						else {
-							addHeap(heap, weights, (xCord+1) + yCord * size_X, queueIndex);
+							visited[(xCord+1) + yCord * size_X] = 1;
+							pred[(xCord+1) + yCord * size_X] = current;
+							addHeap(heap, weights, (xCord+1) + (yCord * size_X), queueIndex);
+							// fprintf(stderr, "adding %d to the heap\n", (xCord+1) + (yCord * size_X));
 							queueIndex++;
 						}
 					}
@@ -536,7 +546,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			if (loc[2]) {
 				if(!visited[xCord + ((yCord + 1) * size_Y)]) {
-					found =1;
 					int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
 					if (catCheeseLoc != CAT) {
 						if (mode == 0 || mode == 1) {
@@ -546,7 +555,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							stackIndex++;
 						}
 						else {
-							addHeap(heap, weights, xCord + (yCord + 1) * size_X, queueIndex);
+							visited[xCord + ((yCord + 1) * size_X)] = 1;
+							pred[xCord + ((yCord + 1) * size_X)] = current;
+							addHeap(heap, weights, xCord + ((yCord + 1) * size_X), queueIndex);
+							// fprintf(stderr, "adding %d to the heap\n", xCord + ((yCord + 1) * size_X));
 							queueIndex++;
 						}
 					}
@@ -556,7 +568,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			}
 			if (loc[3]) {
 				if(!visited[(xCord - 1) + ((yCord) * size_Y)]){
-					found = 1;
 					int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
 					 if (catCheeseLoc != CAT) {
 						if (mode == 0 || mode == 1) {
@@ -566,7 +577,10 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 							stackIndex++;
 						}
 						else {
-							addHeap(heap, weights, (xCord-1) + yCord * size_X, queueIndex);
+							visited[(xCord-1) + (yCord * size_X)] = 1;
+							pred[(xCord-1) + (yCord * size_X)] = current;
+							addHeap(heap, weights, (xCord-1) + (yCord * size_X), queueIndex);
+							// fprintf(stderr, "adding %d to the heap\n", (xCord-1) + (yCord * size_X));
 							queueIndex++;
 						}
 					}
