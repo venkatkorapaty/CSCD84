@@ -437,12 +437,12 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		// 	}
 		// }
 		if (mode == 2 || mode == 3 ) {
-			for (int i = 0; i < graph_size; i++) {
-				int x = i % size_X;
-				int y = i / size_Y;
-				weights[i] = heuristic(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+			// for (int i = 0; i < graph_size; i++) {
+			// 	int x = i % size_X;
+			// 	int y = i / size_Y;
+			// 	weights[i] = heuristic(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 
-			}
+			// }
 			// for (int i = 0; i < graph_size; i++) {
 			// 	heap_visited[i] = 0;
 			// }
@@ -612,6 +612,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 								pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
 								actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 								// fprintf(stderr, "TEST5..");
+								weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
 								// fprintf(stderr, "SUCCESS\n");
 								// fprintf(stderr, "adding %d to the heap\n", (xCord-1) + (yCord * size_X));
@@ -826,17 +827,16 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 
 			These arguments are as described in the search() function above
 	*/
-	double heur = 0;
-
+	int heur = 99999;
 	for (int i = 0; i < cheeses; i++) {
-		double x = fabs(x - cheese_loc[i][0]);
-		double y = fabs(y - cheese_loc[i][1]);
-		double eu_dist = powf((powf(x, 2) + powf(y, 2)), 0.5);
-		fprintf(stderr, "eu_dist: %f,  i: %d\n", eu_dist, i);
-		heur += eu_dist;
+		int xCord = abs(x - cheese_loc[i][0]);
+		int yCord = abs(y - cheese_loc[i][1]);
+		int eu_dist = (int)pow(xCord*xCord + yCord*yCord, 0.5);
+		if (heur > eu_dist) {
+			heur = eu_dist;
+		}
 	}
-	heur = heur/6;
-	fprintf(stderr, "heur of (%d, %d) : %f\n", x, y, heur);
+	// heur = heur/6;
 	return heur;		// <-- Evidently you will need to update this.
 }
 
