@@ -809,7 +809,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 		return (40)*catMultiplier;
 	}
 	normCost += heur;
-	normCost*= 100;
+	normCost *= 100;
 	normCost *= catMultiplier;
 	normCost /= cheeseMultiplier;
 	return normCost;
