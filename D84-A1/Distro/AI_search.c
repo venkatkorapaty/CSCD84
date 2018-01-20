@@ -873,26 +873,26 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	heur;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	int eu = 5000 + heur;
-	int delta = 15;
-	int man_dist;
+	// int delta = 15;
+	// int man_dist;
 
-	for(int i = 0; i < cats; i++) {
-		man_dist =  abs(x - cat_loc[i][0]) + abs(y - cat_loc[i][0]);
-		if (man_dist <= delta) {
-			eu += 400;
-		} else {
-			eu -= 15;
-		}
-	}
+	// for(int i = 0; i < cats; i++) {
+	// 	man_dist =  abs(x - cat_loc[i][0]) + abs(y - cat_loc[i][0]);
+	// 	if (man_dist <= delta) {
+	// 		eu += 400;
+	// 	} else {
+	// 		eu -= 15;
+	// 	}
+	// }
 
-	for (int j = 0; j < cheeses; j++) {
-		man_dist = abs(x - cheese_loc[j][0]) + abs(y - cheese_loc[j][0]);
-		if (man_dist <= delta) {
-			eu -= 80;
-		} else {
-			eu += 50;
-		}
-	}
+	// for (int j = 0; j < cheeses; j++) {
+	// 	man_dist = abs(x - cheese_loc[j][0]) + abs(y - cheese_loc[j][0]);
+	// 	if (man_dist <= delta) {
+	// 		eu -= 80;
+	// 	} else {
+	// 		eu += 50;
+	// 	}
+	// }
 
 	// eu = 4 * eu;
 	// int t = 0;
