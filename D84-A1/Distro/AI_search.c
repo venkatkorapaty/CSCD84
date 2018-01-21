@@ -505,36 +505,53 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			{xCord, yCord + 1},
 			{xCord - 1, yCord}
 			};
-			for (int i = 0; i < 4; i++) {
-				if (loc[i]) {
-					if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
-						int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
-						if (catCheeseLoc != CAT) {
-							if (mode == 0 || mode == 1) {
+			if (mode != 1) {
+				for (int i = 0; i < 4; i++) {
+					if (loc[i]) {
+						if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
+							int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
+							if (catCheeseLoc != CAT) {
+								if (mode == 0 || mode == 1) {
+									queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
+									visited[queueMain[stackIndex]] = 1;
+									pred[queueMain[stackIndex]] = current;
+									stackIndex++;
+								}
+								else {
+									visited[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = 1;
+									pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
+									if (actWeights[xCord + (yCord*size_Y)] == -1) {
+										actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1;
+									} else {
+										actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
+									}
+									weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+									addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
+									queueIndex++;
+								}
+							}
+						} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
+							if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
+								actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
+								pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
+								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
+								queueIndex++;
+							}
+						}
+					}
+				}
+			}
+			else if (mode == 1) {
+				for (int i = 3; i > -1; i--) {
+					if (loc[i]) {
+						if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
+							int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
+							if (catCheeseLoc != CAT) {
 								queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
 								visited[queueMain[stackIndex]] = 1;
 								pred[queueMain[stackIndex]] = current;
 								stackIndex++;
 							}
-							else {
-								visited[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = 1;
-								pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
-								if (actWeights[xCord + (yCord*size_Y)] == -1) {
-									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1;
-								} else {
-									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-								}
-								weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
-								queueIndex++;
-							}
-						}
-					} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-						if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
-							actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-							pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
-							addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
-							queueIndex++;
 						}
 					}
 				}
