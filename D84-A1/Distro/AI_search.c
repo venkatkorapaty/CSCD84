@@ -438,26 +438,30 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			};
 
 			for (int i = 0; i < 4; i++) {
-				if (loc[i]) {
-					if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
-						int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
+				int x = i;
+				if (mode == 1) {
+					x = 3 - i;
+				}
+				if (loc[x]) {
+					if(!visited[(adj_Cords[x][0]) + ((adj_Cords[x][1]) * size_Y)]){
+						int catCheeseLoc = is_cat_or_cheese(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cats, cheese_loc, cheeses);
 						if (catCheeseLoc != CAT) {
 							if (mode == 0 || mode == 1) {
-								queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
+								queueMain[stackIndex] = (adj_Cords[x][0]) + (adj_Cords[x][1]*size_X);
 								visited[queueMain[stackIndex]] = 1;
 								pred[queueMain[stackIndex]] = current;
 								stackIndex++;
 							}
 							else {
-								visited[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = 1;
-								pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
+								visited[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = 1;
+								pred[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = current;
 								if (actWeights[xCord + (yCord*size_Y)] == -1) {
-									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1;
+									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1;
 								} else {
-									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
+									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 								}
-								weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
+								weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = heuristic(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+								addHeap(heap, weights, actWeights, (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X), queueIndex);
 								queueIndex++;
 							}
 						}
@@ -471,22 +475,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					}
 				}
 			}
-			// }
-			// else if (mode == 1) {
-			// 	for (int i = 3; i > -1; i--) {
-			// 		if (loc[i]) {
-			// 			if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
-			// 				int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
-			// 				if (catCheeseLoc != CAT) {
-			// 					queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
-			// 					visited[queueMain[stackIndex]] = 1;
-			// 					pred[queueMain[stackIndex]] = current;
-			// 					stackIndex++;
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
+
 
 		}
 
@@ -550,87 +539,21 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 
 		Input arguments have the same meaning as in the H_cost() function above.
 	*/
-	int normCost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-	normCost++;
-	int heur = 9999;
-	int closeCats = 0;
-	int deadlyCats = 0;
-	int warningCats = 0;
-	int closestDist = 99;
-	for (int i = 0; i < cats; i++) {
-		int xCord = abs(x - cat_loc[i][0]);
-		int yCord = abs(y - cat_loc[i][1]);
-		if (xCord + yCord <= 5) {
-			deadlyCats++;
-		} else if (xCord + yCord <= 10) {
-			closeCats++;
-		} else if (xCord + yCord <= 20) {
-			warningCats++;
-		}
 
-		if (closestDist > xCord + yCord) {
-			closestDist = xCord + yCord;
-		}
+	int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
+	if (normCost <= 1) {
+		return 1000;
 	}
-
-	int catMultiplier = deadlyCats*10 + closeCats*3 + abs(50 - closestDist);
-
-	int closestCheese = 9999;
-	int closeCheeses = 0;
-	for (int i = 0; i < cheeses; i++) {
-		int xCord = abs(x - cheese_loc[i][0]);
-		int yCord = abs(y - cheese_loc[i][1]);
-		if (xCord + yCord <= 5) {
-			closeCheeses++;
-		}
-		if (closestCheese > xCord + yCord) {
-			closestCheese = xCord + yCord;
-		}
+	if (normCost <= 5) {
+		return 100;
 	}
-
-	int cheeseMultiplier = closeCheeses*3 + abs(30 - closestCheese);
-
-
-
-
-	for (int i = 0; i < cheeses; i++) {
-		int man_hat_dist = abs(x - cheese_loc[i][0]) + abs(y - cheese_loc[i][1]);
-
-		man_hat_dist = 4 * man_hat_dist;
-		int t = 0;
-
-		for( int i = 0; i < 4;i++) {
-			t += gr[cheese_loc[i][0] + cheese_loc[i][1]*size_X][i];
-		}
-		if (t == 0)
-			man_hat_dist = 10*man_hat_dist;
-		else {
-			man_hat_dist = man_hat_dist / t;
-		}
-		if (man_hat_dist < heur) {
-			heur = man_hat_dist;
-		}
+	if (normCost <= 10){
+		return 46 - normCost;
 	}
-	if (cheeseMultiplier == 0) {
-		cheeseMultiplier == 1;
+	int walls = 0;
+	for (int i = 0; i < 4; i++) {
+		walls += gr[x + (size_X*y)][i];
 	}
-	fprintf(stderr, "%d\n", cheeseMultiplier);
-	fprintf(stderr, "%d\n", catMultiplier);
-	fprintf(stderr, "%d\n", heur);
-	fprintf(stderr, "%d\n", normCost);
-	// exit(0);
-	// fprintf(stderr, "value: %d\n", (normCost + heur)*(catMultiplier/cheeseMultiplier));
-	if (cheeseMultiplier == 0) {
-		return (40)*catMultiplier;
-	}
-	normCost += heur;
-	normCost *= 100;
-	normCost *= catMultiplier;
-	normCost /= cheeseMultiplier;
-	return normCost;
-	// heur;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	return 46 - walls;
 
-	// int eu = 5000 + heur;
-
-	// return 1;
 }
