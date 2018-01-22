@@ -177,9 +177,6 @@ int extract_min(int *heap, double weights[graph_size], int actWeights[graph_size
 }
 
 
-
-// static int prev[2][3];
-// static int firstIter = 0;
 void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, int (*heuristic)(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4]))
 {
 	/*
@@ -329,72 +326,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	*
 	********************************************************************************************************/
 
-
-	// fprintf(stderr, "SHOULD BE -1: %d\n", heap[0]);
-	// addHeap(heap, weights, 3, 0);
-	// fprintf(stderr, "SHOULD BE 3: %d\n", heap[0]);
-
-	// int extracted = extract_min(heap, weights, 1);
-	// fprintf(stderr, "SHOULD BE 3: %d\n", extracted);
-
-	// addHeap(heap, weights, 8, 0);
-	// addHeap(heap, weights, 3, 1);
-	// addHeap(heap, weights, 10, 2);
-	// addHeap(heap, weights, 5, 3);
-	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d, %d, %d)\n", weights[heap[0]], weights[heap[1]], weights[heap[2]], weights[heap[3]]);
-
-	// extracted = extract_min(heap, weights, 4);
-	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
-	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d, %d)\n", weights[heap[0]], weights[heap[1]], weights[heap[2]]);
-	// extracted = extract_min(heap, weights, 3);
-	// fprintf(stderr, "SHOULD BE 8: %d\n", weights[extracted]);
-	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, %d)\n", weights[heap[0]], weights[heap[1]]);
-	// extracted = extract_min(heap, weights, 2);
-	// fprintf(stderr, "SHOULD BE 9: %d\n", weights[extracted]);
-	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d)\n", weights[heap[0]]);
-	// extracted = extract_min(heap, weights, 1);
-	// fprintf(stderr, "SHOULD BE 10: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 0);
-	// fprintf(stderr, "SHOULD BE -1: %d\n", extracted);
-
-	// addHeap(heap, weights, 8, 0);
-	// addHeap(heap, weights, 3, 1);
-	// addHeap(heap, weights, 10, 2);
-	// addHeap(heap, weights, 5, 3);
-	// addHeap(heap, weights, 98, 4);
-	// addHeap(heap, weights, 435, 5);
-	// addHeap(heap, weights, 12, 6);
-	// addHeap(heap, weights, 345, 7);
-	// fprintf(stderr, "SHOULD BE HEAP ORDER (%d, ", weights[heap[0]]);
-	// fprintf(stderr, "%d, ", weights[heap[1]]);
-	// fprintf(stderr, "%d, ", weights[heap[2]]);
-	// fprintf(stderr, "%d, ", weights[heap[3]]);
-	// fprintf(stderr, "%d, ", weights[heap[4]]);
-	// fprintf(stderr, "%d, ", weights[heap[5]]);
-	// fprintf(stderr, "%d, ", weights[heap[6]]);
-	// fprintf(stderr, "%d)\n", weights[heap[7]]);
-
-	// extracted = extract_min(heap, weights, 8);
-	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 7);
-	// fprintf(stderr, "SHOULD BE 7: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 6);
-	// fprintf(stderr, "SHOULD BE 8: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 5);
-	// fprintf(stderr, "SHOULD BE 9: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 4);
-	// fprintf(stderr, "SHOULD BE 10: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 3);
-	// fprintf(stderr, "SHOULD BE 12: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 2);
-	// fprintf(stderr, "SHOULD BE 17: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 1);
-	// fprintf(stderr, "SHOULD BE 23: %d\n", weights[extracted]);
-	// extracted = extract_min(heap, weights, 0);
-	// fprintf(stderr, "SHOULD BE -1: %d\n", extracted);
-
-
-	// exit(0);
 	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 	int visited[graph_size];
 	int pred[graph_size];
@@ -505,187 +436,54 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			{xCord, yCord + 1},
 			{xCord - 1, yCord}
 			};
-			if (mode != 1) {
-				for (int i = 0; i < 4; i++) {
-					if (loc[i]) {
-						if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
-							int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
-							if (catCheeseLoc != CAT) {
-								if (mode == 0 || mode == 1) {
-									queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
-									visited[queueMain[stackIndex]] = 1;
-									pred[queueMain[stackIndex]] = current;
-									stackIndex++;
-								}
-								else {
-									visited[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = 1;
-									pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
-									if (actWeights[xCord + (yCord*size_Y)] == -1) {
-										actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1;
-									} else {
-										actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-									}
-									weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-									addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
-									queueIndex++;
-								}
-							}
-						} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-							if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
-								actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-								pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
-								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
-								queueIndex++;
-							}
-						}
-					}
-				}
-			}
-			else if (mode == 1) {
-				for (int i = 3; i > -1; i--) {
-					if (loc[i]) {
-						if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
-							int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
-							if (catCheeseLoc != CAT) {
+
+			for (int i = 0; i < 4; i++) {
+				if (loc[i]) {
+					if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
+						int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
+						if (catCheeseLoc != CAT) {
+							if (mode == 0 || mode == 1) {
 								queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
 								visited[queueMain[stackIndex]] = 1;
 								pred[queueMain[stackIndex]] = current;
 								stackIndex++;
 							}
+							else {
+								visited[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = 1;
+								pred[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = current;
+								if (actWeights[xCord + (yCord*size_Y)] == -1) {
+									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1;
+								} else {
+									actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
+								}
+								weights[(adj_Cords[i][0]) + (adj_Cords[i][1] * size_X)] = heuristic(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+								addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
+								queueIndex++;
+							}
+						}
+					} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
+						if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
+							actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
+							pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
+							addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
+							queueIndex++;
 						}
 					}
 				}
 			}
-			// if (loc[0]) {
-			// 	// fprintf(stderr, "here5\n");
-			// 	if (!visited[xCord + ((yCord - 1) * size_Y)]){
-			// 		int catCheeseLoc = is_cat_or_cheese(xCord, yCord - 1, cat_loc, cats, cheese_loc, cheeses);
-			// 		if (catCheeseLoc != CAT) {
-			// 			if (mode == 0 || mode == 1) {
-			// 				queueMain[stackIndex] = xCord + ((yCord - 1) * size_Y);
-			// 				visited[queueMain[stackIndex]] = 1;
-			// 				pred[queueMain[stackIndex]] = current;
-			// 				stackIndex++;
-			// 			}
-			// 			else {
-			// 				visited[xCord + ((yCord - 1) * size_Y)] = 1;
-			// 				pred[xCord + ((yCord - 1) * size_Y)] = current;
-			// 				actWeights[xCord + ((yCord - 1) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 				// fprintf(stderr, "TEST2..");
-			// 				addHeap(heap, weights, actWeights, xCord + ((yCord - 1) * size_Y), queueIndex);
-			// 				// fprintf(stderr, "SUCCESS\n");
-			// 				// fprintf(stderr, "adding %d to the heap\n", xCord + ((yCord - 1) * size_Y));
-			// 				queueIndex++;
-			// 			}
-			// 		}
-					
-			// 	} else if ((mode == 2 || mode == 3) && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-			// 		// fprintf(stderr, "WE OUT HERE1..");
-			// 		if (actWeights[xCord + ((yCord-1) * size_Y)] > 1 + actWeights[xCord + ((yCord)*size_Y)]) {
-			// 			// fprintf(stderr, "IF STATE..");
-			// 			actWeights[xCord + ((yCord-1) * size_Y)] = 1 + actWeights[xCord + ((yCord)*size_Y)];
-			// 			pred[(xCord) + ((yCord-1) * size_X)] = current;
-			// 			addHeap(heap, weights, actWeights, xCord + ((yCord - 1) * size_Y), queueIndex);
-			// 			queueIndex++;
-			// 		}
-			// 		// fprintf(stderr, "I LIED\n");
-			// 	}
 			// }
-			// if (loc[1]) {
-			// 	if (!visited[(xCord + 1) + ((yCord) * size_Y)]) {
-			// 		int catCheeseLoc = is_cat_or_cheese(xCord + 1, yCord, cat_loc, cats, cheese_loc, cheeses);
-			// 		if (catCheeseLoc != CAT) {
-			// 			if (mode == 0 || mode == 1) {
-			// 				queueMain[stackIndex] = (xCord+1) + (yCord*size_X);
-			// 				visited[queueMain[stackIndex]] = 1;
-			// 				pred[queueMain[stackIndex]] = current;
-			// 				stackIndex++;
+			// else if (mode == 1) {
+			// 	for (int i = 3; i > -1; i--) {
+			// 		if (loc[i]) {
+			// 			if(!visited[(adj_Cords[i][0]) + ((adj_Cords[i][1]) * size_Y)]){
+			// 				int catCheeseLoc = is_cat_or_cheese(adj_Cords[i][0], adj_Cords[i][1], cat_loc, cats, cheese_loc, cheeses);
+			// 				if (catCheeseLoc != CAT) {
+			// 					queueMain[stackIndex] = (adj_Cords[i][0]) + (adj_Cords[i][1]*size_X);
+			// 					visited[queueMain[stackIndex]] = 1;
+			// 					pred[queueMain[stackIndex]] = current;
+			// 					stackIndex++;
+			// 				}
 			// 			}
-			// 			else {
-			// 				visited[(xCord+1) + yCord * size_X] = 1;
-			// 				pred[(xCord+1) + yCord * size_X] = current;
-			// 				// fprintf(stderr, "TEST3..");
-			// 				addHeap(heap, weights, actWeights, (xCord+1) + (yCord * size_X), queueIndex);
-			// 				// fprintf(stderr, "SUCCESS\n");
-			// 				// fprintf(stderr, "adding %d to the heap\n", (xCord+1) + (yCord * size_X));
-			// 				queueIndex++;
-			// 			}
-			// 		}
-					
-			// 	} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-			// 		// fprintf(stderr, "WE OUT HERE2..");
-			// 		if (actWeights[xCord+1 + ((yCord) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
-			// 			// fprintf(stderr, "IF STATE..");
-			// 			actWeights[xCord+1 + ((yCord) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 			pred[(xCord+1) + yCord * size_X] = current;
-			// 			addHeap(heap, weights, actWeights, (xCord+1) + (yCord * size_X), queueIndex);
-			// 			queueIndex++;
-			// 		}
-			// 		// fprintf(stderr, "I LIED\n");
-			// 	}
-			// }
-			// if (loc[2]) {
-			// 	if(!visited[xCord + ((yCord + 1) * size_Y)]) {
-			// 		int catCheeseLoc = is_cat_or_cheese(xCord, yCord + 1, cat_loc, cats, cheese_loc, cheeses);
-			// 		if (catCheeseLoc != CAT) {
-			// 			if (mode == 0 || mode == 1) {
-			// 				queueMain[stackIndex] = xCord + ((yCord+1)*size_X);
-			// 				visited[queueMain[stackIndex]] = 1;
-			// 				pred[queueMain[stackIndex]] = current;
-			// 				stackIndex++;
-			// 			}
-			// 			else {
-			// 				visited[xCord + ((yCord + 1) * size_X)] = 1;
-			// 				pred[xCord + ((yCord + 1) * size_X)] = current;
-			// 				actWeights[xCord + ((yCord + 1) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 				// fprintf(stderr, "TEST4..");
-			// 				addHeap(heap, weights, actWeights, xCord + ((yCord + 1) * size_X), queueIndex);
-			// 				// fprintf(stderr, "SUCCESS\n");
-			// 				// fprintf(stderr, "adding %d to the heap\n", xCord + ((yCord + 1) * size_X));
-			// 				queueIndex++;
-			// 			}
-			// 		}
-			// 	} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-			// 		// fprintf(stderr, "WE OUT HERE3..");
-			// 		if (actWeights[xCord + ((yCord+1) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
-			// 			// fprintf(stderr, "IF STATE..");
-			// 			actWeights[xCord + ((yCord+1) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 			pred[(xCord) + ((yCord+1) * size_X)] = current;
-			// 			addHeap(heap, weights, actWeights, xCord + ((yCord + 1) * size_X), queueIndex);
-			// 			queueIndex++;
-			// 		}
-			// 		// fprintf(stderr, "I LIED\n");
-			// 	}
-			// }
-			// if (loc[3]) {
-			// 	if(!visited[(xCord - 1) + ((yCord) * size_Y)]){
-			// 		int catCheeseLoc = is_cat_or_cheese(xCord - 1, yCord, cat_loc, cats, cheese_loc, cheeses);
-			// 		 if (catCheeseLoc != CAT) {
-			// 			if (mode == 0 || mode == 1) {
-			// 				queueMain[stackIndex] = (xCord-1) + (yCord*size_X);
-			// 				visited[queueMain[stackIndex]] = 1;
-			// 				pred[queueMain[stackIndex]] = current;
-			// 				stackIndex++;
-			// 			}
-			// 			else {
-			// 				visited[(xCord-1) + (yCord * size_X)] = 1;
-			// 				pred[(xCord-1) + (yCord * size_X)] = current;
-			// 				actWeights[xCord-1 + ((yCord) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 				// fprintf(stderr, "TEST5..");
-			// 				addHeap(heap, weights, actWeights, (xCord-1) + (yCord * size_X), queueIndex);
-			// 				// fprintf(stderr, "SUCCESS\n");
-			// 				// fprintf(stderr, "adding %d to the heap\n", (xCord-1) + (yCord * size_X));
-			// 				queueIndex++;
-			// 			}
-			// 		}
-			// 	} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-			// 		// fprintf(stderr, "WE OUT HERE4..");
-			// 		if (actWeights[xCord-1 + ((yCord) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
-			// 			// fprintf(stderr, "IF STATE..");
-			// 			actWeights[xCord-1 + ((yCord) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-			// 			pred[(xCord-1) + yCord * size_X] = current;
-			// 			addHeap(heap, weights, actWeights, (xCord-1) + (yCord * size_X), queueIndex);
-			// 			queueIndex++;
 			// 		}
 			// 	}
 			// }
