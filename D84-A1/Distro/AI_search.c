@@ -541,19 +541,31 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	*/
 
 	int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
-	if (normCost <= 1) {
-		return 1000;
-	}
-	if (normCost <= 5) {
-		return 100;
-	}
-	if (normCost <= 10){
-		return 46 - normCost;
-	}
+	int mouseCost = H_cost(mouse_loc[0][0], mouse_loc[0][1], cat_loc, cat_loc, mouse_loc, cats, cats, gr);
 	int walls = 0;
 	for (int i = 0; i < 4; i++) {
 		walls += gr[x + (size_X*y)][i];
 	}
-	return 46 - walls;
+	if (normCost <= 2) {
+		return 10000;
+	}
+	if (normCost <= 5) {
+		if (walls >= 3) {
+			return 10000;
+		}
+		// return 80 - normCost;
+		return (normCost+1)*20;
+	}
+	if (normCost <= 10){
+		// return 46 - normCost;
+		return (normCost+1)*10;
+	}
+	
+	/*
+	ideas
+	give cheeses with less walls lower value and cheeses with more walls higher values
+	*/
+
+	return 46 - normCost;
 
 }
