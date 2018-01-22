@@ -426,6 +426,20 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				}
  				if (mode == 2 || mode == 3)
 					free(heap);
+
+				if (mode == 1) {
+					int prevY;
+					int prevX;
+					for (int i = 0; i < graph_size; i++) {
+						if (path[i][0] == -1) {
+							path[i][0] = prevX;
+							path[i][1] = prevY;
+						}
+						prevX = path[i][0];
+						prevY = path[i][1];
+						// if (path[i])
+					}
+				}
 				return;
 			}
 			visit_order[xCord][yCord] = v;
