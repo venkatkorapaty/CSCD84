@@ -43,7 +43,6 @@
 ***********************************************************************/
 
 #include "AI_search.h"
-#include <unistd.h>
 
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
 	/*
@@ -65,25 +64,12 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 	return 0;
 }
 
-int is_beside_cheese(int x, int y, int cheese_loc[10][2], int cheeses) {
-	/*
-	*/
-	int i = 0;
-	while (i < cheeses) {
-		if (cheese_loc[i][0] == x && cheese_loc[i][1] == y) {
-			return i;
-		}
-		i++;
-	}
-	return -1;
-}
 
 void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1][2]) {
 	int i = 0;
 	int reversePath[1024];
 
 	while (pred[current] != -1 ) {
-		// fprintf(stderr, "CURR: (%d, %d), PRED: (%d, %d)\n", current%size_X, current/size_Y, pred[current]%size_X, pred[current]/size_Y);
 		reversePath[i] = current;
 		current = pred[current];
 		i++;
@@ -100,9 +86,6 @@ void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1]
 	path[0][0] = mouse_loc[0][0];
 	path[0][1] = mouse_loc[0][1];
 
-	// for (int j = 0; j <= i; j++) {
-	// 	fprintf(stderr, "PATH: (%d, %d) \n", path[j][0], path[j][1]);
-	// }
 }
 
 void addHeap(int *heap, double weights[graph_size], int actWeights[graph_size], int val, int size) {
@@ -281,7 +264,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 						the mouse to one of the cheese chunks. The order matters, so
 						path[0][:] must be the mouse's current location, path[1][:]
 						is the next move for the mouse. Each successive row will contain
-						the next move toward the cheese, and the path ends at a location
+						the next move towar		// fprintf(stderr, "CURR: (%d, %d), PRED: (%d, %d)\n", current%size_X, current/size_Y, pred[current]%size_X, pred[current]/size_Y);d the cheese, and the path ends at a location
 						whose coordinates correspond to one of the cheese chunks.
 						Any entries beyond that must remain set to -1
 			- visit_order[size_X][size_Y] 	:  Your search code will update this array to contain the
@@ -557,14 +540,56 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
 	int mouseCost = H_cost(mouse_loc[0][0], mouse_loc[0][1], cat_loc, cat_loc, mouse_loc, cats, cats, gr);
 	int walls = 0;
-	for (int i = 0; i < 4; i++) {
-		walls += gr[x + (size_X*y)][i];
+
+	int cheeseWalls[10][2];
+	int loc[10][2];
+	for (int i = 0; i < cheeses; i++) {
+		loc[0][0] = cheese_loc[i][0];
+		loc[0][1] = cheese_loc[i][1];
+		cheeseWalls[i][1] = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
+		for (int j = 0; j < 4; j++) {
+			cheeseWalls[i][0] += gr[cheese_loc[i][0] + (size_X*cheese_loc[i][1])][j];
+		}
 	}
-	if (normCost <= 2) {
+
+
+	int closestCheese = 999;
+	int index;
+	for (int i = 0; i < cheeses; i++) {
+		if (cheeseWalls[i][1] <= closestCheese) {
+			closestCheese = cheeseWalls[i][1];
+			index = i;
+		}
+	}
+	
+	if (closestCheese <= 5 && cheeseWalls[index][0] >= 3) {
 		return 10000;
 	}
+
+
+	int adjWalls = 0;
+	int adj_Cords[4][2] = {{x, y-1},
+			{x + 1, y},
+			{x, y + 1},
+			{x - 1, y}
+			};
+	for (int i = 0; i < 4; i++) {
+		walls += gr[x + (size_X*y)][i];
+		if (gr[x + (size_X*y)][i]) {
+			for (int j = 0; j < 4; j++) {
+				if (j != i) {
+					adjWalls += gr[adj_Cords[i][0] + (size_X*adj_Cords[i][1])][j];
+				}
+			}
+		}
+	}
+
+	// if (walls <= 2 && adjWalls <= 6)
+	// if (normCost <= 2) {
+	// 	return 10000;
+	// }
 	if (normCost <= 5) {
-		if (walls >= 3) {
+		if (walls <= 2) {
 			return 10000;
 		}
 		// return 80 - normCost;
@@ -577,6 +602,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	
 	/*
 	ideas
+	prioritize cheese that are in the open
 	give cheeses with less walls lower value and cheeses with more walls higher values
 	*/
 
