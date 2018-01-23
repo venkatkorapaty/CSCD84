@@ -354,10 +354,12 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 		while ((((queueIndex < stackIndex)  && (mode == 1 || mode == 0)) || mode == 2 || mode == 3) && cheeses > 0) {
 			if (mode == 0) {
+				// Pop from queue
 				current = queueMain[queueIndex];
 				queueIndex++;
 			}
 			else if (mode == 1) {
+				// Pop from stack
 				current = queueMain[stackIndex - 1];
 				if (stackIndex != 0) {
 					stackIndex--;
@@ -405,6 +407,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 					path[1][1] = mouse_loc[0][1];
 				}
 				else {
+					// if we find cheese, compute the proper path
 					traceBack2(pred, path, current, mouse_loc);
 				}
  				if (mode == 2 || mode == 3)
@@ -425,9 +428,13 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				}
 				return;
 			}
+
+			// keep track of visit order
 			visit_order[xCord][yCord] = v;
 			v++;
 			double *loc = gr[xCord + (yCord*size_X)];
+			
+			// holds grid coordinates around our current coordinate
 			int adj_Cords[4][2] = {{xCord, yCord-1},
 			{xCord + 1, yCord},
 			{xCord, yCord + 1},
@@ -439,7 +446,9 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				if (mode == 1) {
 					x = 3 - i;
 				}
+				// if valid location
 				if (loc[x]) {
+					// if we haven't visited
 					if(!visited[(adj_Cords[x][0]) + ((adj_Cords[x][1]) * size_Y)]){
 						int catCheeseLoc = is_cat_or_cheese(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cats, cheese_loc, cheeses);
 						if (catCheeseLoc != CAT) {
@@ -462,7 +471,9 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 								queueIndex++;
 							}
 						}
-					} else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
+					}
+					// When running UCS, and we come back to a node, see if it has faster path
+					else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
 						if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
 							actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 							pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
@@ -539,16 +550,18 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 
 	int heur = 0;
 
+	// calculate heuristic distance from x y to every mouse
 	int loc[10][2];
 	for (int i = 0; i < cats; i++) {
 		loc[0][0] = cat_loc[i][0];
 		loc[0][1] = cat_loc[i][1];
 		int mouseCost = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
+		// We use 46 as that's an upperboundd for the maximum size of our euclidean distance
 		heur += (46 - mouseCost);
 	}
 
-
-
+	// amount of walls enclosing a cheese, checks if it's too
+	// enclosed in a hallways
 	int cheeseWalls[10][2];
 	for (int i = 0; i < cheeses; i++) {
 		loc[0][0] = cheese_loc[i][0];
@@ -563,105 +576,15 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	int index;
 	int highest_walls = 10;
 	int prioritized_cheese = 10;
+	// Get cheese that has the least amount of walls enclosing a cheese
 	for (int i = 0; i < cheeses; i++) {
 		if (cheeseWalls[i][0] <= highest_walls) {
 			prioritized_cheese = i;
 		}
 	}
+
 	loc[0][0] = cheese_loc[prioritized_cheese][0];
 	loc[0][1] = cheese_loc[prioritized_cheese][1];
-
+	// We use 46 as that's an upperboundd for the maximum size of our euclidean distance
 	return heur + (46 - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
-
-
-
-
-
-
-
-
-	// int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
-	// int mouseCost = H_cost(mouse_loc[0][0], mouse_loc[0][1], cat_loc, cat_loc, mouse_loc, cats, cats, gr);
-	// int walls = 0;
-
-	// int cheeseWalls[10][2];
-	// int loc[10][2];
-	// for (int i = 0; i < cheeses; i++) {
-	// 	loc[0][0] = cheese_loc[i][0];
-	// 	loc[0][1] = cheese_loc[i][1];
-	// 	cheeseWalls[i][1] = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
-	// 	for (int j = 0; j < 4; j++) {
-	// 		cheeseWalls[i][0] += gr[cheese_loc[i][0] + (size_X*cheese_loc[i][1])][j];
-	// 	}
-	// }
-
-
-	// int closestCheese = 999;
-	// int index;
-	// int highest_walls = 10;
-	// int prioritized_cheese = 10;
-	// for (int i = 0; i < cheeses; i++) {
-	// 	if (cheeseWalls[i][1] <= closestCheese) {
-	// 		closestCheese = cheeseWalls[i][1];
-	// 		index = i;
-	// 	}
-	// 	if (cheeseWalls[i][0] < highest_walls) {
-	// 		prioritized_cheese = i;
-	// 	}
-	// }
-
-	// if (closestCheese <= 5 && cheeseWalls[index][0] <= 2) {
-	// 	return 10000;
-	// }
-
-
-	// int adjWalls = 0;
-	// int adj_Cords[4][2] = {{x, y-1},
-	// 		{x + 1, y},
-	// 		{x, y + 1},
-	// 		{x - 1, y}
-	// 		};
-	// for (int i = 0; i < 4; i++) {
-	// 	walls += gr[x + (size_X*y)][i];
-	// 	if (gr[x + (size_X*y)][i]) {
-	// 		for (int j = 0; j < 4; j++) {
-	// 			if (j != i) {
-	// 				adjWalls += gr[adj_Cords[i][0] + (size_X*adj_Cords[i][1])][j];
-	// 			}
-	// 		}
-	// 	}
-	// }
-
-	// loc[0][0] = cheese_loc[prioritized_cheese][0];
-	// loc[0][1] = cheese_loc[prioritized_cheese][1];
-	// int dist_to_pri_che = H_cost(x, y, loc, loc, mouse_loc, cats, cats, gr);
-	// // fprintf(stderr, "normal case: %d\n", dist_to_pri_che);
-
-	// if (walls <= 2 && adjWalls <= 5) {
-	// 	return 10000;
-	// }
-	// // if (normCost <= 2) {
-	// // 	return 10000;
-	// // }
-	// if (normCost <= 5) {
-	// 	if (walls <= 2) {
-	// 		return 10000;
-	// 	}
-	// 	// return 80 - normCost;
-	// 	return 46 + ((normCost+1)*20 - dist_to_pri_che);
-	// }
-	// if (normCost <= 10){
-	// 	// return 46 - normCost;
-	// 	return 46 + ((normCost+1)*10 - dist_to_pri_che);
-	// }
-	
-	// /*
-	// ideas
-	// prioritize cheese that are in the open
-	// give cheeses with less walls lower value and cheeses with more walls higher values
-	// */
-	
-
-	// return 46 - dist_to_pri_che;//46 - normCost;
-
 }
