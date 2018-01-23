@@ -562,7 +562,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 		}
 	}
 	
-	if (closestCheese <= 5 && cheeseWalls[index][0] >= 3) {
+	if (closestCheese <= 5 && cheeseWalls[index][0] <= 2) {
 		return 10000;
 	}
 
@@ -584,7 +584,9 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 		}
 	}
 
-	// if (walls <= 2 && adjWalls <= 6)
+	if (walls <= 2 && adjWalls <= 5) {
+		return 10000;
+	}
 	// if (normCost <= 2) {
 	// 	return 10000;
 	// }

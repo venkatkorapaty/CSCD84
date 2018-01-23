@@ -8,17 +8,17 @@ mark.
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Korapaty, Venkat
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Bisesar, Shevlin
 
-Student number 1:
+Student number 1: 1001365060
 
-Student number 2:
+Student number 2: 1001307766
 
-UTORid 1:
+UTORid 1: korapaty
 
-UTORid 2:
+UTORid 2: bisesars
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -26,7 +26,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: Venkat Korapaty	 Shevlin Bisesar
 
 
 (-5 marks for failing to provide the identifying
@@ -38,20 +38,23 @@ but explain carefully when needed.
 
 1 .- (1 marks) Of BFS and DFS, which search algorithm yields the best results? (i.e. which is more likely
      to get the mouse to the cheese safely before being eaten?)
-
+	BFS.
 
 2 .- (1 marks) Does this mean that in general BFS is a better search algorithm? (yes/no and give reasons to
      support your answer based on your observations)
-
+	No, BFS is not better in general. It is better in this scenario as our graph is wide cyclic, and undirected.
 
 3 .- (2 marks) Describe the heuristic function you used for A* search. Why is this heuristic admissible?
-
+	We used euclidean distance. This heuristic is admissible as the distance calculated, r^2 = x^2 + y^2,
+	r will never be greater than x + y, and x + y is the distance we must travel to reach the goal.
 
 4 .- (1 marks) Explain how your heuristic function accounts for the presence of multiple cheeses.
-
+	We look at the closest cheese and generate a path towards it.
 
 5 .- (1 marks) Is A* equivalent to BFS for this problem? or is it better/worse? explain your answer based on 
      your observations.
+	A* is not equivalent, as we would have some cases where it follows different paths. Usually, the paths
+	computed by A* aren't better, but they are computed faster (not that we can really notice).
 
 6 .- (2 marks) Describe your heuristic function for A*-nokitty. How does it work? what factors are considered
      into the cost function? is it admissible (yes/no and why)?
@@ -67,15 +70,15 @@ doesn't work, or what problems exist.
 	
 		Complete/Working	Partial		Not done
 
-DFS
+DFS				x
 
-BFS
+BFS				x
 
-A*
+A*				x
 
-H
+H				x
 
-H_no_cats
+H_no_cats		x
 
 _____________________________________________________
 
