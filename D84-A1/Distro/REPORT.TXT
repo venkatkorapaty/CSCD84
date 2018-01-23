@@ -58,10 +58,17 @@ but explain carefully when needed.
 
 6 .- (2 marks) Describe your heuristic function for A*-nokitty. How does it work? what factors are considered
      into the cost function? is it admissible (yes/no and why)?
+	no.  First we look at the cost of the given x and y to every cat to get a base heuristic value.
+	Then we look at the locations of all the cheese pieces and their surroundings (how many walls are around them)
+	We then try to prioritize pieces of cheese are have fewer walls around them and that have fewer cats around them.
 
 7 .- (2 marks) What is the largest limitation of the search algorithms implemented in this assignment?
      (i.e. is there anything we are missing that could lead to a smarter mouse?) - this is
      a more or less open question, but we talked about it in lecture!
+	BFS - Doesn't detect if a cat is adjacent or close to our result path (we could easily die)
+	DFS - because it goes as deep as it can every call can find a very different path resulting in loops 
+	A* H_cost - Runs faster than BFS but suffers the same problem more or less
+	A* H_cost_nokitty - It avoids the cats to an extent but it's limited by us not knowing the best way to calculate a heuristic
 
 _____________________________________________________
 

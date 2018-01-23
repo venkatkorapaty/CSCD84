@@ -66,6 +66,7 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 
 
 void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1][2]) {
+	// uses the pred array to backtrack and figure out the path we found to the goal
 	int i = 0;
 	int reversePath[1024];
 
@@ -91,7 +92,7 @@ void traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1]
 void addHeap(int *heap, double weights[graph_size], int actWeights[graph_size], int val, int size) {
 	int parent;
 
-	// heap[size] = loc;
+	// adds val to our heap data structure for the A* algorithms
 
 	while (size > 0) {
 		parent = (size - 1) / 2;
@@ -107,7 +108,7 @@ void addHeap(int *heap, double weights[graph_size], int actWeights[graph_size], 
 }
 
 void propagate(int *heap, double weights[graph_size], int actWeights[graph_size], int node, int size) {
-	// lame case
+	// when extracting min from the heap we need to reorganize our heap
 	if (size == 2) {
 		if (weights[heap[0]] + actWeights[heap[0]] > weights[heap[1]] + actWeights[heap[1]]) {
 			int temp = heap[0];
@@ -138,6 +139,7 @@ void propagate(int *heap, double weights[graph_size], int actWeights[graph_size]
 }
 
 int extract_min(int *heap, double weights[graph_size], int actWeights[graph_size], int size) {
+	//get the first element in the heap and then re-sort it
 	int min;
 	int last_elem;
 	if (size == 0) {
@@ -312,6 +314,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 	int visited[graph_size];
 	int pred[graph_size];
+	//initialize arrays because of C
 	for (int i = 0; i < graph_size; i++) {
 		visited[i] = 0;
 		pred[i] = -1;
@@ -322,7 +325,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 	if (mode >= 0 && mode <= 3) {
 		
 		
-		
+		//declarations
 		int v = 1;
 		int queueMain[graph_size];
 		int queueIndex = 0;
@@ -331,12 +334,17 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		double weights[graph_size];
 		int actWeights[graph_size];
 		int heap_visited[graph_size];
+
+
+		//set all the initial actual weights and visited nodes to 0 for A* modes
 		for (int i = 0; i < graph_size; i++) {
 			actWeights[i] = 0;
 			heap_visited[i] = 0;
 		}
+
 		actWeights[mouse_loc[0][0] + (mouse_loc[0][1]*size_Y)] = -1;
 		if (mode == 2 || mode == 3 ) {
+			//if A* we set all the elements in our heap to -1 and then add the first element (current location)
 			for (int i = 0; i < graph_size; i++) {
 				heap[i] = -1;
 			}
@@ -344,6 +352,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
 			queueIndex++;
 		} else {
+			//if not A* start up our stack/queue
 			queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
 			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
 			stackIndex++;
@@ -416,6 +425,7 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				if (mode == 1) {
 					int prevY;
 					int prevX;
+					//if the dfs path ends before next search call we need to set elements path to the last coord other wise we disappear
 					for (int i = 0; i < graph_size; i++) {
 						if (path[i][0] == -1) {
 							path[i][0] = prevX;
@@ -453,15 +463,18 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 						int catCheeseLoc = is_cat_or_cheese(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cats, cheese_loc, cheeses);
 						if (catCheeseLoc != CAT) {
 							if (mode == 0 || mode == 1) {
+								//add to stack/queue
 								queueMain[stackIndex] = (adj_Cords[x][0]) + (adj_Cords[x][1]*size_X);
 								visited[queueMain[stackIndex]] = 1;
 								pred[queueMain[stackIndex]] = current;
 								stackIndex++;
 							}
 							else {
+								//add to heap and set weights
 								visited[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = 1;
 								pred[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = current;
 								if (actWeights[xCord + (yCord*size_Y)] == -1) {
+									//root is current (act weight is -1)
 									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1;
 								} else {
 									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
@@ -550,7 +563,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 
 	int heur = 0;
 
-	// calculate heuristic distance from x y to every mouse
+	// calculate heuristic distance from x y to every cat
 	int loc[10][2];
 	for (int i = 0; i < cats; i++) {
 		loc[0][0] = cat_loc[i][0];
