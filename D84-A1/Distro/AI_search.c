@@ -516,7 +516,7 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 			heur = eu_dist;
 		}
 	}
-	fprintf(stderr, "heur: %d\n", heur);
+	// fprintf(stderr, "heur: %d\n", heur);
 	return heur;
 }
 
@@ -537,12 +537,19 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 		Input arguments have the same meaning as in the H_cost() function above.
 	*/
 
-	int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
-	int mouseCost = H_cost(mouse_loc[0][0], mouse_loc[0][1], cat_loc, cat_loc, mouse_loc, cats, cats, gr);
-	int walls = 0;
+	int heur = 0;
+
+	int loc[10][2];
+	for (int i = 0; i < cats; i++) {
+		loc[0][0] = cat_loc[i][0];
+		loc[0][1] = cat_loc[i][1];
+		int mouseCost = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
+		heur += (46 - mouseCost);
+	}
+
+
 
 	int cheeseWalls[10][2];
-	int loc[10][2];
 	for (int i = 0; i < cheeses; i++) {
 		loc[0][0] = cheese_loc[i][0];
 		loc[0][1] = cheese_loc[i][1];
@@ -551,63 +558,110 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 			cheeseWalls[i][0] += gr[cheese_loc[i][0] + (size_X*cheese_loc[i][1])][j];
 		}
 	}
-
-
+	
 	int closestCheese = 999;
 	int index;
+	int highest_walls = 10;
+	int prioritized_cheese = 10;
 	for (int i = 0; i < cheeses; i++) {
-		if (cheeseWalls[i][1] <= closestCheese) {
-			closestCheese = cheeseWalls[i][1];
-			index = i;
+		if (cheeseWalls[i][0] <= highest_walls) {
+			prioritized_cheese = i;
 		}
 	}
-	
-	if (closestCheese <= 5 && cheeseWalls[index][0] <= 2) {
-		return 10000;
-	}
+	loc[0][0] = cheese_loc[prioritized_cheese][0];
+	loc[0][1] = cheese_loc[prioritized_cheese][1];
+
+	return heur + (46 - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
 
 
-	int adjWalls = 0;
-	int adj_Cords[4][2] = {{x, y-1},
-			{x + 1, y},
-			{x, y + 1},
-			{x - 1, y}
-			};
-	for (int i = 0; i < 4; i++) {
-		walls += gr[x + (size_X*y)][i];
-		if (gr[x + (size_X*y)][i]) {
-			for (int j = 0; j < 4; j++) {
-				if (j != i) {
-					adjWalls += gr[adj_Cords[i][0] + (size_X*adj_Cords[i][1])][j];
-				}
-			}
-		}
-	}
 
-	if (walls <= 2 && adjWalls <= 5) {
-		return 10000;
-	}
-	// if (normCost <= 2) {
+
+
+
+
+
+	// int normCost = H_cost(x, y, cat_loc, cat_loc, mouse_loc, cats, cats, gr);
+	// int mouseCost = H_cost(mouse_loc[0][0], mouse_loc[0][1], cat_loc, cat_loc, mouse_loc, cats, cats, gr);
+	// int walls = 0;
+
+	// int cheeseWalls[10][2];
+	// int loc[10][2];
+	// for (int i = 0; i < cheeses; i++) {
+	// 	loc[0][0] = cheese_loc[i][0];
+	// 	loc[0][1] = cheese_loc[i][1];
+	// 	cheeseWalls[i][1] = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
+	// 	for (int j = 0; j < 4; j++) {
+	// 		cheeseWalls[i][0] += gr[cheese_loc[i][0] + (size_X*cheese_loc[i][1])][j];
+	// 	}
+	// }
+
+
+	// int closestCheese = 999;
+	// int index;
+	// int highest_walls = 10;
+	// int prioritized_cheese = 10;
+	// for (int i = 0; i < cheeses; i++) {
+	// 	if (cheeseWalls[i][1] <= closestCheese) {
+	// 		closestCheese = cheeseWalls[i][1];
+	// 		index = i;
+	// 	}
+	// 	if (cheeseWalls[i][0] < highest_walls) {
+	// 		prioritized_cheese = i;
+	// 	}
+	// }
+
+	// if (closestCheese <= 5 && cheeseWalls[index][0] <= 2) {
 	// 	return 10000;
 	// }
-	if (normCost <= 5) {
-		if (walls <= 2) {
-			return 10000;
-		}
-		// return 80 - normCost;
-		return (normCost+1)*20;
-	}
-	if (normCost <= 10){
-		// return 46 - normCost;
-		return (normCost+1)*10;
-	}
-	
-	/*
-	ideas
-	prioritize cheese that are in the open
-	give cheeses with less walls lower value and cheeses with more walls higher values
-	*/
 
-	return 46 - normCost;
+
+	// int adjWalls = 0;
+	// int adj_Cords[4][2] = {{x, y-1},
+	// 		{x + 1, y},
+	// 		{x, y + 1},
+	// 		{x - 1, y}
+	// 		};
+	// for (int i = 0; i < 4; i++) {
+	// 	walls += gr[x + (size_X*y)][i];
+	// 	if (gr[x + (size_X*y)][i]) {
+	// 		for (int j = 0; j < 4; j++) {
+	// 			if (j != i) {
+	// 				adjWalls += gr[adj_Cords[i][0] + (size_X*adj_Cords[i][1])][j];
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	// loc[0][0] = cheese_loc[prioritized_cheese][0];
+	// loc[0][1] = cheese_loc[prioritized_cheese][1];
+	// int dist_to_pri_che = H_cost(x, y, loc, loc, mouse_loc, cats, cats, gr);
+	// // fprintf(stderr, "normal case: %d\n", dist_to_pri_che);
+
+	// if (walls <= 2 && adjWalls <= 5) {
+	// 	return 10000;
+	// }
+	// // if (normCost <= 2) {
+	// // 	return 10000;
+	// // }
+	// if (normCost <= 5) {
+	// 	if (walls <= 2) {
+	// 		return 10000;
+	// 	}
+	// 	// return 80 - normCost;
+	// 	return 46 + ((normCost+1)*20 - dist_to_pri_che);
+	// }
+	// if (normCost <= 10){
+	// 	// return 46 - normCost;
+	// 	return 46 + ((normCost+1)*10 - dist_to_pri_che);
+	// }
+	
+	// /*
+	// ideas
+	// prioritize cheese that are in the open
+	// give cheeses with less walls lower value and cheeses with more walls higher values
+	// */
+	
+
+	// return 46 - dist_to_pri_che;//46 - normCost;
 
 }
