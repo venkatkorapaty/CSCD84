@@ -68,6 +68,8 @@ but explain carefully when needed.
 	BFS - Doesn't detect if a cat is adjacent or close to our result path (we could easily die)
 	DFS - because it goes as deep as it can every call can find a very different path resulting in loops 
 	A* H_cost - Runs faster than BFS but suffers the same problem more or less
+	The above algorithms do not take into account how close a cat is when making a shortest path (only if a cat is on the spot).
+	We may have a shortest path to a cheese, but it may not be wise to take it as a cat could intercept nearby.
 	A* H_cost_nokitty - It avoids the cats to an extent but it's limited by us not knowing the best way to calculate a heuristic
 
 _____________________________________________________
