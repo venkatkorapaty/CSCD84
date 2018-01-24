@@ -44,6 +44,8 @@
 
 #include "AI_search.h"
 
+static int MAX_DIST_FROM_TWO_POINTS = 46;
+
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses) {
 	/*
 	  Return 0 for safe spot
@@ -320,11 +322,8 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 		pred[i] = -1;
 	}
 
-
-	// fprintf(stderr, "MOUSE_LOC: (%d, %d)\n", mouse_loc[0][0], mouse_loc[0][1]);
 	if (mode >= 0 && mode <= 3) {
-		
-		
+
 		//declarations
 		int v = 1;
 		int queueMain[graph_size];
@@ -433,7 +432,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 						}
 						prevX = path[i][0];
 						prevY = path[i][1];
-						// if (path[i])
 					}
 				}
 				return;
@@ -570,7 +568,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 		loc[0][1] = cat_loc[i][1];
 		int mouseCost = H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr);
 		// We use 46 as that's an upperboundd for the maximum size of our euclidean distance
-		heur += (46 - mouseCost);
+		heur += (MAX_DIST_FROM_TWO_POINTS - mouseCost);
 	}
 
 	// amount of walls enclosing a cheese, checks if it's too
@@ -599,5 +597,5 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	loc[0][0] = cheese_loc[prioritized_cheese][0];
 	loc[0][1] = cheese_loc[prioritized_cheese][1];
 	// We use 46 as that's an upperboundd for the maximum size of our euclidean distance
-	return heur + (46 - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
+	return heur + (MAX_DIST_FROM_TWO_POINTS - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
 }
