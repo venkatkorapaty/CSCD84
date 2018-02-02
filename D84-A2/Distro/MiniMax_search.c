@@ -48,11 +48,11 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		   The game state is composed of:
 
 			* Mouse, cat, and cheese positions (and number of cats and cheeses)
-			
+
 		   At the top level (when this function is called by the mini-max driver code), the game state
 		   correspond to the current situation of the game. But once you start recursively calling
 		   this function for lower levels of the search tree the positions of agents will have changed.
-		   
+
 		   Therefore, you will need to define local variables to keep the game state at each node of the
 		   mini-max search tree, and you will need to update this state when calling recursively so that
 		   the search does the right thing.
@@ -156,7 +156,15 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
  // Stub so that the code compiles/runs - This will be removed and replaced by your code!
 
  path[0][0]=mouse_loc[0][0];
- path[0][1]=mouse_loc[0][1];
+ path[0][1]=mouse_loc[0][1] - 1;
+//  int adjs[4][2] = {{mouse_loc[0][0], mouse_loc[0][1] - 1}, {mouse_loc[0][0] + 1, mouse_loc[0][1]}, {mouse_loc[0][0], mouse_loc[0][1] + 1}, {mouse_loc[0][0] - 1, mouse_loc[0][1]}};
+//  for (int i = 0; i < 4; i++) {
+// 	 if (gr[mouse_loc[0][0] + (32 * mouse_loc[0][1])][i]) {
+// 		 path[0][0] = adjs[i][0];
+// 		 path[0][1] = adjs[i][1];
+// 		 return(0.0);
+// 	 }
+//  }
 
  return(0.0);
 }
