@@ -350,30 +350,20 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 			addHeap(heap, weights, actWeights, mouse_loc[0][0] + mouse_loc[0][1]*size_X, queueIndex);
 			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
 			queueIndex++;
-		} else {
-			//if not A* start up our stack/queue
-			queueMain[stackIndex] = mouse_loc[0][0] + (size_Y*mouse_loc[0][1]);
-			visited[mouse_loc[0][0] + (size_Y*mouse_loc[0][1])] = 1;
-			stackIndex++;
 		}
 
 		int current = -1;
+
+		if (mouse_loc[0][0] == 9 && mouse_loc[0][1] == 8) {
+			for (int ches = 0; ches < cheeses; ches++) {
+				int d = abs(9 - cheese_loc[ches][0]) + abs(8 - cheese_loc[ches][1]);//pow(abs(9 - cheese_loc[ches][0])*abs(9 - cheese_loc[ches][0]) + abs(8 - cheese_loc[ches][1])*abs(8 - cheese_loc[ches][1]), 0.5);
+				fprintf(stderr,"FOUND DEVIL'S LOCATION: (%d, %d), DIST: %d\n", cheese_loc[ches][0], cheese_loc[ches][1], d);
+			}
+		}
 		
 
 		while ((((queueIndex < stackIndex)  && (mode == 1 || mode == 0)) || mode == 2 || mode == 3) && cheeses > 0) {
-			if (mode == 0) {
-				// Pop from queue
-				current = queueMain[queueIndex];
-				queueIndex++;
-			}
-			else if (mode == 1) {
-				// Pop from stack
-				current = queueMain[stackIndex - 1];
-				if (stackIndex != 0) {
-					stackIndex--;
-				}
-			}
-			else if (mode == 2 || mode == 3) {
+			if (mode == 2 || mode == 3) {
 				current = extract_min(heap, weights, actWeights, queueIndex);
 				queueIndex--;
 				if (current == -1) {
@@ -421,19 +411,6 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
  				if (mode == 2 || mode == 3)
 					free(heap);
 
-				if (mode == 1) {
-					int prevY;
-					int prevX;
-					//if the dfs path ends before next search call we need to set elements path to the last coord other wise we disappear
-					for (int i = 0; i < graph_size; i++) {
-						if (path[i][0] == -1) {
-							path[i][0] = prevX;
-							path[i][1] = prevY;
-						}
-						prevX = path[i][0];
-						prevY = path[i][1];
-					}
-				}
 				return;
 			}
 
@@ -451,41 +428,30 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 
 			for (int i = 0; i < 4; i++) {
 				int x = i;
-				if (mode == 1) {
-					x = 3 - i;
-				}
 				// if valid location
 				if (loc[x]) {
 					// if we haven't visited
 					if(!visited[(adj_Cords[x][0]) + ((adj_Cords[x][1]) * size_Y)]){
 						int catCheeseLoc = is_cat_or_cheese(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cats, cheese_loc, cheeses);
 						if (catCheeseLoc != CAT) {
-							if (mode == 0 || mode == 1) {
-								//add to stack/queue
-								queueMain[stackIndex] = (adj_Cords[x][0]) + (adj_Cords[x][1]*size_X);
-								visited[queueMain[stackIndex]] = 1;
-								pred[queueMain[stackIndex]] = current;
-								stackIndex++;
+							//add to heap and set weights
+							visited[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = 1;
+							pred[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = current;
+							if (actWeights[xCord + (yCord*size_Y)] == -1) {
+								//root is current (act weight is -1)
+								actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1;
+							} else {
+								actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 							}
-							else {
-								//add to heap and set weights
-								visited[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = 1;
-								pred[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = current;
-								if (actWeights[xCord + (yCord*size_Y)] == -1) {
-									//root is current (act weight is -1)
-									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1;
-								} else {
-									actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
-								}
-								weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = heuristic(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-								addHeap(heap, weights, actWeights, (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X), queueIndex);
-								queueIndex++;
-							}
+							weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = heuristic(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+							addHeap(heap, weights, actWeights, (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X), queueIndex);
+							queueIndex++;
+							
 						}
 					}
 					// When running UCS, and we come back to a node, see if it has faster path
 					else if ((mode == 2 || mode == 3)  && actWeights[xCord + ((yCord)*size_Y)] == -1) {
-						if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] > 1 + actWeights[xCord + (yCord*size_Y)]) {
+						if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] >= 1 + actWeights[xCord + (yCord*size_Y)]) {
 							actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 							pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
 							addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex);
@@ -531,9 +497,10 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 	*/
 	int heur = 99999;
 	for (int i = 0; i < cheeses; i++) {
-		int xCord = abs(x - cheese_loc[i][0]);
-		int yCord = abs(y - cheese_loc[i][1]);
-		int eu_dist = (int)pow(xCord*xCord + yCord*yCord, 0.5);
+		// int xCord = abs(x - cheese_loc[i][0]);
+		// int yCord = abs(y - cheese_loc[i][1]);
+		// int eu_dist = (int)pow(xCord*xCord + yCord*yCord, 0.5);
+		int eu_dist = abs(x - cheese_loc[i][0]) + abs(y - cheese_loc[i][1]);
 		if (heur > eu_dist) {
 			heur = eu_dist;
 		}

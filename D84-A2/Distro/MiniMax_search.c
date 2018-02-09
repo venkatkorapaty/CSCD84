@@ -157,6 +157,40 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 
  path[0][0]=mouse_loc[0][0];
  path[0][1]=mouse_loc[0][1];
+ int ded = checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses);
+ if (ded == 2) {
+	 //some high value
+ } else if (ded == 1) {
+	 //some low value
+ } else if (depth == 0) {
+	 //utility function
+ }
+ int *curr_player;
+ if (agentId == 0) {
+	 curr_player = mouse_loc[agentId];
+ } else {
+	 curr_player = cat_loc[agentId - 1];
+ }
+ 
+ int x = curr_player[0];
+ int y = curr_player[1];
+ int adj_list[4][2] = {{x, y-1},
+ 					   {x+1, y},
+ 					   {x, y+1},
+ 					   {x-1, y}};
+ for (int i = 0; i < 4; i++) {
+	 if (gr[x + (y * size_Y)][i]) {
+		 //check for terminal using a possible move of the current player
+		 int origX = curr_player[0];
+		 int origY = curr_player[1];
+		 curr_player[0] = adj_list[i][0];
+		 curr_player[1] = adj_list[i][1];
+		 double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, agentId, depth-1, maxDepth, alpha, beta);
+	 	 curr_player[0] = origX;
+		 curr_player[1] = origY;
+	 }
+ }
+
 
  return(0.0);
 }
@@ -205,7 +239,7 @@ int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2
 
  // Check for mouse having lunch
  for (int i=0; i<cheeses; i++)
-  if (mouse_loc[0][0]==cheese_loc[i][0]&&mouse_loc[0][1]==cheese_loc[i][1]) return(1);
+  if (mouse_loc[0][0]==cheese_loc[i][0]&&mouse_loc[0][1]==cheese_loc[i][1]) return(2);
 
  return(0);
 
