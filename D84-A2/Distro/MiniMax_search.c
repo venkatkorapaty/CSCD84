@@ -56,14 +56,16 @@ int traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1][
 	int reversePath[1024];
 
 	while (pred[current] != -1 ) {
+		
 		reversePath[i] = current;
 		current = pred[current];
 		i++;
 	}
-	return i;
+	// return i;
 
 	int x;
 	int y;
+	double total = 0;
 	for (int j = 0; j < i; j++) {
 		x = reversePath[j]%size_X;
 		y = reversePath[j]/size_Y;
@@ -72,7 +74,7 @@ int traceBack2(int pred[1024], int path[1024][2], int current, int mouse_loc[1][
 	}
 	path[0][0] = mouse_loc[0][0];
 	path[0][1] = mouse_loc[0][1];
-
+	return i;
 }
 
 void addHeap(int *heap, double weights[graph_size], int actWeights[graph_size], int val, int size) {
@@ -309,6 +311,7 @@ int search(double gr[graph_size][4], int path[graph_size][2], int visit_order[si
 			else {
 				// if we find cheese, compute the proper path
 				dist = traceBack2(pred, path, current, mouse_loc);
+				// dist += weights[path[1][0] + path[1][1]*size_X];
 			}
 
 			free(heap);
@@ -344,7 +347,7 @@ int search(double gr[graph_size][4], int path[graph_size][2], int visit_order[si
 						} else {
 							actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 						}
-						weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = H_cost(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+						weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = H_cost_nokitty(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 						addHeap(heap, weights, actWeights, (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X), queueIndex);
 						queueIndex++;
 						
@@ -507,7 +510,12 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	// path[0][0]=mouse_loc[0][0];
 	// path[0][1]=mouse_loc[0][1];
 	// fprintf(stderr, "DEPTH: %d\n", depth);
-	
+	// double num = 10000;
+	// if (num == 10000.00000) {
+	// 	fprintf(stderr, "thing");
+
+	// }
+	// 		exit(0);
 	int *curr_player;
 	if (agentId == 0) {
 		curr_player = mouse_loc[agentId];
@@ -515,13 +523,13 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		curr_player = cat_loc[agentId - 1];
 	}
 	int ded = checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses);
-	fprintf(stderr, "move is %d depth %d\n", agentId, depth);
+	// fprintf(stderr, "move is %d depth %d --(%d, %d)\n", agentId, depth, curr_player[0], curr_player[1]);
 	// fprintf(stderr, "DED: %d\n", ded);
 	// fprintf(stderr, "test\n");
 	if (ded == 2) {
 		// fprintf(stderr, "test1\n");
 		//some high value
-		minmax_cost[curr_player[0]][curr_player[1]] = 6400;
+		minmax_cost[curr_player[0]][curr_player[1]] = 100;
 		return minmax_cost[curr_player[0]][curr_player[1]];
 	} else if (ded == 1) {
 		// fprintf(stderr, "test2\n");
@@ -531,7 +539,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	} else if (depth == maxDepth) {
 		// fprintf(stderr, "test3\n");
 		//utility function
-		minmax_cost[curr_player[0]][curr_player[1]] = 640 - utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
+		minmax_cost[curr_player[0]][curr_player[1]] = utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
 		return minmax_cost[curr_player[0]][curr_player[1]];
 	}
 	// fprintf(stderr, "test8\n");
@@ -544,9 +552,16 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 						{x, y+1},
 						{x-1, y}};
 	// fprintf(stderr, "test4\n");
-	int val = 100000000;
+	double val = 10000;
 	int optX = 0;
 	int optY = 0;
+	double vals[4][3];
+	for (int i = 0; i < 4; i++) {
+		if (agentId == 0)
+			vals[i][0] = -10000.0;
+		else
+			vals[i][0] = 10000.0;
+	}
 	for (int i = 0; i < 4; i++) {
 		// fprintf(stderr, "test5\n");
 		if (gr[x + (y * size_Y)][i]) {
@@ -564,8 +579,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				mouse_loc[0][1] = adj_list[i][1];
 				mouse_loc[0][0] = adj_list[i][0];
 			} else {
-				cat_loc[0][1] = adj_list[i][1];
-				cat_loc[0][0] = adj_list[i][0];
+				cat_loc[agentId - 1][1] = adj_list[i][1];
+				cat_loc[agentId - 1][0] = adj_list[i][0];
 			}
 			// curr_player[1] = adj_list[i][1];
 			int cat_agent = agentId;
@@ -576,25 +591,28 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			}
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
 			// fprintf(stderr, "CHILDVAL: %f\n", childVal);
-			if (val = 100000000) {
+			if (val == 10000.0 || val == -10000.0) {
 				val = childVal;
-				optX = curr_player[0];
-				optY = curr_player[1];
+				optX = adj_list[i][0];
+				optY = adj_list[i][1];
 			}
-			if (agentId == 0) {
-				if (childVal > val) {
-					val = childVal;
-					optX = curr_player[0];
-					optY = curr_player[1];
-				}
-			}
-			else {
-				if (childVal < val) {
-					val = childVal;
-					optX = curr_player[0];
-					optY = curr_player[1];
-				}
-			}
+			// if (agentId == 0) {
+			// 	if (childVal > val) {
+			// 		val = childVal;
+			// 		optX = adj_list[i][0];
+			// 		optY = adj_list[i][1];
+			// 	}
+			// }
+			// else {
+			// 	if (childVal < val) {
+			// 		val = childVal;
+			// 		optX = adj_list[i][0];
+			// 		optY = adj_list[i][1];
+			// 	}
+			// }
+			vals[i][0] = childVal;
+			vals[i][1] = adj_list[i][0];
+			vals[i][2] = adj_list[i][1];
 			if (agentId == 0) {
 				// curr_player = mouse_loc[agentId];			fprintf(stderr, "checking %d %d\n", x, y);
 				mouse_loc[0][1] = y;
@@ -603,29 +621,61 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				cat_loc[agentId-1][1] = y;
 				cat_loc[agentId-1][0] = x;
 			}
+			// fprintf(stderr, "%d value: %f\n", i, childVal);
 		}
 	}
 	// fprintf(stderr, "test7\n");
 	if (depth == 0) {
-		// if (start == 0) {
-		// 	start = 1;
+		// for (int i = 0; i < 4; i++) {
+		// 	fprintf(stderr, "%f VALUES\n", vals[i][0]);
+		// }
+		// exit(0);
+		
+		// fprintf(stderr, "val %f, (%d, %d)\n", val, optX, optY);
+
+		// if (start < 3) {
+		// 	start++;
 		// }
 		// else {
-		// 	sleep(10);
+		// 	exit(1);
 		// }
-		path[0][0] = optX;
-		path[0][1] = optY;
-		// exit(1);
 	}
 	
+	for (int i = 0; i < 4; i++) {
+		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
+			if (agentId == 0) {
+				if (val < vals[i][0]) {
+					val = vals[i][0];
+					optX = vals[i][1];
+					optY = vals[i][2];
+				}
+			} else {
+				if (val > vals[i][0]) {
+					val = vals[i][0];
+					optX = vals[i][1];
+					optY = vals[i][2];
+				}
+			}
+		}
+	}
 
+	path[0][0] = optX;
+	path[0][1] = optY;
+	for (int i = 0; i < 4; i++) {
+		fprintf(stderr, "%f VALUES\n", vals[i][0]);
+	}
+	if (agentId == 0) {
+		fprintf(stderr, "max node, returning %f\n", val);
+	} else {
+		fprintf(stderr, "min node, returning %f\n", val);
+	}
 	minmax_cost[curr_player[0]][curr_player[1]] = val;
 	return val;
 }
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4])
 {
- /*
+	/*
 	This function computes and returns the utility value for a given game configuration.
 	As discussed in lecture, this should return a positive value for configurations that are 'good'
 	for the mouse, and a negative value for locations that are 'bad' for the mouse.
@@ -644,20 +694,34 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		gr - The graph's adjacency list for the maze
 
 		These arguments are as described in A1. Do have a look at your solution!
- */
- int visit_order[32][32];
- for (int i = 0; i < 32; i++) {
-	 for (int j = 0; j < 32; j++) {
-		 visit_order[i][j] = 0;
-	 }
- }
- int path[1024][2];
- for (int i = 0; i < 1024; i++) {
-	 path[i][0] = -1;
-	 path[i][1] = -1;
- }
- int path_len = search(gr, path, visit_order, cat_loc, cats, cheese_loc, cheeses, mouse_loc);
- return path_len;   // <--- Obviously, this will be replaced by your computer utilities
+	*/
+	int visit_order[32][32];
+	for (int i = 0; i < 32; i++) {
+		for (int j = 0; j < 32; j++) {
+			visit_order[i][j] = 0;
+		}
+	}
+	int path[1024][2];
+	for (int i = 0; i < 1024; i++) {
+		path[i][0] = -1;
+		path[i][1] = -1;
+	}
+	int mouse_len = search(gr, path, visit_order, cat_loc, cats, cheese_loc, cheeses, mouse_loc);
+	// mouse_len = 64 - mouse_len;
+	int cat_len;
+	int catnum[1][2];
+	int ignoreCats[1][2] = {{-1, -1}};
+	int bestest = 1000000;
+	for (int i = 0; i < cats; i++) {
+		catnum[0][0] = cat_loc[i][0];
+		catnum[0][1] = cat_loc[i][1];
+		cat_len = search(gr, path, visit_order, ignoreCats, 0, mouse_loc, 1, catnum);
+		if (bestest > cat_len) {
+			bestest = cat_len;
+		}
+	}
+
+	return 128-mouse_len;  // <--- Obviously, this will be replaced by your computer utilities
 }
 
 int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses)
