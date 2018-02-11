@@ -471,7 +471,13 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		// fprintf(stderr, "test1\n");
 		//some high value
 		minmax_cost[curr_player[0]][curr_player[1]] = 9999;
-		
+
+		if (cheeses == 1)
+			free(pred);
+		for (int i = 0; i < cheeses; i++) {
+			free(cheese_paths[i]);
+		}
+		free(cheese_paths);
 
 		return minmax_cost[curr_player[0]][curr_player[1]];
 	} else if (ded == 1) {
@@ -566,13 +572,18 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	}
 	// fprintf(stderr, "SGHDG\n");
 
-	// if (depth == 0) {
+	if (depth == 0) {
 	// 	free(pred);
 	// 	for (int i = 0; i < cheeses; i++) {
 	// 		free(cheese_paths[i]);
 	// 	}
 	// 	free(cheese_paths);
-	// }
+		/********
+		 * READ COMEMNT \/\/\/\/\/\/
+		// NOT FREEING PROEPRLYL
+		*/
+		int t = pred[0] + pred[1]; 	
+	}
 
 	path[0][0] = optX;
 	path[0][1] = optY;
