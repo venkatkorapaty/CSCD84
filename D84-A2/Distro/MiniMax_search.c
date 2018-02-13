@@ -608,6 +608,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				else if (val == vals[i][0]) {
 					int cheese_len = 10000;
 					int ind = 0;
+					// NOTE: WE CHOOSE CLOSER CHEESE, BUT CLOSER DOESN'T MEAN
+					// BETTER AS IT COULD LEAD TO US DYING SOONER
 					for (int l = 0; l < cheeses; l++) {
 						// fprintf(stderr, "test10.5\n");
 						//int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
