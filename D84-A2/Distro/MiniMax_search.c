@@ -439,7 +439,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 
 	// int *pred = (int*)malloc(graph_size*sizeof(int));
 	if (depth == 0) {
-		fprintf(stderr, "gaege2\n");
+		// fprintf(stderr, "gaege2\n");
 		int path1[graph_size][2];
 		for (int i = 0; i < graph_size; i++) {
 			path1[i][0] = -1;
@@ -456,7 +456,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				}
 				cheese_paths = (int**)malloc(10*sizeof(int*));
 				for (int j = 0; j < cheeses; j++) {
-					fprintf(stderr, "gaege5.1/3\n");
+					// fprintf(stderr, "gaege5.1/3\n");
 					cheese_paths[j] = (int*)malloc(graph_size*sizeof(int));
 					int player[1][2];
 					player[0][0] = cheese_loc[j][0];
@@ -480,14 +480,14 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		pred = (int*)malloc(graph_size*sizeof(int));
 		// cheese_paths = (int**)malloc(10*sizeof(int*));
 		// }
-		fprintf(stderr, "gaege4\n");
+		// fprintf(stderr, "gaege4\n");
 		
-		fprintf(stderr, "gaege5\n");
+		// fprintf(stderr, "gaege5\n");
 		start++;
 		search(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
-		fprintf(stderr, "gaege.1/4\n");
+		// fprintf(stderr, "gaege.1/4\n");
 		
-		fprintf(stderr, "gaege6\n");
+		// fprintf(stderr, "gaege6\n");
 		int shitter2[1][2] = {{cheese_loc[0][0], cheese_loc[0][1]}};
 
 		traceBack2(cheese_paths[0], getLocation(mouse_loc[0]), shitter2[0]);
@@ -553,8 +553,17 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		else
 			vals[i][0] = 10000.0;
 	}
+	int prune[4];
+	prune[0]=1;
+	prune[1]=1;
+	prune[2]=1;
+	prune[3]=1;
+
 	for (int i = 0; i < 4; i++) {
-		if (gr[x + (y * size_Y)][i]) {
+		if (prune[i] != 1) {
+			break;
+		}
+		if (gr[x + (y * size_Y)][i] && prune[i] == 1) {
 			// fprintf(stderr, "test6\n");
 			//check for terminal using a possible move of the current player
 			// int cordX = curr_player[0];
@@ -573,7 +582,21 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			} else {
 				cat_agent = 0;
 			}
+
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
+			if (i != 3) {
+				if (agentId == 0) {
+					if (beta > childVal) {
+						prune[i + 1] = 0;
+					}
+				}
+				else {
+					if (alpha < childVal) {
+						prune[i + 1] = 0;
+					}
+				}
+			}
+
 			// fprintf(stderr, "CHILDVAL: %f\n", childVal);
 			if (val == 10000.0 || val == -10000.0) {
 				val = childVal;
@@ -584,9 +607,15 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			vals[i][1] = adj_list[i][0];
 			vals[i][2] = adj_list[i][1];
 			if (agentId == 0) {
+				if (childVal > alpha) {
+					beta = childVal;
+				}
 				mouse_loc[0][1] = y;
 				mouse_loc[0][0] = x;
 			} else {
+				if (childVal < beta) {
+					alpha = childVal;
+				}
 				cat_loc[agentId-1][1] = y;
 				cat_loc[agentId-1][0] = x;
 			}
@@ -596,6 +625,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	// fprintf(stderr, "GAEGA\n");
 
 	for (int i = 0; i < 4; i++) {
+		if (prune[i] != 1) {
+			break;
+		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
 				if (val < vals[i][0]) {
@@ -664,7 +696,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		// 	free(cheese_paths[i]);
 		// }
 		// free(cheese_paths);
-		fprintf(stderr, "gaege\n");
+		// fprintf(stderr, "gaege\n");
 		pred = NULL;
 		// cheese_paths = NULL;
 		/********
@@ -684,7 +716,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	// } else {
 	// 	fprintf(stderr, "min node, returning %f\n", val);
 	// }
-	fprintf(stderr, "gaege1\n");
+	// fprintf(stderr, "gaege1\n");
 	if (agentId == 0)
 		minmax_cost[curr_player[0]][curr_player[1]] = val;
 	// fprintf(stderr, "cdj\n");
