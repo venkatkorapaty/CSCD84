@@ -10,17 +10,17 @@ mark.
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Bisesar, Shevlin
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Korapaty, Venkat
 
-Student number 1:
+Student number 1: 1001307766
 
-Student number 2:
+Student number 2: 1001365060
 
-UTORid 1:
+UTORid 1: korapaty
 
-UTORid 2:
+UTORid 2: bisesars
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -28,7 +28,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: Shevlin Bisesar 	Venkat Korapaty
 
 
 (-5 marks for failing to provide the identifying
@@ -104,6 +104,7 @@ Marking:
 (15 marks) Answers in this report file
 
 (2 bonus)  Bonus!
+jimi hendrix is kool guy
 
 Total for A2:       / out of 60
 
