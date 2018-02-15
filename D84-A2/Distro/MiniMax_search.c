@@ -560,7 +560,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	prune[3]=1;
 
 	for (int i = 0; i < 4; i++) {
-		if (prune[i] != 1) {
+		if (mode == 1 && prune[i] != 1) {
 			break;
 		}
 		if (gr[x + (y * size_Y)][i] && prune[i] == 1) {
@@ -584,14 +584,14 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			}
 
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
-			if (i != 3) {
+			if (i != 3 && mode == 1) {
 				if (agentId == 0) {
-					if (beta > childVal) {
+					if (beta < childVal) {
 						prune[i + 1] = 0;
 					}
 				}
 				else {
-					if (alpha < childVal) {
+					if (alpha > childVal) {
 						prune[i + 1] = 0;
 					}
 				}
@@ -607,14 +607,14 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			vals[i][1] = adj_list[i][0];
 			vals[i][2] = adj_list[i][1];
 			if (agentId == 0) {
-				if (childVal > alpha) {
-					beta = childVal;
+				if (mode == 1 && childVal > alpha) {
+					alpha = childVal;
 				}
 				mouse_loc[0][1] = y;
 				mouse_loc[0][0] = x;
 			} else {
-				if (childVal < beta) {
-					alpha = childVal;
+				if (mode == 1 && childVal < beta) {
+					beta = childVal;
 				}
 				cat_loc[agentId-1][1] = y;
 				cat_loc[agentId-1][0] = x;
