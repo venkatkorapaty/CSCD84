@@ -745,31 +745,135 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 
 		These arguments are as described in A1. Do have a look at your solution!
 	*/
+
+	//pick the closest cheese that has the least amount of walls around it
+	// for (int i = 0; i < cheeses; i++) {
+	// 	// fprintf(stderr, "test10.5\n");
+		
+	// 	int wallTemp = 0;
+	// 	// fprintf(stderr, "test11\n");
+
+	// 	for (int j = 0; j < 4; j++) {
+	// 		wallTemp += gr[getLocation(cheese_loc[i])][j];
+	// 	}
+		
+	// 	if (wallTemp < walls) {
+	// 		walls = wallTemp;
+	// 		int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
+	// 		if (temp < cheese_len) {
+	// 			cheese_len = temp;
+	// 		}
+	// 	}
+	// }
+
 	int cheese_len = 10000;
-	for (int i = 0; i < cheeses; i++) {
-		// fprintf(stderr, "test10.5\n");
-		int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
-		// fprintf(stderr, "test11\n");
-		if (temp < cheese_len) {
-			cheese_len = temp;
+	int walls = 50;
+	int cheeseNum = 0;
+
+	int cheeseWalls = 0;
+	int x = -1;
+	int y = -1;
+	int adj_list[4][2];
+	
+	for (int i = 0; i < 4; i++) {
+		int temp = 0;
+		x = cheese_loc[i][0];
+		y = cheese_loc[i][1];
+		adj_list[0][0] = x;
+		adj_list[0][1] = y-1;
+		adj_list[1][0] = x+1;
+		adj_list[1][1] = y;
+		adj_list[2][0] = x;
+		adj_list[2][1] = y+1;
+		adj_list[3][0] = x-1;
+		adj_list[3][1] = x;
+		for (int j = 0; j < 4; j++) {
+			if (gr[getLocation(cheese_loc[i])][j]) {
+				for (int k = 0; k < 4; k++) {
+					temp += gr[getLocation(adj_list[j])][k];
+				}
+			} else {
+				temp++;
+			}
+		}
+		if (temp < walls) {
+			walls = temp;
+			cheeseNum = i;
+		}
+	}
+	cheese_len = traceBack2(cheese_paths[cheeseNum], getLocation(mouse_loc[0]), cheese_loc[cheeseNum]);
+	
+	//pick the closest cat
+
+	int catChoice = 11;
+	int cat_len = 10000;
+	int numCloseCats = 0;
+	for (int i = 0; i < cats; i++) {
+		// fprintf(stderr, "test12\n");
+		int temp = traceBack2(pred, getLocation(cat_loc[i]), mouse_loc[0]);
+		
+		// fprintf(stderr, "test12.5\n");
+		if (temp < cat_len) {
+			if (temp < 5) {
+				numCloseCats++;
+			}
+			cat_len = temp;
+			catChoice = i;
 		}
 	}
 
 	
 
-	int cat_len = 10000;
-	for (int i = 0; i < cats; i++) {
-		// fprintf(stderr, "test12\n");
-		int temp = traceBack2(pred, getLocation(cat_loc[i]), mouse_loc[0]);
-		// fprintf(stderr, "test12.5\n");
-		if (temp < cat_len) {
-			cat_len = temp;
+	
+	
+	if (numCloseCats > 2) {
+
+		int mouseWalls = 0;
+		x = mouse_loc[0][0];
+		y = mouse_loc[0][1];
+		
+		adj_list[0][0] = x;
+		adj_list[0][1] = y-1;
+		adj_list[1][0] = x+1;
+		adj_list[1][1] = y;
+		adj_list[2][0] = x;
+		adj_list[2][1] = y+1;
+		adj_list[3][0] = x-1;
+		adj_list[3][1] = x;
+
+		for (int j = 0; j < 4; j++) {
+			if (gr[getLocation(mouse_loc[0])][j]) {
+				for (int i = 0; i < 4; i++) {
+					int catCheeseLoc = is_cat_or_cheese(adj_list[j][0], adj_list[j][1] , cat_loc, cats, cheese_loc, cheeses);
+					if (gr[getLocation(adj_list[j])][i] || (catCheeseLoc == 2 && gr[getLocation(adj_list[j])][i] == 0)) {
+						mouseWalls++;
+					}
+				}
+			}
 		}
+
+		int catWalls = 0;
+		x = cat_loc[catChoice][0];
+		y = cat_loc[catChoice][1];
+		adj_list[0][0] = x;
+		adj_list[0][1] = y-1;
+		adj_list[1][0] = x+1;
+		adj_list[1][1] = y;
+		adj_list[2][0] = x;
+		adj_list[2][1] = y+1;
+		adj_list[3][0] = x-1;
+		adj_list[3][1] = x;
+
+		for (int j = 0; j < 4; j++) {
+				catWalls += gr[getLocation(adj_list[0])][j];
+				catWalls += gr[getLocation(adj_list[1])][j];
+				catWalls += gr[getLocation(adj_list[2])][j];
+				catWalls += gr[getLocation(adj_list[3])][j];
+		}
+
+		return ((cat_len) - (cheese_len))/mouseWalls;
 	}
-	// fprintf(stderr, "dist from mouse to cheese is %d\n", cheese_len);
-	// fprintf(stderr, "dist from mouse to cat is %d\n", cat_len);
-	// exit(0);
-	return cat_len - cheese_len;  // <--- Obviously, this will be replaced by your computer utilities
+	return 100 - cheese_len;
 }
 
 int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses)
