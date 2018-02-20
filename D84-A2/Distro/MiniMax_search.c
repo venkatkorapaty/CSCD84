@@ -326,6 +326,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	 	   all game states down to the maximum search depth specified by the user. In order to do that,
 		   the function needs to be called with the correct state at each specific node in the mini-max
 		   search tree.
+static int visited[graph_size];
 
 		   The game state is composed of:
 
@@ -499,6 +500,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	} else {
 		curr_player = cat_loc[agentId - 1];
 	}
+
 	int ded = checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses);
 	if (ded == 2) {
 		// fprintf(stderr, "test1\n");
@@ -512,17 +514,17 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		// free(cheese_paths);
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = 9999;
-			return 9999;
+			return 9999/(depth + 1);
 		}
-		return 9999;
+		return 9999/(depth+1);
 	} else if (ded == 1) {
 		// fprintf(stderr, "test2\n");
 		//some low value
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = -9999;
-			return -9999;
+			return -9999/(depth+1);
 		}
-		return -9999;
+		return -9999/(depth+1);
 	} else if (depth == maxDepth) {
 		// fprintf(stderr, "test3\n");
 		//utility function
@@ -559,6 +561,12 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	prune[2]=1;
 	prune[3]=1;
 
+	// int recursed[4];
+	// recursed[0] = -1;
+	// recursed[1] = -1;
+	// recursed[2] = -1;
+	// recursed[3] = -1;
+
 	for (int i = 0; i < 4; i++) {
 		if (mode == 1 && prune[i] != 1) {
 			break;
@@ -584,6 +592,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			}
 
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
+			// double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
 			if (i != 3 && mode == 1) {
 				if (agentId == 0) {
 					if (beta < childVal) {
@@ -630,6 +639,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
+				// fprintf(stderr, "val: (%f, %f, %f)\n", vals[i][0], vals[i][1], vals[i][2]);
 				if (val < vals[i][0]) {
 					val = vals[i][0];
 					optX = vals[i][1];
@@ -717,8 +727,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	// 	fprintf(stderr, "min node, returning %f\n", val);
 	// }
 	// fprintf(stderr, "gaege1\n");
-	if (agentId == 0)
+	if (agentId == 0) {
 		minmax_cost[curr_player[0]][curr_player[1]] = val;
+	}
 	// fprintf(stderr, "cdj\n");
 	return val;
 }
@@ -738,6 +749,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		cat_loc - Cat locations
 		cheese_loc - Cheese locations
 		mouse_loc - Mouse location
+					
 		cats - # of cats
 		cheeses - # of cheeses
 		depth - current search depth
@@ -759,6 +771,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		
 	// 	if (wallTemp < walls) {
 	// 		walls = wallTemp;
+					
 	// 		int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 	// 		if (temp < cheese_len) {
 	// 			cheese_len = temp;
@@ -787,6 +800,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		adj_list[2][1] = y+1;
 		adj_list[3][0] = x-1;
 		adj_list[3][1] = x;
+		int tempLen = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 		for (int j = 0; j < 4; j++) {
 			if (gr[getLocation(cheese_loc[i])][j]) {
 				for (int k = 0; k < 4; k++) {
@@ -798,10 +812,11 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		}
 		if (temp < walls) {
 			walls = temp;
-			cheeseNum = i;
+			if (tempLen < cheese_len) {
+				cheese_len = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
+			}
 		}
 	}
-	cheese_len = traceBack2(cheese_paths[cheeseNum], getLocation(mouse_loc[0]), cheese_loc[cheeseNum]);
 	
 	//pick the closest cat
 
@@ -822,58 +837,61 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		}
 	}
 
+	int mouseWalls = 0;
+	x = mouse_loc[0][0];
+	y = mouse_loc[0][1];
 	
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+
+	for (int j = 0; j < 4; j++) {
+		if (gr[getLocation(mouse_loc[0])][j]) {
+			for (int i = 0; i < 4; i++) {
+				int catCheeseLoc = is_cat_or_cheese(adj_list[j][0], adj_list[j][1] , cat_loc, cats, cheese_loc, cheeses);
+				if (gr[getLocation(adj_list[j])][i] || (catCheeseLoc == 2 && gr[getLocation(adj_list[j])][i] == 0)) {
+					mouseWalls++;
+				}
+			}
+		}
+	}
+
+	int catWalls = 0;
+	x = cat_loc[catChoice][0];
+	y = cat_loc[catChoice][1];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+
+	for (int j = 0; j < 4; j++) {
+			catWalls += gr[getLocation(adj_list[0])][j];
+			catWalls += gr[getLocation(adj_list[1])][j];
+			catWalls += gr[getLocation(adj_list[2])][j];
+			catWalls += gr[getLocation(adj_list[3])][j];
+	}
+
+					
+	int ret = (catWalls*cat_len) - (walls*cheese_len);
 
 	
 	
 	if (numCloseCats > 2) {
-
-		int mouseWalls = 0;
-		x = mouse_loc[0][0];
-		y = mouse_loc[0][1];
-		
-		adj_list[0][0] = x;
-		adj_list[0][1] = y-1;
-		adj_list[1][0] = x+1;
-		adj_list[1][1] = y;
-		adj_list[2][0] = x;
-		adj_list[2][1] = y+1;
-		adj_list[3][0] = x-1;
-		adj_list[3][1] = x;
-
-		for (int j = 0; j < 4; j++) {
-			if (gr[getLocation(mouse_loc[0])][j]) {
-				for (int i = 0; i < 4; i++) {
-					int catCheeseLoc = is_cat_or_cheese(adj_list[j][0], adj_list[j][1] , cat_loc, cats, cheese_loc, cheeses);
-					if (gr[getLocation(adj_list[j])][i] || (catCheeseLoc == 2 && gr[getLocation(adj_list[j])][i] == 0)) {
-						mouseWalls++;
-					}
-				}
-			}
+		if (ret > 0) {
+			return ret/mouseWalls;
 		}
-
-		int catWalls = 0;
-		x = cat_loc[catChoice][0];
-		y = cat_loc[catChoice][1];
-		adj_list[0][0] = x;
-		adj_list[0][1] = y-1;
-		adj_list[1][0] = x+1;
-		adj_list[1][1] = y;
-		adj_list[2][0] = x;
-		adj_list[2][1] = y+1;
-		adj_list[3][0] = x-1;
-		adj_list[3][1] = x;
-
-		for (int j = 0; j < 4; j++) {
-				catWalls += gr[getLocation(adj_list[0])][j];
-				catWalls += gr[getLocation(adj_list[1])][j];
-				catWalls += gr[getLocation(adj_list[2])][j];
-				catWalls += gr[getLocation(adj_list[3])][j];
-		}
-
-		return ((cat_len) - (cheese_len))/mouseWalls;
+		return ret*mouseWalls;
 	}
-	return 100 - cheese_len;
+	return ret;
 }
 
 int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses)
