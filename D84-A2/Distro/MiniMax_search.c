@@ -307,6 +307,9 @@ static int prevMove[10][2] = {{-1, -1},{-1, -1},{-1, -1},{-1, -1},{-1, -1},{-1, 
 		// pred = (int*)malloc(graph_size*sizeof(int));
 		// cheese_paths = (int**)malloc(10*sizeof(int*));
 
+static int distanceBase = 0;
+static int turns = 0;
+
 double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, double (*utility)(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4]), int agentId, int depth, int maxDepth, double alpha, double beta)
 {
  /*
@@ -441,6 +444,15 @@ static int visited[graph_size];
 	// int *pred = (int*)malloc(graph_size*sizeof(int));
 	if (depth == 0) {
 		// fprintf(stderr, "gaege2\n");
+		if (distanceBase == 0) {
+			distanceBase = abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1]);
+		} else if (turns < 5) {
+			int temp = abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1]);
+			if (abs(temp - distanceBase) > 5) {
+				distanceBase = -1;
+			}
+			turns++;
+		}
 		int path1[graph_size][2];
 		for (int i = 0; i < graph_size; i++) {
 			path1[i][0] = -1;
@@ -503,22 +515,13 @@ static int visited[graph_size];
 
 	int ded = checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses);
 	if (ded == 2) {
-		// fprintf(stderr, "test1\n");
 		//some high value
-
-		// if (cheeses == 1)
-		// 	free(pred);
-		// for (int i = 0; i < cheeses; i++) {
-		// 	free(cheese_paths[i]);
-		// }
-		// free(cheese_paths);
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = 9999;
 			return 9999/(depth + 1);
 		}
 		return 9999/(depth+1);
 	} else if (ded == 1) {
-		// fprintf(stderr, "test2\n");
 		//some low value
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = -9999;
@@ -526,7 +529,6 @@ static int visited[graph_size];
 		}
 		return -9999/(depth+1);
 	} else if (depth == maxDepth) {
-		// fprintf(stderr, "test3\n");
 		//utility function
 		int x = utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
 		if (agentId == 0) {
@@ -535,9 +537,6 @@ static int visited[graph_size];
 		}
 		return x;
 	}
-		
-	// fprintf(stderr, "test8\n");
-	
 
 	int x = curr_player[0];
 	int y = curr_player[1];
@@ -561,21 +560,12 @@ static int visited[graph_size];
 	prune[2]=1;
 	prune[3]=1;
 
-	// int recursed[4];
-	// recursed[0] = -1;
-	// recursed[1] = -1;
-	// recursed[2] = -1;
-	// recursed[3] = -1;
-
 	for (int i = 0; i < 4; i++) {
 		if (mode == 1 && prune[i] != 1) {
 			break;
 		}
 		if (gr[x + (y * size_Y)][i] && prune[i] == 1) {
-			// fprintf(stderr, "test6\n");
 			//check for terminal using a possible move of the current player
-			// int cordX = curr_player[0];
-			// int cordY = curr_player[1];
 
 			if (agentId == 0) {
 				mouse_loc[0][1] = adj_list[i][1];
@@ -592,13 +582,16 @@ static int visited[graph_size];
 			}
 
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
-			// double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
+			
+			// for pruning, check if we should prune the following branches
 			if (i != 3 && mode == 1) {
+				// for max nodes
 				if (agentId == 0) {
 					if (beta < childVal) {
 						prune[i + 1] = 0;
 					}
 				}
+				// for min nodes
 				else {
 					if (alpha > childVal) {
 						prune[i + 1] = 0;
@@ -606,7 +599,6 @@ static int visited[graph_size];
 				}
 			}
 
-			// fprintf(stderr, "CHILDVAL: %f\n", childVal);
 			if (val == 10000.0 || val == -10000.0) {
 				val = childVal;
 				optX = adj_list[i][0];
@@ -616,30 +608,30 @@ static int visited[graph_size];
 			vals[i][1] = adj_list[i][0];
 			vals[i][2] = adj_list[i][1];
 			if (agentId == 0) {
+				// for pruning, update our alphas for that parent node
 				if (mode == 1 && childVal > alpha) {
 					alpha = childVal;
 				}
 				mouse_loc[0][1] = y;
 				mouse_loc[0][0] = x;
 			} else {
+				// for pruning update our betas for that parent node
 				if (mode == 1 && childVal < beta) {
 					beta = childVal;
 				}
 				cat_loc[agentId-1][1] = y;
 				cat_loc[agentId-1][0] = x;
 			}
-			// fprintf(stderr, "%d value: %f\n", i, childVal);
 		}
 	}
-	// fprintf(stderr, "GAEGA\n");
 
 	for (int i = 0; i < 4; i++) {
+		// if we reached a point where we pruned, don't bother checking rest of values
 		if (prune[i] != 1) {
 			break;
 		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
-				// fprintf(stderr, "val: (%f, %f, %f)\n", vals[i][0], vals[i][1], vals[i][2]);
 				if (val < vals[i][0]) {
 					val = vals[i][0];
 					optX = vals[i][1];
@@ -650,13 +642,8 @@ static int visited[graph_size];
 				else if (val == vals[i][0]) {
 					int cheese_len = 10000;
 					int ind = 0;
-					// NOTE: WE CHOOSE CLOSER CHEESE, BUT CLOSER DOESN'T MEAN
-					// BETTER AS IT COULD LEAD TO US DYING SOONER
 					for (int l = 0; l < cheeses; l++) {
-						// fprintf(stderr, "test10.5\n");
-						//int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 						int temp = abs(x - cheese_loc[l][0]) + abs(y - cheese_loc[l][1]);
-						// fprintf(stderr, "test11\n");
 						if (temp < cheese_len) {
 							ind = l;
 						}
@@ -666,7 +653,6 @@ static int visited[graph_size];
 						optX = vals[i][1];
 						optY = vals[i][2];
 					}
-					// val = min(abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]),abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1]));
 				}
 			} else {
 				if (val > vals[i][0]) {
@@ -680,10 +666,7 @@ static int visited[graph_size];
 					int cheese_len = 10000;
 					int ind = 0;
 					for (int l = 0; l < cheeses; l++) {
-						// fprintf(stderr, "test10.5\n");
-						//int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 						int temp = abs(x - cheese_loc[l][0]) + abs(y - cheese_loc[l][1]);
-						// fprintf(stderr, "test11\n");
 						if (temp < cheese_len) {
 							ind = l;
 						}
@@ -693,44 +676,21 @@ static int visited[graph_size];
 						optX = vals[i][1];
 						optY = vals[i][2];
 					}
-					// val = min(abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]),abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1]));
 				}
 			}
 		}
 	}
-	// fprintf(stderr, "SGHDG\n");
 
 	if (depth == 0) {
 		free(pred);
-		// for (int i = 0; i < cheeses; i++) {
-		// 	free(cheese_paths[i]);
-		// }
-		// free(cheese_paths);
-		// fprintf(stderr, "gaege\n");
 		pred = NULL;
-		// cheese_paths = NULL;
-		/********
-		 * READ COMEMNT \/\/\/\/\/\/
-		// NOT FREEING PROEPRLYL
-		*/
-		// int t = pred[0] + pred[1]; 	
 	}
 
 	path[0][0] = optX;
 	path[0][1] = optY;
-	// for (int i = 0; i < 4; i++) {
-	// 	fprintf(stderr, "%f VALUES\n", vals[i][0]);
-	// }
-	// if (agentId == 0) {
-	// 	fprintf(stderr, "max node, returning %f\n", val);
-	// } else {
-	// 	fprintf(stderr, "min node, returning %f\n", val);
-	// }
-	// fprintf(stderr, "gaege1\n");
 	if (agentId == 0) {
 		minmax_cost[curr_player[0]][curr_player[1]] = val;
 	}
-	// fprintf(stderr, "cdj\n");
 	return val;
 }
 
@@ -744,7 +704,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 	How to define 'good' and 'bad' is up to you. Note that you can write a utility function
 	that favours your mouse or favours the cats, but that would be a bad idea... (why?)
 
-	Input arguments:
+	Input arguments:abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1])
 
 		cat_loc - Cat locations
 		cheese_loc - Cheese locations
@@ -824,10 +784,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 	int cat_len = 10000;
 	int numCloseCats = 0;
 	for (int i = 0; i < cats; i++) {
-		// fprintf(stderr, "test12\n");
 		int temp = traceBack2(pred, getLocation(cat_loc[i]), mouse_loc[0]);
-		
-		// fprintf(stderr, "test12.5\n");
 		if (temp < cat_len) {
 			if (temp < 5) {
 				numCloseCats++;
@@ -883,8 +840,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 					
 	int ret = (catWalls*cat_len) - (walls*cheese_len);
 
-	
-	
+	if (distanceBase > 0 && turns == 5) {
+		return 100 - cheese_len;
+	}
+
 	if (numCloseCats > 2) {
 		if (ret > 0) {
 			return ret/mouseWalls;
