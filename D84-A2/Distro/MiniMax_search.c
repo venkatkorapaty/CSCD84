@@ -632,10 +632,16 @@ static int visited[graph_size];
 		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
+				if(depth == 0) {
+					if (curr_player[0] == 10 && curr_player[1] == 10)
+						fprintf(stderr, "(10, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
+					//else if (curr_player[0] == 13 && curr_player[1] == 12)
+					//	fprintf(stderr, "(13, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
+				}
 				if (val < vals[i][0]) {
 					val = vals[i][0];
-					optX = vals[i][1];
-					optY = vals[i][2];
+					optX = (int)vals[i][1];
+					optY = (int)vals[i][2];
 				}
 				// we found an equally good move, pick the one
 				// that's closer in path length heuristic
@@ -643,22 +649,22 @@ static int visited[graph_size];
 					int cheese_len = 10000;
 					int ind = 0;
 					for (int l = 0; l < cheeses; l++) {
-						int temp = abs(x - cheese_loc[l][0]) + abs(y - cheese_loc[l][1]);
+						int temp = pow(pow(x - cheese_loc[l][0], 2) + pow(y - cheese_loc[l][1], 2), 0.5);
 						if (temp < cheese_len) {
 							ind = l;
 						}
 					}
-					if (abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]) > abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
+					if (pow(pow((int)optX-cheese_loc[ind][0], 2)+pow((int)optY-cheese_loc[ind][1], 2),0.5) > pow(pow(vals[i][1]-cheese_loc[ind][0], 2)+pow(vals[i][2]-cheese_loc[ind][1], 2), 0.5)) {
 						val = vals[i][0];
-						optX = vals[i][1];
-						optY = vals[i][2];
+						optX = (int)vals[i][1];
+						optY = (int)vals[i][2];
 					}
 				}
 			} else {
 				if (val > vals[i][0]) {
 					val = vals[i][0];
-					optX = vals[i][1];
-					optY = vals[i][2];
+					optX = (int)vals[i][1];
+					optY = (int)vals[i][2];
 				}
 				// we found an equally good move, pick the one
 				// that's closer in path length heuristic
@@ -671,10 +677,10 @@ static int visited[graph_size];
 							ind = l;
 						}
 					}
-					if (abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]) < abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
+					if (abs((int)optX-cheese_loc[ind][0])+abs((int)optY-cheese_loc[ind][1]) < abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
 						val = vals[i][0];
-						optX = vals[i][1];
-						optY = vals[i][2];
+						optX = (int)vals[i][1];
+						optY = (int)vals[i][2];
 					}
 				}
 			}
@@ -684,6 +690,7 @@ static int visited[graph_size];
 	if (depth == 0) {
 		free(pred);
 		pred = NULL;
+		fprintf(stderr, "BEST VAL: (%f, %d, %d)\n", val, optX, optY);
 	}
 
 	path[0][0] = optX;
@@ -693,6 +700,106 @@ static int visited[graph_size];
 	}
 	return val;
 }
+
+int isCorneredCheese(int gr[graph_size][4], int x, int y, int chsX, int chsY) {
+	int modGr[graph_size][4];
+
+	for (int i = 0; i < graph_size; i++) {
+		for (int j = 0; j < 4; j++) {
+			modGr[i][j] = gr[i][j];
+		}
+	}
+
+	if (x + 1 == chsX) {
+		modGr[chsX + chsY*size_Y][3] = 1;
+	}
+	else if (x - 1 == chsX) {
+		modGr[chsX + chsY*size_Y][1] = 1;
+	}
+	else if (y + 1 == chsY) {
+		modGr[chsX + chsY*size_Y][0] = 1;
+	}
+	else
+		modGr[chsX = chsY*size_Y][2] = 1;
+
+	int adj_list[4][2];
+	adj_list[0][0] = chsX;
+	adj_list[0][1] = chsY-1;
+	adj_list[1][0] = chsX+1;
+	adj_list[1][1] = chsY;
+	adj_list[2][0] = chsX;
+	adj_list[2][1] = chsY+1;
+	adj_list[3][0] = chsX-1;
+	adj_list[3][1] = chsX;
+	for (int i = 0; i < 4; i++) {
+		if (!gr[chsX + chsY*size_Y][i]) {
+
+		}
+	}
+
+}
+
+int checkHallway(int freeX, int freeY, int x, int y, double gr[graph_size][4]) {
+	int temp = 0;
+	int adj_list[4][2];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+	int nextX = -1;
+	int nextY = -1;
+	for (int i = 0; i < 4; i++) {
+		int curr[2] = {x, y};
+		if (gr[getLocation(curr)][i]) {
+			temp++;
+		} else if (adj_list[0][0] != freeX && adj_list[0][1] != freeY){
+			nextX = adj_list[i][0];
+			nextY = adj_list[i][0];
+		}
+	}
+
+	if (temp == 2) {
+		return 1 + checkHallway(x, y, nextX, nextY, gr);
+	}
+
+	return 0;
+}
+
+int wallz(double gr[graph_size][4], int x, int y) {
+	int temp = 0;
+	int freeX = -1;
+	int freeY = -1;
+	int adj_list[4][2];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+	for (int i = 0; i < 4; i++) {
+		int curr[2] = {x, y};
+		if (gr[getLocation(curr)][i]) {
+			temp++;
+		} else {
+			freeX = adj_list[i][0];
+			freeY = adj_list[i][0];
+		}
+	}
+
+	if (temp == 3) {
+		return 1 + checkHallway(x, y, freeX, freeY, gr);
+	}
+
+	return 0;
+}
+
+
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4])
 {
@@ -747,8 +854,9 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 	int x = -1;
 	int y = -1;
 	int adj_list[4][2];
+	int hallDepth = 0;
 	
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < cheeses; i++) {
 		int temp = 0;
 		x = cheese_loc[i][0];
 		y = cheese_loc[i][1];
@@ -760,20 +868,25 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		adj_list[2][1] = y+1;
 		adj_list[3][0] = x-1;
 		adj_list[3][1] = x;
+		int choice = 0;
 		int tempLen = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
+		
 		for (int j = 0; j < 4; j++) {
 			if (gr[getLocation(cheese_loc[i])][j]) {
 				for (int k = 0; k < 4; k++) {
-					temp += gr[getLocation(adj_list[j])][k];
+					temp += !(gr[getLocation(adj_list[j])][k]);
 				}
 			} else {
-				temp++;
+				temp += 2;
 			}
 		}
 		if (temp < walls) {
 			walls = temp;
 			if (tempLen < cheese_len) {
-				cheese_len = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
+				choice = i;
+
+				hallDepth = wallz(gr, cheese_loc[i][0], cheese_loc[i][1]);
+				cheese_len = tempLen;
 			}
 		}
 	}
@@ -837,7 +950,6 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 			catWalls += gr[getLocation(adj_list[3])][j];
 	}
 
-					
 	int ret = (catWalls*cat_len) - (walls*cheese_len);
 
 	if (distanceBase > 0 && turns == 5) {
