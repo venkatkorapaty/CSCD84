@@ -196,7 +196,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	return heur + (MAX_DIST_FROM_TWO_POINTS - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
 }
 
-void search(double gr[graph_size][4], int path[graph_size][2], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred)
+void findDeWay(double gr[graph_size][4], int path[graph_size][2], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred)
 {
 	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 	int visited[graph_size];
@@ -474,7 +474,7 @@ static int visited[graph_size];
 						cats_loc[k][0] = -1;
 						cats_loc[k][1] = -2;
 					}
-					search(gr, path1, cats_loc, 0, mouse_loc, 1, player, cheese_paths[j]);
+					findDeWay(gr, path1, cats_loc, 0, mouse_loc, 1, player, cheese_paths[j]);
 				}
 				start = 1;
 
@@ -485,10 +485,7 @@ static int visited[graph_size];
 		}
 		pred = (int*)malloc(graph_size*sizeof(int));
 		start++;
-		search(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
-		int shitter2[1][2] = {{cheese_loc[0][0], cheese_loc[0][1]}};
-
-		traceBack2(cheese_paths[0], getLocation(mouse_loc[0]), shitter2[0]);
+		findDeWay(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
 	}
 
 	int *curr_player;
@@ -686,44 +683,6 @@ static int visited[graph_size];
 	return val;
 }
 
-int isCorneredCheese(int gr[graph_size][4], int x, int y, int chsX, int chsY) {
-	int modGr[graph_size][4];
-
-	for (int i = 0; i < graph_size; i++) {
-		for (int j = 0; j < 4; j++) {
-			modGr[i][j] = gr[i][j];
-		}
-	}
-
-	if (x + 1 == chsX) {
-		modGr[chsX + chsY*size_Y][3] = 1;
-	}
-	else if (x - 1 == chsX) {
-		modGr[chsX + chsY*size_Y][1] = 1;
-	}
-	else if (y + 1 == chsY) {
-		modGr[chsX + chsY*size_Y][0] = 1;
-	}
-	else
-		modGr[chsX = chsY*size_Y][2] = 1;
-
-	int adj_list[4][2];
-	adj_list[0][0] = chsX;
-	adj_list[0][1] = chsY-1;
-	adj_list[1][0] = chsX+1;
-	adj_list[1][1] = chsY;
-	adj_list[2][0] = chsX;
-	adj_list[2][1] = chsY+1;
-	adj_list[3][0] = chsX-1;
-	adj_list[3][1] = chsX;
-	for (int i = 0; i < 4; i++) {
-		if (!gr[chsX + chsY*size_Y][i]) {
-
-		}
-	}
-
-}
-
 int checkHallway(int freeX, int freeY, int x, int y, double gr[graph_size][4]) {
 	int temp = 0;
 	int adj_list[4][2];
@@ -833,11 +792,13 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		adj_list[2][1] = y+1;
 		adj_list[3][0] = x-1;
 		adj_list[3][1] = x;
+
 		int choice = 0;
 		int tempLen = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 		
 		for (int j = 0; j < 4; j++) {
 			if (gr[getLocation(cheese_loc[i])][j]) {
+				//
 				for (int k = 0; k < 4; k++) {
 					temp += !(gr[getLocation(adj_list[j])][k]);
 				}
