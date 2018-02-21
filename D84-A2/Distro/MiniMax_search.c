@@ -60,7 +60,6 @@ int traceBack2(int pred[1024], int current, int origin[2]) {
 	int reversePath[1024];
 
 	while (pred[current] != -1 && current != getLocation(origin)) {
-		// fprintf(stderr, "%d\n", current);
 		reversePath[i] = current;
 		current = pred[current];
 		i++;
@@ -150,7 +149,6 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 			heur = eu_dist;
 		}
 	}
-	// fprintf(stderr, "heur: %d\n", heur);
 	return heur;
 }
 
@@ -441,9 +439,7 @@ static int visited[graph_size];
 
  // Stub so that the code compiles/runs - This will be removed and replaced by your code!
 
-	// int *pred = (int*)malloc(graph_size*sizeof(int));
 	if (depth == 0) {
-		// fprintf(stderr, "gaege2\n");
 		if (distanceBase == 0) {
 			distanceBase = abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1]);
 		} else if (turns < 5) {
@@ -469,7 +465,6 @@ static int visited[graph_size];
 				}
 				cheese_paths = (int**)malloc(10*sizeof(int*));
 				for (int j = 0; j < cheeses; j++) {
-					// fprintf(stderr, "gaege5.1/3\n");
 					cheese_paths[j] = (int*)malloc(graph_size*sizeof(int));
 					int player[1][2];
 					player[0][0] = cheese_loc[j][0];
@@ -488,19 +483,9 @@ static int visited[graph_size];
 			}
 
 		}
-		// if (pred == NULL) {
-		// 	fprintf(stderr, "gaege3\n");
 		pred = (int*)malloc(graph_size*sizeof(int));
-		// cheese_paths = (int**)malloc(10*sizeof(int*));
-		// }
-		// fprintf(stderr, "gaege4\n");
-		
-		// fprintf(stderr, "gaege5\n");
 		start++;
 		search(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
-		// fprintf(stderr, "gaege.1/4\n");
-		
-		// fprintf(stderr, "gaege6\n");
 		int shitter2[1][2] = {{cheese_loc[0][0], cheese_loc[0][1]}};
 
 		traceBack2(cheese_paths[0], getLocation(mouse_loc[0]), shitter2[0]);
@@ -632,12 +617,12 @@ static int visited[graph_size];
 		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
-				if(depth == 0) {
-					if (curr_player[0] == 10 && curr_player[1] == 10)
-						fprintf(stderr, "(10, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
+				// if(depth == 0) {
+					// if (curr_player[0] == 10 && curr_player[1] == 10)
+					// 	fprintf(stderr, "(10, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
 					//else if (curr_player[0] == 13 && curr_player[1] == 12)
 					//	fprintf(stderr, "(13, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
-				}
+				// }
 				if (val < vals[i][0]) {
 					val = vals[i][0];
 					optX = (int)vals[i][1];
@@ -690,7 +675,7 @@ static int visited[graph_size];
 	if (depth == 0) {
 		free(pred);
 		pred = NULL;
-		fprintf(stderr, "BEST VAL: (%f, %d, %d)\n", val, optX, optY);
+		// fprintf(stderr, "BEST VAL: (%f, %d, %d)\n", val, optX, optY);
 	}
 
 	path[0][0] = optX;
