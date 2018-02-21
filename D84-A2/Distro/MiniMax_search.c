@@ -825,26 +825,6 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		These arguments are as described in A1. Do have a look at your solution!
 	*/
 
-	//pick the closest cheese that has the least amount of walls around it
-	// for (int i = 0; i < cheeses; i++) {
-	// 	// fprintf(stderr, "test10.5\n");
-		
-	// 	int wallTemp = 0;
-	// 	// fprintf(stderr, "test11\n");
-
-	// 	for (int j = 0; j < 4; j++) {
-	// 		wallTemp += gr[getLocation(cheese_loc[i])][j];
-	// 	}
-		
-	// 	if (wallTemp < walls) {
-	// 		walls = wallTemp;
-					
-	// 		int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
-	// 		if (temp < cheese_len) {
-	// 			cheese_len = temp;
-	// 		}
-	// 	}
-	// }
 
 	int cheese_len = 10000;
 	int walls = 50;
@@ -877,7 +857,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 					temp += !(gr[getLocation(adj_list[j])][k]);
 				}
 			} else {
-				temp += 2;
+				temp++;
 			}
 		}
 		if (temp < walls) {
@@ -924,10 +904,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 		if (gr[getLocation(mouse_loc[0])][j]) {
 			for (int i = 0; i < 4; i++) {
 				int catCheeseLoc = is_cat_or_cheese(adj_list[j][0], adj_list[j][1] , cat_loc, cats, cheese_loc, cheeses);
-				if (gr[getLocation(adj_list[j])][i] || (catCheeseLoc == 2 && gr[getLocation(adj_list[j])][i] == 0)) {
+				if ( !(gr[getLocation(adj_list[j])][i]) || (catCheeseLoc == 2)) {
 					mouseWalls++;
 				}
 			}
+		} else {
+			mouseWalls++;
 		}
 	}
 
@@ -944,10 +926,13 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 	adj_list[3][1] = x;
 
 	for (int j = 0; j < 4; j++) {
-			catWalls += gr[getLocation(adj_list[0])][j];
-			catWalls += gr[getLocation(adj_list[1])][j];
-			catWalls += gr[getLocation(adj_list[2])][j];
-			catWalls += gr[getLocation(adj_list[3])][j];
+		if (gr[getLocation(cat_loc[catChoice])][j]) {
+			catWalls += !gr[getLocation(adj_list[0])][j];
+			catWalls += !gr[getLocation(adj_list[1])][j];
+			catWalls += !gr[getLocation(adj_list[2])][j];
+			catWalls += !gr[getLocation(adj_list[3])][j];
+		}
+		
 	}
 
 	int ret = (catWalls*cat_len) - (walls*cheese_len);
