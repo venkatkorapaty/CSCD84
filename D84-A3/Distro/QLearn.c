@@ -29,7 +29,25 @@
 	Starter code: F.J.E. Jan. 16
 */
 
+#include <time.h>
 #include "QLearn.h"
+
+double get_Q(double *QTable, int s, int a) {
+  // fprintf(stderr, " a: %d s: %d ", a,s);
+  return *(QTable + 4*s + a);
+}
+
+void set_Q(double *QTable, int s, int a, double val) {
+  *(QTable + 4*s + a) = val;
+}
+
+void cum_set_Q(double *QTable, int s, int a, double val) {
+  *(QTable + 4*s + a) += val;
+}
+
+int get_s(int mouse[2], int cat[2], int cheese[2], int size_X, int graph_size) {
+  return (mouse[0]+(mouse[1]*size_X)) * ((cat[0]+(cat[1]*size_X))*graph_size) + ((cheese[0]+(cheese[1]*size_X))*graph_size*graph_size);
+}
 
 void QLearn_update(int s, int a, double r, int s_new, double *QTable)
 {
@@ -51,7 +69,21 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
    * TO DO: Complete this function
    ***********************************************************************************************/
 
+  double curr_s_a = get_Q(QTable, s, a);
+  // fprintf(stderr, "..13..");
+  int maxAct = 0;
+  double maxxx = get_Q(QTable, s_new, maxAct) - get_Q(QTable, s, maxAct);
+  // fprintf(stderr, "..14..");
   
+  for (int a_p = 0; a_p < 4; a_p++) {
+    double diff = get_Q(QTable, s_new, a_p) - curr_s_a;
+    if (diff > maxxx) {
+      maxAct = a_p;
+      maxxx = diff;
+    }
+  }
+
+  cum_set_Q(QTable, s, a, alpha*(r + lambda*maxxx));
 }
 
 int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], double pct, double *QTable, int size_X, int graph_size)
@@ -130,8 +162,62 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
    * TO DO: Complete this function
    ***********************************************************************************************/  
 
-  return(0);		// <--- of course, you will change this!
+  //observer current state
+  // fprintf(stderr, "1..");
+  int s = get_s(mouse_pos[0], cats[0], cheeses[0], size_X, graph_size);
+  // fprintf(stderr, ".. s: %d grsize %d ..", s, graph_size);
+  // fprintf(stderr, "..2..");
+  srand(time(NULL));
+  double prob_rand = rand()/RAND_MAX;
+  int a = 0;
+  // fprintf(stderr, "..3..");
+  if (prob_rand <= pct) {
+    do {
+      // do rand act that's also valid
+      a = rand()%4;
+      // fprintf(stderr, "a: %d\n", a);
+      srand(time(NULL));
+    } while(!(gr[mouse_pos[0][0] + mouse_pos[0][1]][a]));
+    // fprintf(stderr, ".. 3.5 ..");
+  }
+  else {
+    // dun do rand act
+    int vals[] = {get_Q(QTable, s, 0), get_Q(QTable, s, 1), get_Q(QTable, s, 2), get_Q(QTable, s, 3)};
+    int max = -1000;
+    for (int i = 0; i < 4; i ++) {
+      if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][a]) && vals[i] > max) {
+        max = vals[i];
+        a = i;
+      }
+    }
+    // fprintf(stderr, "..4..");
+  }
+
+  double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, max_graph_size);
+  // fprintf(stderr, "..10..");
+  int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
+  if (a % 2 == 0) {
+    new_mouse[1] -= 1 - a;
+  } else {
+    new_mouse[0] += 2 - a;
+  }
+  // fprintf(stderr, "..11..");
   
+  int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
+  // fprintf(stderr, "..12..");
+  
+  QLearn_update(s, a, r, s_p, QTable);
+  // fprintf(stderr, "..20..");
+  
+  int maxAct = 0;
+  for (int i = 0; i < 4; i++) {
+    if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i]) && (get_Q(QTable, s, i) > get_Q(QTable, s, maxAct)))
+      maxAct = i;
+  }
+
+  if (0)
+  return(0);		// <--- of course, you will change this!
+  return maxAct;
 }
 
 double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
@@ -153,6 +239,15 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
    /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/ 
+
+  if (mouse_pos[0][0] == cats[0][0] && mouse_pos[0][1] == cats[0][1]) {
+    return -100;
+  }
+  if (mouse_pos[0][0] == cheeses[0][0] && mouse_pos[0][1] == cheeses[0][1]) {
+    return 100;
+  }
+
+
 
   return(0);		// <--- of course, you will change this as well!     
 }

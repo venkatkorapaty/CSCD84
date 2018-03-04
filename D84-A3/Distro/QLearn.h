@@ -47,5 +47,7 @@ void expensiveFeature1(double gr[max_graph_size][4], int path[max_graph_size][2]
 int checkForGoal(int x, int y, int pos[5][2]);
 
 // If you need to add any function prototypes yourself, you can do so *below* this line.
+double get_Q(double *QTable, int s, int a);
+void set_Q(double *QTable, int s, int a, double val);
 #endif
 
