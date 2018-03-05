@@ -41,7 +41,7 @@ void set_Q(double *QTable, int s, int a, double val) {
   *(QTable + 4*s + a) = val;
 }
 
-void cum_set_Q(double *QTable, int s, int a, double val) {
+void cum_sum_set_Q(double *QTable, int s, int a, double val) {
   *(QTable + 4*s + a) += val;
 }
 
@@ -72,18 +72,18 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
   double curr_s_a = get_Q(QTable, s, a);
   // fprintf(stderr, "..13..");
   int maxAct = 0;
-  double maxxx = get_Q(QTable, s_new, maxAct) - get_Q(QTable, s, maxAct);
+  double maxxx = get_Q(QTable, s_new, maxAct);
   // fprintf(stderr, "..14..");
-  
+  // - get_Q(QTable, s, maxAct);
   for (int a_p = 0; a_p < 4; a_p++) {
-    double diff = get_Q(QTable, s_new, a_p) - curr_s_a;
-    if (diff > maxxx) {
+    double maxxxer = get_Q(QTable, s_new, a_p);
+    if (maxxxer > maxxx) {
       maxAct = a_p;
-      maxxx = diff;
+      maxxx = maxxxer;
     }
   }
 
-  cum_set_Q(QTable, s, a, alpha*(r + lambda*maxxx));
+  cum_sum_set_Q(QTable, s, a, alpha*(r + lambda*maxxx - get_Q(QTable, s, a)));
 }
 
 int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], double pct, double *QTable, int size_X, int graph_size)
@@ -209,10 +209,17 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   QLearn_update(s, a, r, s_p, QTable);
   // fprintf(stderr, "..20..");
   
-  int maxAct = 0;
+  int maxAct = 3;
   for (int i = 0; i < 4; i++) {
-    if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i]) && (get_Q(QTable, s, i) > get_Q(QTable, s, maxAct)))
+    double a_i = get_Q(QTable, s, i);
+    double a_jabest = get_Q(QTable, s, maxAct);
+    int loc = gr[new_mouse[0] + new_mouse[1]*size_X][i];
+    fprintf(stderr, "(s, a'): %f, (s, a): %f, loc: %d", a_i, a_jabest, loc);
+    if ((gr[new_mouse[0] + new_mouse[1]*size_X][i]) && a_i > a_jabest) {
+      fprintf(stderr, "IN IF STATEMENT");
       maxAct = i;
+    }
+    fprintf(stderr, "\n");
   }
 
   if (0)
@@ -248,7 +255,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
   }
 
 
-
+  
   return(0);		// <--- of course, you will change this as well!     
 }
 
