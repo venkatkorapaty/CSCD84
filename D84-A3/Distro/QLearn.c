@@ -85,7 +85,7 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
     }
   }
   // fprintf(stderr, "%f\n", (double)alpha*((double)r + (double)lambda*(double)maxxx - (double)get_Q(QTable, s, a)));
-  cum_sum_set_Q(QTable, s, a, alpha*((double)r + ((double)lambda*(double)maxxx) - (double)get_Q(QTable, s, a)));
+  cum_sum_set_Q(QTable, s, a, alpha*(r + (lambda*maxxx) - get_Q(QTable, s, a)));
 }
 
 int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], double pct, double *QTable, int size_X, int graph_size)
@@ -205,6 +205,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   }
   int fuck[1][2] = {{new_mouse[0], new_mouse[1]}};
   double r = QLearn_reward(gr, fuck, cats, cheeses, size_X, graph_size);
+  //double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   
   int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
   
