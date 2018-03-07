@@ -33,7 +33,7 @@
 #include "QLearn.h"
 
 double get_Q(double *QTable, int s, int a) {
-  // fprintf(stderr, " a: %d s: %d ", a,s);
+  // // fprintf(stderr, " a: %d s: %d ", a,s);
   return *(QTable + 4*s + a);
 }
 
@@ -46,7 +46,8 @@ void cum_sum_set_Q(double *QTable, int s, int a, double val) {
 }
 
 int get_s(int mouse[2], int cat[2], int cheese[2], int size_X, int graph_size) {
-  return (mouse[0]+(mouse[1]*size_X)) * ((cat[0]+(cat[1]*size_X))*graph_size) + ((cheese[0]+(cheese[1]*size_X))*graph_size*graph_size);
+  return (mouse[0]+(mouse[1]*size_X)) + ((cat[0]+(cat[1]*size_X))*graph_size) + ((cheese[0]+(cheese[1]*size_X))*graph_size*graph_size);
+  // (i+(j*size_X)) + ((k+(l*size_X))*graph_size) + ((m+(n*size_X))*graph_size*graph_size)
 }
 
 void QLearn_update(int s, int a, double r, int s_new, double *QTable)
@@ -69,22 +70,21 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
    * TO DO: Complete this function
    ***********************************************************************************************/
 
-  double curr_s_a = get_Q(QTable, s, a);
-  fprintf(stderr, "..13..");
+  // fprintf(stderr, "..13..");
   int maxAct = 0;
-  fprintf(stderr, "\n %d, %d\n", s_new, maxAct);
+  // fprintf(stderr, "\n %d, %d\n", s_new, maxAct);
   
   double maxxx = get_Q(QTable, s_new, maxAct);
-  fprintf(stderr, "..14..");
+  // fprintf(stderr, "..14..");
   // - get_Q(QTable, s, maxAct);
-  for (int a_p = 0; a_p < 4; a_p++) {
+  for (int a_p = 1; a_p < 4; a_p++) {
     double maxxxer = (double)get_Q(QTable, s_new, a_p);
     if (maxxxer > maxxx) {
       maxAct = a_p;
       maxxx = maxxxer;
     }
   }
-  fprintf(stderr, "%f\n", (double)alpha*((double)r + (double)lambda*(double)maxxx - (double)get_Q(QTable, s, a)));
+  // fprintf(stderr, "%f\n", (double)alpha*((double)r + (double)lambda*(double)maxxx - (double)get_Q(QTable, s, a)));
   cum_sum_set_Q(QTable, s, a, alpha*((double)r + ((double)lambda*(double)maxxx) - (double)get_Q(QTable, s, a)));
 }
 
@@ -165,76 +165,84 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
    ***********************************************************************************************/  
 
   //observer current state
-  fprintf(stderr, "1..");
   int s = get_s(mouse_pos[0], cats[0], cheeses[0], size_X, graph_size);
-  // fprintf(stderr, ".. s: %d grsize %d ..", s, graph_size);
-  fprintf(stderr, "..2..");
-  srand(time(NULL));
+  // srand(time(NULL));
   double prob_rand = (double)rand()/(double)RAND_MAX;
   int a = 0;
-  fprintf(stderr, "..3..");
+
   if (prob_rand <= pct) {
     do {
       // do rand act that's also valid
       a = rand()%4;
-      fprintf(stderr, "..3.25.");
-      // fprintf(stderr, "a: %d\n", a);
+
       // srand(time(NULL));
     } while(!(gr[mouse_pos[0][0] + size_X*mouse_pos[0][1]][a]));
-    fprintf(stderr, ".. 3.5 ..");
   }
   else {
     // dun do rand act
     double vals[] = {get_Q(QTable, s, 0), get_Q(QTable, s, 1), get_Q(QTable, s, 2), get_Q(QTable, s, 3)};
     double max = -100000.0;
+    int newer_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
+    
     for (int i = 0; i < 4; i ++) {
-      if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][a]) && vals[i] > max) {
+      if (i % 2 == 0) {
+        newer_mouse[1] -= 1 - i;
+      } else {
+        newer_mouse[0] += 2 - i;
+      }
+      if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][a]) && (newer_mouse[0] >= 0 && newer_mouse[0] < size_X) && (newer_mouse[1] >= 0 && newer_mouse[1] < size_X) && vals[i] > max) {
         max = vals[i];
         a = i;
       }
     }
-    fprintf(stderr, "..4..");
   }
 
-
-  double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  fprintf(stderr, "..10..");
   int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
   if (a % 2 == 0) {
     new_mouse[1] -= 1 - a;
   } else {
     new_mouse[0] += 2 - a;
   }
-  fprintf(stderr, "..11..");
+  int fuck[1][2] = {{new_mouse[0], new_mouse[1]}};
+  double r = QLearn_reward(gr, fuck, cats, cheeses, size_X, graph_size);
   
   int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
-  fprintf(stderr, "..12..");
   
   QLearn_update(s, a, r, s_p, QTable);
-  fprintf(stderr, "..20..");
   
   int maxAct = 4;
   double a_jabest = -100000.0;
+  
   for (int i = 0; i < 4; i++) {
     double a_i = (double)get_Q(QTable, s, i);
-    // double a_jabest = get_Q(QTable, s, maxAct);
-    
-    // int loc = gr[new_mouse[0] + new_mouse[1]*size_X][i];
-    // fprintf(stderr, "(s, a'): %f, (s, a): %f, loc: %d", a_i, a_jabest, loc);
-    if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i]) && a_i > a_jabest) {
-      fprintf(stderr, "IN IF STATEMENT");
+    new_mouse[0] = mouse_pos[0][0];
+    new_mouse[1] = mouse_pos[0][1];
+    if (i % 2 == 0) {
+      new_mouse[1] -= 1 - i;
+    } else {
+      new_mouse[0] += 2 - i;
+    }
+    int valid_spot = gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i];
+    int better = a_i > a_jabest;
+    int out_x = new_mouse[0] >= 0 && new_mouse[0] < size_X;
+    int out_y = new_mouse[1] >= 0 && new_mouse[1] < size_X;
+
+    if ((valid_spot) && (better) && (out_x) && (out_y)) {
+
       maxAct = i;
       a_jabest = a_i;
     }
-    fprintf(stderr, "\n");
   }
 
-  if (maxAct == 4) {
-    return maxAct;
-  }
+  // if (maxAct != 4) {
+  //   // fprintf(stderr, "a..");
+  //   return maxAct;
+  // }
 
-
-  return maxAct;		// <--- of course, you will change this!
+  // fprintf(stderr, "returning..");
+  if(0)
+  return(0);		// <--- of course, you will change this!
+  return maxAct;
 }
 
 double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
@@ -258,15 +266,15 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
    ***********************************************************************************************/ 
 
   if (mouse_pos[0][0] == cats[0][0] && mouse_pos[0][1] == cats[0][1]) {
-    return -100;
+    return -50.0;
   }
   if (mouse_pos[0][0] == cheeses[0][0] && mouse_pos[0][1] == cheeses[0][1]) {
-    return 100;
+    return 50.0;
   }
 
 
-  
-  return(0);		// <--- of course, you will change this as well!     
+  return(0);
+  // return(fabs(mouse_pos[0][0] - cats[0][0]) + fabs(mouse_pos[0][1] - cats[0][1]) - (fabs(mouse_pos[0][0] - cheeses[0][0]) + fabs(mouse_pos[0][1] - cheeses[0][1])));		// <--- of course, you will change this as well!     
 }
 
 void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double reward, int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
