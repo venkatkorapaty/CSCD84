@@ -44,24 +44,46 @@ but explain carefully when needed.
      a single, meaningful value. Convince us that your utility
      makes sense!
 
+	First thing we do is we calculate, at depth 0, the mice to all
+	other locations, and cheeses to all other locations. We calculate this
+	once at depth = 0 to minimize time complexity.
+	Check the closest cat and see how many walls are around it.
+	For the cheese, we pick the one with the least amount of walls
+	around it, and get the distance from it. We check the walls around
+	the mouses area, to see if there's a chance of getting cornered.
+	We then get the difference of cat's and cheese's distance, and use
+	a ratio of that and the mouses walls.
+
 2 .- (2 marks) Ignoring computation time, what is the effect of
      search depth (number of turns) on the chances of the mouse
      winning the game. 
+	We generally have a better mouse.
 
 3 .- (2 marks) What situations will cause your mouse to lose?
      can these be fixed either with the utility function, or
      by changing the search depth? if so, how?
+	When multiple cheeses are surrounded in corners and we have
+	cats behind us. If we go for a cheese, the cats can trap and kill us.
+	To fix this, you'd have to calculate exactly which cheese and what path
+	to go through, while accounting for the cats ganging up together.
 
 4 .- (2 marks) Compare cats with smartness=.8 against cats with
      smartness=1 - which are harder for your mouse to beat?
      why do you think that is?
+	0.8 is a bit harder for us to beat. This is because they stay
+	around spots that make it harder for us to go to a cheese.
 
 5 .- (2 marks) Can the mouse be made unbeatable by having an
      optimal utility function?
+	No. There are situations where it is impossible to win.
 
 6 .- (2 bonus marks) Could a human playing the game in place
       of the mouse do better than your code? (yes, no, and
       a reasonable explanation of why)
+	There exists a human in the set of all humans, that is really good
+	at video games. Our code isn't perfect, but a human can account for
+	certain situations that we don't. Such as avoiding cheeses trapped
+	every time.
 
 _____________________________________________________
 
@@ -71,12 +93,12 @@ doesn't work, or what problems exist.
 	
 	Complete/Working	Partial		Not done
 
-Utility
+Utility		x
  function
 
-MiniMax
+MiniMax		x
 
-Alpha/Beta
+Alpha/Beta	x
  pruning
 _____________________________________________________
 
@@ -104,7 +126,6 @@ Marking:
 (15 marks) Answers in this report file
 
 (2 bonus)  Bonus!
-jimi hendrix is kool guy
 
 Total for A2:       / out of 60
 

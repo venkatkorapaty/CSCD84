@@ -60,7 +60,6 @@ int traceBack2(int pred[1024], int current, int origin[2]) {
 	int reversePath[1024];
 
 	while (pred[current] != -1 && current != getLocation(origin)) {
-		// fprintf(stderr, "%d\n", current);
 		reversePath[i] = current;
 		current = pred[current];
 		i++;
@@ -150,7 +149,6 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 			heur = eu_dist;
 		}
 	}
-	// fprintf(stderr, "heur: %d\n", heur);
 	return heur;
 }
 
@@ -198,7 +196,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	return heur + (MAX_DIST_FROM_TWO_POINTS - H_cost(x, y, loc, loc, mouse_loc, 1, 1, gr));
 }
 
-void search(double gr[graph_size][4], int path[graph_size][2], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred)
+void findDeWay(double gr[graph_size][4], int path[graph_size][2], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred)
 {
 	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 	int visited[graph_size];
@@ -307,6 +305,9 @@ static int prevMove[10][2] = {{-1, -1},{-1, -1},{-1, -1},{-1, -1},{-1, -1},{-1, 
 		// pred = (int*)malloc(graph_size*sizeof(int));
 		// cheese_paths = (int**)malloc(10*sizeof(int*));
 
+static int distanceBase = 0;
+static int turns = 0;
+
 double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, double (*utility)(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4]), int agentId, int depth, int maxDepth, double alpha, double beta)
 {
  /*
@@ -326,6 +327,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	 	   all game states down to the maximum search depth specified by the user. In order to do that,
 		   the function needs to be called with the correct state at each specific node in the mini-max
 		   search tree.
+static int visited[graph_size];
 
 		   The game state is composed of:
 
@@ -437,9 +439,16 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 
  // Stub so that the code compiles/runs - This will be removed and replaced by your code!
 
-	// int *pred = (int*)malloc(graph_size*sizeof(int));
 	if (depth == 0) {
-		// fprintf(stderr, "gaege2\n");
+		if (distanceBase == 0) {
+			distanceBase = abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1]);
+		} else if (turns < 5) {
+			int temp = abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1]);
+			if (abs(temp - distanceBase) > 5) {
+				distanceBase = -1;
+			}
+			turns++;
+		}
 		int path1[graph_size][2];
 		for (int i = 0; i < graph_size; i++) {
 			path1[i][0] = -1;
@@ -456,7 +465,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				}
 				cheese_paths = (int**)malloc(10*sizeof(int*));
 				for (int j = 0; j < cheeses; j++) {
-					// fprintf(stderr, "gaege5.1/3\n");
 					cheese_paths[j] = (int*)malloc(graph_size*sizeof(int));
 					int player[1][2];
 					player[0][0] = cheese_loc[j][0];
@@ -466,7 +474,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 						cats_loc[k][0] = -1;
 						cats_loc[k][1] = -2;
 					}
-					search(gr, path1, cats_loc, 0, mouse_loc, 1, player, cheese_paths[j]);
+					findDeWay(gr, path1, cats_loc, 0, mouse_loc, 1, player, cheese_paths[j]);
 				}
 				start = 1;
 
@@ -475,22 +483,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			}
 
 		}
-		// if (pred == NULL) {
-		// 	fprintf(stderr, "gaege3\n");
 		pred = (int*)malloc(graph_size*sizeof(int));
-		// cheese_paths = (int**)malloc(10*sizeof(int*));
-		// }
-		// fprintf(stderr, "gaege4\n");
-		
-		// fprintf(stderr, "gaege5\n");
 		start++;
-		search(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
-		// fprintf(stderr, "gaege.1/4\n");
-		
-		// fprintf(stderr, "gaege6\n");
-		int shitter2[1][2] = {{cheese_loc[0][0], cheese_loc[0][1]}};
-
-		traceBack2(cheese_paths[0], getLocation(mouse_loc[0]), shitter2[0]);
+		findDeWay(gr, path1, cat_loc, cats, cheese_loc, cheeses, mouse_loc, pred);
 	}
 
 	int *curr_player;
@@ -499,32 +494,23 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 	} else {
 		curr_player = cat_loc[agentId - 1];
 	}
+
 	int ded = checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses);
 	if (ded == 2) {
-		// fprintf(stderr, "test1\n");
 		//some high value
-
-		// if (cheeses == 1)
-		// 	free(pred);
-		// for (int i = 0; i < cheeses; i++) {
-		// 	free(cheese_paths[i]);
-		// }
-		// free(cheese_paths);
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = 9999;
-			return 9999;
+			return 9999/(depth + 1);
 		}
-		return 9999;
+		return 9999/(depth+1);
 	} else if (ded == 1) {
-		// fprintf(stderr, "test2\n");
 		//some low value
 		if (agentId == 0) {
 			minmax_cost[curr_player[0]][curr_player[1]] = -9999;
-			return -9999;
+			return -9999/(depth+1);
 		}
-		return -9999;
+		return -9999/(depth+1);
 	} else if (depth == maxDepth) {
-		// fprintf(stderr, "test3\n");
 		//utility function
 		int x = utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
 		if (agentId == 0) {
@@ -533,9 +519,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 		}
 		return x;
 	}
-		
-	// fprintf(stderr, "test8\n");
-	
 
 	int x = curr_player[0];
 	int y = curr_player[1];
@@ -564,10 +547,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			break;
 		}
 		if (gr[x + (y * size_Y)][i] && prune[i] == 1) {
-			// fprintf(stderr, "test6\n");
 			//check for terminal using a possible move of the current player
-			// int cordX = curr_player[0];
-			// int cordY = curr_player[1];
 
 			if (agentId == 0) {
 				mouse_loc[0][1] = adj_list[i][1];
@@ -584,12 +564,16 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			}
 
 			double childVal = MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc, cheeses, mouse_loc, mode, *utility, cat_agent, depth+1, maxDepth, alpha, beta);
+			
+			// for pruning, check if we should prune the following branches
 			if (i != 3 && mode == 1) {
+				// for max nodes
 				if (agentId == 0) {
 					if (beta < childVal) {
 						prune[i + 1] = 0;
 					}
 				}
+				// for min nodes
 				else {
 					if (alpha > childVal) {
 						prune[i + 1] = 0;
@@ -597,7 +581,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 				}
 			}
 
-			// fprintf(stderr, "CHILDVAL: %f\n", childVal);
 			if (val == 10000.0 || val == -10000.0) {
 				val = childVal;
 				optX = adj_list[i][0];
@@ -607,62 +590,63 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 			vals[i][1] = adj_list[i][0];
 			vals[i][2] = adj_list[i][1];
 			if (agentId == 0) {
+				// for pruning, update our alphas for that parent node
 				if (mode == 1 && childVal > alpha) {
 					alpha = childVal;
 				}
 				mouse_loc[0][1] = y;
 				mouse_loc[0][0] = x;
 			} else {
+				// for pruning update our betas for that parent node
 				if (mode == 1 && childVal < beta) {
 					beta = childVal;
 				}
 				cat_loc[agentId-1][1] = y;
 				cat_loc[agentId-1][0] = x;
 			}
-			// fprintf(stderr, "%d value: %f\n", i, childVal);
 		}
 	}
-	// fprintf(stderr, "GAEGA\n");
 
 	for (int i = 0; i < 4; i++) {
+		// if we reached a point where we pruned, don't bother checking rest of values
 		if (prune[i] != 1) {
 			break;
 		}
 		if (vals[i][0] != 10000.0 || vals[i][0] != -10000.0) {
 			if (agentId == 0) {
+				// if(depth == 0) {
+					// if (curr_player[0] == 10 && curr_player[1] == 10)
+					// 	fprintf(stderr, "(10, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
+					//else if (curr_player[0] == 13 && curr_player[1] == 12)
+					//	fprintf(stderr, "(13, 10), i: %d, val: (%f, %f, %f)\n", i, vals[i][0], vals[i][1], vals[i][2]);
+				// }
 				if (val < vals[i][0]) {
 					val = vals[i][0];
-					optX = vals[i][1];
-					optY = vals[i][2];
+					optX = (int)vals[i][1];
+					optY = (int)vals[i][2];
 				}
 				// we found an equally good move, pick the one
 				// that's closer in path length heuristic
 				else if (val == vals[i][0]) {
 					int cheese_len = 10000;
 					int ind = 0;
-					// NOTE: WE CHOOSE CLOSER CHEESE, BUT CLOSER DOESN'T MEAN
-					// BETTER AS IT COULD LEAD TO US DYING SOONER
 					for (int l = 0; l < cheeses; l++) {
-						// fprintf(stderr, "test10.5\n");
-						//int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
-						int temp = abs(x - cheese_loc[l][0]) + abs(y - cheese_loc[l][1]);
-						// fprintf(stderr, "test11\n");
+						int temp = pow(pow(x - cheese_loc[l][0], 2) + pow(y - cheese_loc[l][1], 2), 0.5);
 						if (temp < cheese_len) {
 							ind = l;
 						}
 					}
-					if (abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]) > abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
+					if (pow(pow((int)optX-cheese_loc[ind][0], 2)+pow((int)optY-cheese_loc[ind][1], 2),0.5) > pow(pow(vals[i][1]-cheese_loc[ind][0], 2)+pow(vals[i][2]-cheese_loc[ind][1], 2), 0.5)) {
 						val = vals[i][0];
-						optX = vals[i][1];
-						optY = vals[i][2];
+						optX = (int)vals[i][1];
+						optY = (int)vals[i][2];
 					}
-					// val = min(abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]),abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1]));
 				}
 			} else {
 				if (val > vals[i][0]) {
 					val = vals[i][0];
-					optX = vals[i][1];
-					optY = vals[i][2];
+					optX = (int)vals[i][1];
+					optY = (int)vals[i][2];
 				}
 				// we found an equally good move, pick the one
 				// that's closer in path length heuristic
@@ -670,58 +654,96 @@ double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size
 					int cheese_len = 10000;
 					int ind = 0;
 					for (int l = 0; l < cheeses; l++) {
-						// fprintf(stderr, "test10.5\n");
-						//int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
 						int temp = abs(x - cheese_loc[l][0]) + abs(y - cheese_loc[l][1]);
-						// fprintf(stderr, "test11\n");
 						if (temp < cheese_len) {
 							ind = l;
 						}
 					}
-					if (abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]) < abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
+					if (abs((int)optX-cheese_loc[ind][0])+abs((int)optY-cheese_loc[ind][1]) < abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1])) {
 						val = vals[i][0];
-						optX = vals[i][1];
-						optY = vals[i][2];
+						optX = (int)vals[i][1];
+						optY = (int)vals[i][2];
 					}
-					// val = min(abs(optX-cheese_loc[ind][0])+abs(optY-cheese_loc[ind][1]),abs(vals[i][1]-cheese_loc[ind][0])+abs(vals[i][2]-cheese_loc[ind][1]));
 				}
 			}
 		}
 	}
-	// fprintf(stderr, "SGHDG\n");
 
 	if (depth == 0) {
 		free(pred);
-		// for (int i = 0; i < cheeses; i++) {
-		// 	free(cheese_paths[i]);
-		// }
-		// free(cheese_paths);
-		// fprintf(stderr, "gaege\n");
 		pred = NULL;
-		// cheese_paths = NULL;
-		/********
-		 * READ COMEMNT \/\/\/\/\/\/
-		// NOT FREEING PROEPRLYL
-		*/
-		// int t = pred[0] + pred[1]; 	
+		// fprintf(stderr, "BEST VAL: (%f, %d, %d)\n", val, optX, optY);
 	}
 
 	path[0][0] = optX;
 	path[0][1] = optY;
-	// for (int i = 0; i < 4; i++) {
-	// 	fprintf(stderr, "%f VALUES\n", vals[i][0]);
-	// }
-	// if (agentId == 0) {
-	// 	fprintf(stderr, "max node, returning %f\n", val);
-	// } else {
-	// 	fprintf(stderr, "min node, returning %f\n", val);
-	// }
-	// fprintf(stderr, "gaege1\n");
-	if (agentId == 0)
+	if (agentId == 0) {
 		minmax_cost[curr_player[0]][curr_player[1]] = val;
-	// fprintf(stderr, "cdj\n");
+	}
 	return val;
 }
+
+int checkHallway(int freeX, int freeY, int x, int y, double gr[graph_size][4]) {
+	int temp = 0;
+	int adj_list[4][2];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+	int nextX = -1;
+	int nextY = -1;
+	for (int i = 0; i < 4; i++) {
+		int curr[2] = {x, y};
+		if (gr[getLocation(curr)][i]) {
+			temp++;
+		} else if (adj_list[0][0] != freeX && adj_list[0][1] != freeY){
+			nextX = adj_list[i][0];
+			nextY = adj_list[i][0];
+		}
+	}
+
+	if (temp == 2) {
+		return 1 + checkHallway(x, y, nextX, nextY, gr);
+	}
+
+	return 0;
+}
+
+int wallz(double gr[graph_size][4], int x, int y) {
+	int temp = 0;
+	int freeX = -1;
+	int freeY = -1;
+	int adj_list[4][2];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+	for (int i = 0; i < 4; i++) {
+		int curr[2] = {x, y};
+		if (gr[getLocation(curr)][i]) {
+			temp++;
+		} else {
+			freeX = adj_list[i][0];
+			freeY = adj_list[i][0];
+		}
+	}
+
+	if (temp == 3) {
+		return 1 + checkHallway(x, y, freeX, freeY, gr);
+	}
+
+	return 0;
+}
+
+
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4])
 {
@@ -733,11 +755,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 	How to define 'good' and 'bad' is up to you. Note that you can write a utility function
 	that favours your mouse or favours the cats, but that would be a bad idea... (why?)
 
-	Input arguments:
+	Input arguments:abs(mouse_loc[0][0] - cat_loc[0][0])+abs(mouse_loc[0][1] + cat_loc[0][1])
 
 		cat_loc - Cat locations
 		cheese_loc - Cheese locations
 		mouse_loc - Mouse location
+					
 		cats - # of cats
 		cheeses - # of cheeses
 		depth - current search depth
@@ -745,31 +768,132 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], i
 
 		These arguments are as described in A1. Do have a look at your solution!
 	*/
+
+
 	int cheese_len = 10000;
-	for (int i = 0; i < cheeses; i++) {
-		// fprintf(stderr, "test10.5\n");
-		int temp = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
-		// fprintf(stderr, "test11\n");
-		if (temp < cheese_len) {
-			cheese_len = temp;
-		}
-	}
+	int walls = 50;
+	int cheeseNum = 0;
 
+	int cheeseWalls = 0;
+	int x = -1;
+	int y = -1;
+	int adj_list[4][2];
+	int hallDepth = 0;
 	
+	for (int i = 0; i < cheeses; i++) {
+		int temp = 0;
+		x = cheese_loc[i][0];
+		y = cheese_loc[i][1];
+		adj_list[0][0] = x;
+		adj_list[0][1] = y-1;
+		adj_list[1][0] = x+1;
+		adj_list[1][1] = y;
+		adj_list[2][0] = x;
+		adj_list[2][1] = y+1;
+		adj_list[3][0] = x-1;
+		adj_list[3][1] = x;
 
-	int cat_len = 10000;
-	for (int i = 0; i < cats; i++) {
-		// fprintf(stderr, "test12\n");
-		int temp = traceBack2(pred, getLocation(cat_loc[i]), mouse_loc[0]);
-		// fprintf(stderr, "test12.5\n");
-		if (temp < cat_len) {
-			cat_len = temp;
+		int choice = 0;
+		int tempLen = traceBack2(cheese_paths[i], getLocation(mouse_loc[0]), cheese_loc[i]);
+		
+		for (int j = 0; j < 4; j++) {
+			if (gr[getLocation(cheese_loc[i])][j]) {
+				//
+				for (int k = 0; k < 4; k++) {
+					temp += !(gr[getLocation(adj_list[j])][k]);
+				}
+			} else {
+				temp++;
+			}
+		}
+		if (temp < walls) {
+			walls = temp;
+			if (tempLen < cheese_len) {
+				choice = i;
+
+				hallDepth = wallz(gr, cheese_loc[i][0], cheese_loc[i][1]);
+				cheese_len = tempLen;
+			}
 		}
 	}
-	// fprintf(stderr, "dist from mouse to cheese is %d\n", cheese_len);
-	// fprintf(stderr, "dist from mouse to cat is %d\n", cat_len);
-	// exit(0);
-	return cat_len - cheese_len;  // <--- Obviously, this will be replaced by your computer utilities
+	
+	//pick the closest cat
+
+	int catChoice = 11;
+	int cat_len = 10000;
+	int numCloseCats = 0;
+	for (int i = 0; i < cats; i++) {
+		int temp = traceBack2(pred, getLocation(cat_loc[i]), mouse_loc[0]);
+		if (temp < cat_len) {
+			if (temp < 5) {
+				numCloseCats++;
+			}
+			cat_len = temp;
+			catChoice = i;
+		}
+	}
+
+	int mouseWalls = 0;
+	x = mouse_loc[0][0];
+	y = mouse_loc[0][1];
+	
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+
+	for (int j = 0; j < 4; j++) {
+		if (gr[getLocation(mouse_loc[0])][j]) {
+			for (int i = 0; i < 4; i++) {
+				int catCheeseLoc = is_cat_or_cheese(adj_list[j][0], adj_list[j][1] , cat_loc, cats, cheese_loc, cheeses);
+				if ( !(gr[getLocation(adj_list[j])][i]) || (catCheeseLoc == 2)) {
+					mouseWalls++;
+				}
+			}
+		} else {
+			mouseWalls++;
+		}
+	}
+
+	int catWalls = 0;
+	x = cat_loc[catChoice][0];
+	y = cat_loc[catChoice][1];
+	adj_list[0][0] = x;
+	adj_list[0][1] = y-1;
+	adj_list[1][0] = x+1;
+	adj_list[1][1] = y;
+	adj_list[2][0] = x;
+	adj_list[2][1] = y+1;
+	adj_list[3][0] = x-1;
+	adj_list[3][1] = x;
+
+	for (int j = 0; j < 4; j++) {
+		if (gr[getLocation(cat_loc[catChoice])][j]) {
+			catWalls += !gr[getLocation(adj_list[0])][j];
+			catWalls += !gr[getLocation(adj_list[1])][j];
+			catWalls += !gr[getLocation(adj_list[2])][j];
+			catWalls += !gr[getLocation(adj_list[3])][j];
+		}
+		
+	}
+
+	int ret = (catWalls*cat_len) - (walls*cheese_len);
+
+	if (distanceBase > 0 && turns == 5) {
+		return 100 - cheese_len;
+	}
+
+	if (numCloseCats > 2) {
+		if (ret > 0) {
+			return ret/mouseWalls;
+		}
+		return ret*mouseWalls;
+	}
+	return ret;
 }
 
 int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses)
