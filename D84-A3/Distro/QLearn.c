@@ -204,7 +204,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
     new_mouse[0] += 2 - a;
   }
   int fuck[1][2] = {{new_mouse[0], new_mouse[1]}};
-  double r = QLearn_reward(gr, fuck, cats, cheeses, size_X, graph_size);
+  double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   //double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   
   int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
