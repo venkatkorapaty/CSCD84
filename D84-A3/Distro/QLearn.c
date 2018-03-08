@@ -33,7 +33,6 @@
 #include "QLearn.h"
 
 double get_Q(double *QTable, int s, int a) {
-  // // fprintf(stderr, " a: %d s: %d ", a,s);
   return *(QTable + 4*s + a);
 }
 
@@ -47,7 +46,6 @@ void cum_sum_set_Q(double *QTable, int s, int a, double val) {
 
 int get_s(int mouse[2], int cat[2], int cheese[2], int size_X, int graph_size) {
   return (mouse[0]+(mouse[1]*size_X)) + ((cat[0]+(cat[1]*size_X))*graph_size) + ((cheese[0]+(cheese[1]*size_X))*graph_size*graph_size);
-  // (i+(j*size_X)) + ((k+(l*size_X))*graph_size) + ((m+(n*size_X))*graph_size*graph_size)
 }
 
 void QLearn_update(int s, int a, double r, int s_new, double *QTable)
@@ -70,13 +68,11 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
    * TO DO: Complete this function
    ***********************************************************************************************/
 
-  // fprintf(stderr, "..13..");
-  int maxAct = 0;
-  // fprintf(stderr, "\n %d, %d\n", s_new, maxAct);
-  
+  //finding the actions for the given s_new that yields the highest Q(s_new,a_prime) value
+  //then update the Q table for Q(s,a) with it's a number influenced by the immediate reward for s
+  //and the reward for s_new
+  int maxAct = 0;  
   double maxxx = get_Q(QTable, s_new, maxAct);
-  // fprintf(stderr, "..14..");
-  // - get_Q(QTable, s, maxAct);
   for (int a_p = 1; a_p < 4; a_p++) {
     double maxxxer = (double)get_Q(QTable, s_new, a_p);
     if (maxxxer > maxxx) {
@@ -84,7 +80,6 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable)
       maxxx = maxxxer;
     }
   }
-  // fprintf(stderr, "%f\n", (double)alpha*((double)r + (double)lambda*(double)maxxx - (double)get_Q(QTable, s, a)));
   cum_sum_set_Q(QTable, s, a, alpha*(r + (lambda*maxxx) - get_Q(QTable, s, a)));
 }
 
@@ -109,7 +104,9 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
      This function *must return* an action index in [0,3] where
         0 - move up
         1 - move right
-        2 - move down
+        2 - move down    // int out_x = new_mouse[0] >= 0 && new_mouse[0] < size_X;
+    // int out_y = new_mouse[1] >= 0 && new_mouse[1] < size_X;
+    //  && (out_y) && (out_x)
         3 - move left
         
      QLearn_core_GL will print a warning if your action makes the mouse cross a wall, or if it makes
@@ -170,47 +167,49 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   double prob_rand = (double)rand()/(double)RAND_MAX;
   int a = 0;
   // fprintf(stderr, "%f\n", pct);
-  if (prob_rand - pct ) {
+  if (prob_rand > pct) {
     do {
       // do rand act that's also valid
       a = rand()%4;
 
-      // srand(time(NULL));
     } while(!(gr[mouse_pos[0][0] + size_X*mouse_pos[0][1]][a]));
   }
   else {
     // dun do rand act
+    //take the actions that yields the largest Q(s,a) value
     double vals[] = {get_Q(QTable, s, 0), get_Q(QTable, s, 1), get_Q(QTable, s, 2), get_Q(QTable, s, 3)};
     double max = -100000.0;
     int newer_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
     
     for (int i = 0; i < 4; i ++) {
-      if (i % 2 == 0) {
-        newer_mouse[1] -= 1 - i;
-      } else {
-        newer_mouse[0] += 2 - i;
-      }
-      if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][a]) && (newer_mouse[0] >= 0 && newer_mouse[0] < size_X) && (newer_mouse[1] >= 0 && newer_mouse[1] < size_X) && vals[i] > max) {
+      if ((gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i]) && vals[i] > max) {
         max = vals[i];
         a = i;
       }
     }
   }
 
+  //find new mouse coords given the action we decided to take
   int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
   if (a % 2 == 0) {
     new_mouse[1] -= 1 - a;
   } else {
     new_mouse[0] += 2 - a;
   }
+
+  //receive immediate reward
   int fuck[1][2] = {{new_mouse[0], new_mouse[1]}};
   double r = QLearn_reward(gr, fuck, cats, cheeses, size_X, graph_size);
-  //double r = QLearn_reward(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   
+  //observe s prime
   int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
   
+  //update Q(s,a) with <s,a,r,s_p>
   QLearn_update(s, a, r, s_p, QTable);
   
+
+  //once our table is updated, look at the possible actions to take from state s
+  //and take the best one
   int maxAct = 4;
   double a_jabest = -100000.0;
   
@@ -225,25 +224,16 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
     }
     int valid_spot = gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i];
     int better = a_i > a_jabest;
-    int out_x = new_mouse[0] >= 0 && new_mouse[0] < size_X;
-    int out_y = new_mouse[1] >= 0 && new_mouse[1] < size_X;
 
-    if ((valid_spot) && (better) && (out_x) && (out_y)) {
-
+    if ((valid_spot) && (better)) {
       maxAct = i;
       a_jabest = a_i;
     }
   }
 
-  // if (maxAct != 4) {
-  //   // fprintf(stderr, "a..");
-  //   return maxAct;
-  // }
-
-  // fprintf(stderr, "returning..");
   if(0)
   return(0);		// <--- of course, you will change this!
-  return maxAct;
+  return maxAct; //we didn't change it!
 }
 
 double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
@@ -265,6 +255,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
    /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/ 
+
 
   if (mouse_pos[0][0] == cats[0][0] && mouse_pos[0][1] == cats[0][1]) {
     return -50.0;
@@ -333,7 +324,9 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
    Note that instead of passing down the number of cats and the number of cheese chunks (too many parms!)
    the arrays themselves will tell you what are valid cat/cheese locations.
    
-   You can have up to 5 cats and up to 5 cheese chunks, and array entries for the remaining cats/cheese
+   You can have up to    // int out_x = new_mouse[0] >= 0 && new_mouse[0] < size_X;
+    // int out_y = new_mouse[1] >= 0 && new_mouse[1] < size_X;
+    //  && (out_y) && (out_x) 5 cats and up to 5 cheese chunks, and array entries for the remaining cats/cheese
    will have a value of -1 - check this when evaluating your features!
   */
 
