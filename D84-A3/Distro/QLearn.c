@@ -215,13 +215,6 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   
   for (int i = 0; i < 4; i++) {
     double a_i = (double)get_Q(QTable, s, i);
-    new_mouse[0] = mouse_pos[0][0];
-    new_mouse[1] = mouse_pos[0][1];
-    if (i % 2 == 0) {
-      new_mouse[1] -= 1 - i;
-    } else {
-      new_mouse[0] += 2 - i;
-    }
     int valid_spot = gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i];
     int better = a_i > a_jabest;
 
@@ -283,8 +276,31 @@ void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double 
   
    /***********************************************************************************************
    * TO DO: Complete this function
-   ***********************************************************************************************/        
-      
+   ***********************************************************************************************/       
+
+  //create and evaluate the features array
+  double * features = (double*)malloc(sizeof(int)*25);
+  evaluateFeatures(gr, features, mouse_pos, cats, cheeses, size_X, graph_size);
+  int *a;
+  *a = 0;
+  double *max;
+  *max = -100000.0;
+
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, max, a);
+  int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
+  if (*a % 2 == 0) {
+    new_mouse[1] -= 1 - *a;
+  } else {
+    new_mouse[0] += 2 - *a;
+  }
+
+  double qs = Qsa(weights, features);
+
+   for (int i = 0; i < 25; i++) {
+     weights[i] += alpha*(reward + (lambda * *max) - qs) * features[i];
+   } 
+
+  free(features);
 }
 
 int feat_QLearn_action(double gr[max_graph_size][4],double weights[25], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], double pct, int size_X, int graph_size)
@@ -306,7 +322,68 @@ int feat_QLearn_action(double gr[max_graph_size][4],double weights[25], int mous
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/        
+  //observer current state
 
+  // srand(time(NULL));
+  double prob_rand = (double)rand()/(double)RAND_MAX;
+  int *a;
+  *a = 0;
+  double *val;
+  *val = 0.0;
+  // fprintf(stderr, "%f\n", pct);
+  if (prob_rand > pct) {
+    do {
+      // do rand act that's also valid
+      *a = rand()%4;
+
+    } while(!(gr[mouse_pos[0][0] + size_X*mouse_pos[0][1]][*a]));
+  }
+  else {
+    maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, val, a);
+
+  }
+
+  //find new mouse coords given the action we decided to take
+  int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
+  if (*a % 2 == 0) {
+    new_mouse[1] -= 1 - *a;
+  } else {
+    new_mouse[0] += 2 - *a;
+  }
+
+  //receive immediate reward
+  int fuckyou[1][2] = {{new_mouse[0], new_mouse[1]}};
+  double reward = QLearn_reward(gr, fuckyou, cats, cheeses, size_X, graph_size);
+  
+  //observe s prime
+  feat_QLearn_update(gr, weights, reward, mouse_pos, cats, cheeses, size_X, graph_size);
+  // int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
+  
+  //update Q(s,a) with <s,a,r,s_p>
+  // QLearn_update(s, a, r, s_p, QTable);
+  
+
+  //once our table is updated, look at the possible actions to take from state s
+  //and take the best one
+  // int maxAct = 4;
+  // double a_jabest = -100000.0;
+  
+  // for (int i = 0; i < 4; i++) {
+  //   double a_i = (double)get_Q(QTable, s, i);
+  //   int valid_spot = gr[mouse_pos[0][0] + mouse_pos[0][1]*size_X][i];
+  //   int better = a_i > a_jabest;
+
+  //   if ((valid_spot) && (better)) {
+  //     maxAct = i;
+  //     a_jabest = a_i;
+  //   }
+  // }
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, val, a);
+
+  if(0)
+  return(0);		// <--- of course, you will change this!
+  return *a; //we didn't change it!
+  
   return(0);		// <--- replace this while you're at it!
 
 }
@@ -333,6 +410,10 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
    /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/      
+  features[0] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+  for (int i = 1; i < 25; i++) {
+    features[i] = 0;
+  }
    
 }
 
@@ -345,8 +426,12 @@ double Qsa(double weights[25], double features[25])
   /***********************************************************************************************
   * TO DO: Complete this function
   ***********************************************************************************************/  
-  
-  return(0);		// <--- stub! compute and return the Qsa value
+  double ret = 0;
+  //GRADIENT DESCENT
+  for (int i = 0; i < 25; i++) {
+    ret += (weights[i])*(features[i]);
+  }
+  return ret;		// <--- stub! compute and return the Qsa value
 }
 
 void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size, double *maxU, int *maxA)
@@ -364,8 +449,38 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/  
  
-  *maxU=0;	// <--- stubs! your code will compute actual values for these two variables!
-  *maxA=0;
+  *maxU = -100000.0;
+  
+  
+  for (int a_i = 0; a_i < 4; a_i++) {
+    //if actions is available
+    if (gr[mouse_pos[0][0] + (size_X*mouse_pos[0][1])][a_i]) {
+
+      //calculate coords of mouse after actions is taken
+      int new_mouse[1][2] = {{mouse_pos[0][0], mouse_pos[0][1]}};
+      if (a_i % 2 == 0) {
+        new_mouse[0][1] -= 1 - a_i;
+      } else {
+        new_mouse[0][0] += 2 - a_i;
+      }
+
+      //create and evaluate the features array
+      double * features = (double*)malloc(sizeof(int)*25);
+      evaluateFeatures(gr, features, new_mouse, cats, cheeses, size_X, graph_size);
+      //get Qsa for this move
+      double maybeBetter = Qsa(weights, features);
+      free(features);
+
+      //make sure we have the best one
+      if (maybeBetter > *maxU) {
+        *maxU = maybeBetter;
+        *maxA = a_i;
+      }
+    }
+  }
+  
+  // *maxU=0;	// <--- stubs! your code will compute actual values for these two variables!
+  // *maxA=0;
   return;
    
 }
@@ -374,3 +489,7 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
  *  Add any functions needed to compute your features below 
  *                 ---->  THIS BOX <-----
  * *************************************************************************************************/
+int distCheese(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size) {
+  //test code
+  return abs(mouse_pos[0][0] - cheeses[0][0]) + abs(mouse_pos[0][1] - cheeses[0][1]);
+}
