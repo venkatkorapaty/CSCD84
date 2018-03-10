@@ -569,7 +569,9 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
     }
   }
 
-  int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, mouse_pos);
+  int *p;
+
+  int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, mouse_pos, p);
 
   int mansNotHOt = abs(mouse_pos[0][0] - cheeses[priority_cheese][0]) + abs(mouse_pos[0][1] - cheeses[priority_cheese][1]);
 
@@ -577,10 +579,25 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
     amountOfPaths += 1.0;
   }
 
+  int distClosestToCat = 1000;
+
+  // GET CLOSEST CAT
+
+  for (int spot = 0; spot < pathLen; spot++) {
+    int x = p[spot]%size_X;
+    int y = p[spot]/size_X;
+    int loc[1][2] = {{x, y}};
+    double closestCat = distCat(gr, loc, cats, cheeses, size_X, graph_size);
+    if (closestCat < distClosestToCat) {
+      distClosestToCat = closestCat;
+    }
+  }
+
+  free(p);
   return amountOfPaths;
 }
 
-int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int path[max_graph_size][2], int mouse_pos[1][2]) {
+int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int path[max_graph_size][2], int mouse_pos[1][2], int *p) {
   int size_X = ((int)sqrt(graph_size));
   int size_Y = size_X;
 	// uses the pred array to backtrack and figure out the path we found to the goal
@@ -596,17 +613,21 @@ int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_s
 		i++;
 	}
 
-	// int x;
-	// int y;
-	// for (int j = 0; j < i; j++) {
-	// 	x = reversePath[j]%size_X;
-	// 	y = reversePath[j]/size_Y;
-	// 	path[i - j][0] = x;
-	// 	path[i - j][1] = y;
-  //   fprintf(stderr, "path loc: (%d, %d)\n",x, y);
-	// }
+	int x;
+	int y;
+  p = (int*)malloc(sizeof(int)*i);
+	for (int j = 0; j < i; j++) {
+		x = reversePath[j]%size_X;
+		y = reversePath[j]/size_Y;
+		// path[i - j][0] = x;
+		// path[i - j][1] = y;
+    p[i - j] = x + y*size_X;
+    // fprintf(stderr, "path loc: (%d, %d)\n",x, y);
+	}
+  p[0] = mouse_pos[0][0] + mouse_pos[0][1]*size_X;
 	// path[0][0] = mouse_pos[0][0];
 	// path[0][1] = mouse_pos[0][1];
+
 
 	return i;
 }

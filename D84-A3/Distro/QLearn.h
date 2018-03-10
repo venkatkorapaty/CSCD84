@@ -57,7 +57,7 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 int extract_min(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int size, int graph_size);
 void propagate(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int node, int size, int graph_size);
 void addHeap(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int val, int size, int graph_size);
-int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int path[max_graph_size][2], int mouse_pos[1][2]);
+int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int path[max_graph_size][2], int mouse_pos[1][2], int *p);
 int getLocation(int coords[2], int size_Y);
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses);
 double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size);
