@@ -400,8 +400,8 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
-  features[3] = (double)findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
-  for (int i = 4; i < 25; i++) {
+  // features[3] = (double)findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
+  for (int i = 3; i < 25; i++) {
     features[i] = 0;
   }
    
@@ -496,13 +496,17 @@ double distCat(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2]
   //test code
   double shortest = 1000.0;
   for (int i = 0; i < 5; i++) {
+    
     if (cats[i][0] < 0 || cats[i][1] < 0) {
       continue;
     }
+    
     double temp = pow(pow(fabs(mouse_pos[0][0] - cats[i][0]), 2) + pow(fabs(mouse_pos[0][1] - cats[i][1]), 2),0.5);
+    
     if (temp < shortest) {
       shortest = temp;
     }
+   
   }
   return 1/(1+ shortest);
 }
@@ -550,7 +554,7 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   }
   // find optimial path from mouse location to every other spot
   findDeWay(gr, path, cats, amountOfCats, cheeses, amountOfCheeses, mouse_pos, pred, graph_size);
-
+  
   // fprintf(stderr, "start\n");
   // for (int i = 0; i < graph_size; i++) {
   //   fprintf(stderr, "%d: %d\n", i, pred[i]);
@@ -566,7 +570,7 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
         wallsAroundCheese[cheese]++;
     }
   }
-
+  
   // find cheese with least amount of walls
   int resultWalls = 4;
   for (int cheese = 0; cheese < amountOfCheeses; cheese++) {
@@ -577,10 +581,13 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   }
 
   int *p;
-
+  
   int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, mouse_pos, p);
+  free(p);
+  // fprintf(stderr, "%d\n", pathLen);
+  return pathLen;
   // return pathLen;
-
+  
   int mansNotHOt = abs(mouse_pos[0][0] - cheeses[priority_cheese][0]) + abs(mouse_pos[0][1] - cheeses[priority_cheese][1]);
 
   if (pathLen >= mansNotHOt) {
@@ -590,17 +597,17 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   int distClosestToCat = 1000;
 
   // GET CLOSEST CAT
-
   for (int spot = 0; spot < pathLen; spot++) {
     int x = p[spot]%size_X;
     int y = p[spot]/size_X;
+     
     int loc[1][2] = {{x, y}};
     double closestCat = distCat(gr, loc, cats, cheeses, size_X, graph_size);
     if (closestCat < distClosestToCat) {
       distClosestToCat = closestCat;
     }
   }
-
+  
   free(p);
   return amountOfPaths;
 }
