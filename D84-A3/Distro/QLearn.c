@@ -248,14 +248,20 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
    /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/ 
+  int c_cat = 0;
+  int cat_Val = 10000;
+  int c_cheese = 0;
+  int cheese_val = 10000;
+  for (int i = 0; i < 5; i++) {
+    if (mouse_pos[0][0] == cats[i][0] && mouse_pos[0][1] == cats[i][1]) {
+      return -50.0;
+    }
+    if (mouse_pos[0][0] == cheeses[i][0] && mouse_pos[0][1] == cheeses[i][1]) {
+      return 50.0;
+    }
 
-
-  if (mouse_pos[0][0] == cats[0][0] && mouse_pos[0][1] == cats[0][1]) {
-    return -50.0;
   }
-  if (mouse_pos[0][0] == cheeses[0][0] && mouse_pos[0][1] == cheeses[0][1]) {
-    return 50.0;
-  }
+  
 
 
   return(0);
@@ -291,13 +297,14 @@ void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double 
   double max_val = -100000.0;
   max = &max_val;
 
-  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, max, a);
-  int new_mouse[2] = {mouse_pos[0][0], mouse_pos[0][1]};
+  
+  int new_mouse[1][2] = {{mouse_pos[0][0], mouse_pos[0][1]}};
   if (act % 2 == 0) {
-    new_mouse[1] -= 1 - act;
+    new_mouse[0][1] -= 1 - act;
   } else {
-    new_mouse[0] += 2 - act;
+    new_mouse[0][0] += 2 - act;
   }
+  maxQsa(gr, weights, new_mouse, cats, cheeses, size_X, graph_size, max, a);
   double qs = Qsa(weights, features);
   // fprintf(stderr, "..WHYYY2\n");
   for (int i = 0; i < 25; i++) {
@@ -393,8 +400,8 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
-  // features[0] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
-  for (int i = 3; i < 25; i++) {
+  features[3] = (double)findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
+  for (int i = 4; i < 25; i++) {
     features[i] = 0;
   }
    
@@ -572,6 +579,7 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   int *p;
 
   int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, mouse_pos, p);
+  // return pathLen;
 
   int mansNotHOt = abs(mouse_pos[0][0] - cheeses[priority_cheese][0]) + abs(mouse_pos[0][1] - cheeses[priority_cheese][1]);
 
