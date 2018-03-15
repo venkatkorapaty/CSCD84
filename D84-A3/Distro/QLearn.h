@@ -61,5 +61,6 @@ int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_s
 int getLocation(int coords[2], int size_Y);
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses);
 double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size);
+double distCatCheese(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size);
 #endif
 

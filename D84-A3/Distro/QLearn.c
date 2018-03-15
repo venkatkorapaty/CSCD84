@@ -400,8 +400,9 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
+  features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   // features[3] = (double)findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
-  for (int i = 3; i < 25; i++) {
+  for (int i = 4; i < 25; i++) {
     features[i] = 0;
   }
    
@@ -774,7 +775,9 @@ void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int ca
 
 	while (queueIndex > 0/*cheeses > 0*/) {
 		current = extract_min(heap, weights, actWeights, queueIndex, graph_size);
-		queueIndex--;
+		queueIndex--;for (int i = 0; i < 5; i++) {
+    
+  }
 		while (heap_visited[current] == 1) {
 			current = extract_min(heap, weights, actWeights, queueIndex, graph_size);
 			queueIndex--;
@@ -855,4 +858,38 @@ int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[
 		i++;
 	}
 	return 0;
+}
+
+double distCatCheese(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size) {
+  int cheese = 0;
+  double shortest = 1000.0;
+  //pick the prioritized cheese
+  for (int i = 0; i < 5; i++) {
+    if (cheeses[i][0] < 0 || cheeses[i][1] < 0) {
+      continue;
+    }
+    double temp = pow(pow(fabs(mouse_pos[0][0] - cheeses[i][0]), 2) + pow(fabs(mouse_pos[0][1] - cheeses[i][1]), 2),0.5);
+    if (temp < shortest) {
+      shortest = temp;
+      cheese = i;
+    }
+  }
+
+  int num_cats = 0;
+  double total = 0.0;
+
+  for (int i = 0; i < 5; i++) {
+    
+    if (cats[i][0] < 0 || cats[i][1] < 0) {
+      continue;
+    }
+    
+    double temp = pow(pow(fabs(mouse_pos[0][0] - cats[i][0]), 2) + pow(fabs(mouse_pos[0][1] - cats[i][1]), 2),0.5);
+    total += temp;
+    num_cats++;
+   
+  }
+
+  return total/num_cats;
+
 }
