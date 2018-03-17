@@ -198,8 +198,8 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   }
 
   //receive immediate reward
-  int fuck[1][2] = {{new_mouse[0], new_mouse[1]}};
-  double r = QLearn_reward(gr, fuck, cats, cheeses, size_X, graph_size);
+  int temp_mouse[1][2] = {{new_mouse[0], new_mouse[1]}};
+  double r = QLearn_reward(gr, temp_mouse, cats, cheeses, size_X, graph_size);
   
   //observe s prime
   int s_p = get_s(new_mouse, cats[0], cheeses[0], size_X, graph_size);
@@ -261,10 +261,10 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
   int cheese_val = 10000;
   for (int i = 0; i < 5; i++) {
     if (mouse_pos[0][0] == cats[i][0] && mouse_pos[0][1] == cats[i][1]) {
-      return -50.0;
+      return -2.0;
     }
     if (mouse_pos[0][0] == cheeses[i][0] && mouse_pos[0][1] == cheeses[i][1]) {
-      return 50.0/(1+amountOfCheeses);
+      return 2.0;
     }
 
   }
@@ -371,8 +371,8 @@ int feat_QLearn_action(double gr[max_graph_size][4],double weights[25], int mous
     new_mouse[0] += 2 - act;
   }
   //receive immediate reward
-  int fuckyou[1][2] = {{new_mouse[0], new_mouse[1]}};
-  double reward = QLearn_reward(gr, fuckyou, cats, cheeses, size_X, graph_size);
+  int temp_mouse[1][2] = {{new_mouse[0], new_mouse[1]}};
+  double reward = QLearn_reward(gr, temp_mouse, cats, cheeses, size_X, graph_size);
   //observe s prime
   feat_QLearn_update(gr, weights, reward, mouse_pos, cats, cheeses, size_X, graph_size);
   maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, val, a);
@@ -401,15 +401,20 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
     //  && (out_y) && (out_x) 5 cats and up to 5 cheese chunks, and array entries for the remaining cats/cheese
    will have a value of -1 - check this when evaluating your features!
   */
-  int paths[2];
-  features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
-  features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size, paths);
-  features[4] = (double)paths[0];
-  features[5] = (double)paths[1];
-  for (int i = 6; i < 25; i++) {
+  // features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+  // features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+  // features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
+  // features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+  // features[4] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
+
+  features[2] = 1.0/(1+distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[1] = 1.0/(1+distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[0] = 1.0/(1+mouseWalls(gr, mouse_pos, cats, size_X));
+  features[3] = 1.0/(1+distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[4] = 1.0/(1+findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size));
+  // double totalFeat = features[0] + features[1] + features[2] + features[3] + features[4];
+  // for (int i = 0; i < 5; i++) features[i] = features[i]/totalFeat;
+  for (int i = 5; i < 25; i++) {
     features[i] = 0;
   }
    
@@ -425,7 +430,9 @@ double Qsa(double weights[25], double features[25])
   //GRADIENT DESCENT
   for (int i = 0; i < 25; i++) {
     ret += (weights[i])*(features[i]);
+    // fprintf(stderr, "weights i : %f\n", weights[i]);
   }
+  
   return ret;		// <--- stub! compute and return the Qsa value
 }
 
@@ -445,7 +452,7 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
    ***********************************************************************************************/  
  
   *maxU = -(pow (max_graph_size, 3));
-  int set = 0;
+  // int set = 0;
   
   
   for (int a_i = 0; a_i < 4; a_i++) {
@@ -465,19 +472,19 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
       evaluateFeatures(gr, features, new_mouse, cats, cheeses, size_X, graph_size);
       //get Qsa for this move
       double maybeBetter = Qsa(weights, features);
-      fprintf(stderr, "%f..", maybeBetter);
+      // fprintf(stderr, "%f..", maybeBetter);
       free(features);
 
       //make sure we have the best one
       if (maybeBetter > *maxU) {
-        set = 1;
+        // set = 1;
         *maxU = maybeBetter;
         *maxA = a_i;
       }
     }
-    if (set == 0) {
-      fprintf(stderr, "fasdfasdf  %d\n", mouse_pos[0][0] + (size_X*mouse_pos[0][1]));
-    }
+    // if (set == 0) {
+    //   fprintf(stderr, "fasdfasdf  %d\n", mouse_pos[0][0] + (size_X*mouse_pos[0][1]));
+    // }
   }
   
   // *maxU=0;	// <--- stubs! your code will compute actual values for these two variables!
@@ -548,7 +555,7 @@ double mouseWalls(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   return (double)walls;
 }
 
-void findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size, int *paths) {
+double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size) {
   double amountOfPaths = 0.0;
 
   int size_X = (int)sqrt(graph_size);
@@ -639,11 +646,12 @@ void findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
   // free(pred);
   // fprintf(stderr, "pred pls dund break\n");
 
-  paths[0] = pathLen;
-  paths[1] = amountOfPaths;
-  if (pathLen == -1) {
-    paths[0] = paths[1] = 0;
-  }
+  // paths[0] = pathLen;
+  // paths[1] = amountOfPaths;
+  // if (pathLen == -1) {
+  //   paths[0] = paths[1] = 0;
+  // }
+  return amountOfPaths;
 }
 
 int traceBack2(int *pred, int current, int origin[2], int graph_size, int *p) {
@@ -701,92 +709,17 @@ int traceBack2(int *pred, int current, int origin[2], int graph_size, int *p) {
 	return i;
 }
 
-void addHeap(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int val, int size, int graph_size) {
-	// adds val to our heap data structure for the A* algorithms
-	int parent;
-	while (size > 0) {
-		parent = (size - 1) / 2;
-		
-		if (weights[val] + actWeights[val] >= weights[heap[parent]] + actWeights[heap[parent]]) {
-			heap[size] = val;
-			return;
-		}
-		heap[size] = heap[parent];
-		size = parent;
-	}
-	heap[0] = val;
-}
-
-void propagate(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int node, int size, int graph_size) {
-	// when extracting min from the heap we need to reorganize our heap
-	if (size == 2) {
-		if (weights[heap[0]] + actWeights[heap[0]] > weights[heap[1]] + actWeights[heap[1]]) {
-			int temp = heap[0];
-			heap[0] = heap[1];
-			heap[1] = temp;
-		}
-		return;
-	}
-	int l = node*2 + 1;
-	int r = node*2 + 2;
-	int min = weights[heap[node]] + actWeights[heap[node]];
-	int mindex = node;
-
-	if (l < size - 1 && (weights[heap[l]] + actWeights[heap[l]]) < (weights[heap[r]] + actWeights[heap[r]])) {
-		min = weights[heap[l]] + actWeights[heap[l]];
-		mindex = l;
-	}
-	if (r < size - 1 && (weights[heap[r]] + actWeights[heap[r]]) < (weights[heap[mindex]] + actWeights[heap[mindex]])) {
-		min = weights[heap[r]] + actWeights[heap[r]];
-		mindex = r;
-	}
-	if (mindex != node) {
-		int temp = heap[node];
-		heap[node] = heap[mindex];
-		heap[mindex] = temp;
-		propagate(heap, weights, actWeights, mindex, size, graph_size);
-	}
-}
-
-int extract_min(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int size, int graph_size) {
-	//get the first element in the heap and then re-sort it
-	int min;
-	int last_elem;
-	if (size == 0) {
-		return -1;
-	}
-	if (size == 1) {
-		min = heap[0];
-		heap[0] = -1;
-		return min;
-	}
-
-	min = heap[0];
-	last_elem = heap[size - 1];
-	heap[0] = last_elem;
-	heap[size - 1] = -1;
-
-	propagate(heap, weights, actWeights, 0, size - 1, graph_size);
-
-	return min;
-}
-
-int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[max_graph_size][4], int graph_size)
+int findDeWay(double gr_temp[max_graph_size][4], int path[max_graph_size][2], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int *p)
 {
-
-	int heur = 99999;
-	for (int i = 0; i < cheeses; i++) {
-		int eu_dist = abs(x - cheese_loc[i][0]) + abs(y - cheese_loc[i][1]);
-		if (heur > eu_dist) {
-			heur = eu_dist;
-		}
-	}
-	return heur;
-}
-
-int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int *p)
-{
+  double gr[graph_size][4];
+  for (int k = 0; k < graph_size; k++) {
+    gr[k][0] = gr_temp[k][0];
+    gr[k][1] = gr_temp[k][1];
+    gr[k][2] = gr_temp[k][2];
+    gr[k][3] = gr_temp[k][3];
+  }
   
+
   //declarations
 	int v = 1;
 	int queueMain[graph_size];
@@ -891,11 +824,11 @@ int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat
             }
             weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = H_cost(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr, graph_size);
             int ind = (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X);
-            if (ind <= graph_size && ind >= 0) {
-              blah = 1;
-              addHeap(heap, weights, actWeights, ind, queueIndex, graph_size);
-              queueIndex++;
-            }
+            // if (ind <= graph_size && ind >= 0) {
+            //   blah = 1;
+            addHeap(heap, weights, actWeights, ind, queueIndex, graph_size);
+            queueIndex++;
+            // }
             // if (!blah)
             //   fprintf(stderr, "ind %d %d\n", ind, graph_size);
           }
@@ -907,11 +840,11 @@ int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat
 						pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
             int ind = (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X);
             // fprintf(stderr, "ind %d\n", ind);
-            if (ind <= graph_size && ind >= 0) {
-              blah = 1;
-              addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex, graph_size);
-              queueIndex++;
-            }
+            // if (ind <= graph_size && ind >= 0) {
+              // blah = 1;
+            addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex, graph_size);
+            queueIndex++;
+            // }
             // if (!blah)
             //   fprintf(stderr, "ind %d %d\n", ind, graph_size);
 					}
@@ -925,6 +858,89 @@ int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat
   // fprintf(stderr, "..end\n");
   // did not find cheese
   return -1;
+}
+
+void addHeap(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int val, int size, int graph_size) {
+	// adds val to our heap data structure for the A* algorithms
+	int parent;
+	while (size > 0) {
+		parent = (size - 1) / 2;
+		
+		if (weights[val] + actWeights[val] >= weights[heap[parent]] + actWeights[heap[parent]]) {
+			heap[size] = val;
+			return;
+		}
+		heap[size] = heap[parent];
+		size = parent;
+	}
+	heap[0] = val;
+}
+
+void propagate(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int node, int size, int graph_size) {
+	// when extracting min from the heap we need to reorganize our heap
+	if (size == 2) {
+		if (weights[heap[0]] + actWeights[heap[0]] > weights[heap[1]] + actWeights[heap[1]]) {
+			int temp = heap[0];
+			heap[0] = heap[1];
+			heap[1] = temp;
+		}
+		return;
+	}
+	int l = node*2 + 1;
+	int r = node*2 + 2;
+	int min = weights[heap[node]] + actWeights[heap[node]];
+	int mindex = node;
+
+	if (l < size - 1 && (weights[heap[l]] + actWeights[heap[l]]) < (weights[heap[r]] + actWeights[heap[r]])) {
+		min = weights[heap[l]] + actWeights[heap[l]];
+		mindex = l;
+	}
+	if (r < size - 1 && (weights[heap[r]] + actWeights[heap[r]]) < (weights[heap[mindex]] + actWeights[heap[mindex]])) {
+		min = weights[heap[r]] + actWeights[heap[r]];
+		mindex = r;
+	}
+	if (mindex != node) {
+		int temp = heap[node];
+		heap[node] = heap[mindex];
+		heap[mindex] = temp;
+		propagate(heap, weights, actWeights, mindex, size, graph_size);
+	}
+}
+
+int extract_min(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int size, int graph_size) {
+	//get the first element in the heap and then re-sort it
+	int min;
+	int last_elem;
+	if (size == 0) {
+		return -1;
+	}
+	if (size == 1) {
+		min = heap[0];
+		heap[0] = -1;
+		return min;
+	}
+
+	min = heap[0];
+	last_elem = heap[size - 1];
+	heap[0] = last_elem;
+	heap[size - 1] = -1;
+
+	propagate(heap, weights, actWeights, 0, size - 1, graph_size);
+
+	return min;
+}
+
+int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[max_graph_size][4], int graph_size)
+{
+
+	int heur = 99999;
+	for (int i = 0; i < cheeses; i++) {
+		int eu_dist = abs(x - cheese_loc[i][0]) + abs(y - cheese_loc[i][1]);
+		if (heur > eu_dist) {
+			heur = eu_dist;
+		}
+	}
+	return heur;
 }
 
 int getLocation(int coords[2], int size_Y) {

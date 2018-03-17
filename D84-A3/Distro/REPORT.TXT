@@ -10,17 +10,17 @@ mark.
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Bisesar, Shevlin
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Korapaty, Venkat
 
-Student number 1:
+Student number 1: 1001307766
 
-Student number 2:
+Student number 2: 1001365060
 
-UTORid 1:
+UTORid 1: bisesars
 
-UTORid 2:
+UTORid 2: korapaty
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -28,7 +28,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: Shevlin Bisesar	Venkat Korapaty
 
 
 (-5 marks for failing to provide the identifying
@@ -41,9 +41,11 @@ but explain carefully when needed.
 1 .- (1 mark) Explain your reward function. What game elements
       are used, and why you think this is a good reward function
       for this problem.
+	We have a simple reward function, gives positive number for getting cheese,
+	negative number for dying to a cat, and 0 otherwise.
 
 2 .- These are multiple experiments (once you are sure your 
-     QLearning code is working!) 
+     QLearning code is working!)
 
      * IMPORTANT! * For each training run, SAVE the Qtable
      you will re-use the Qtables later.
@@ -51,56 +53,80 @@ but explain carefully when needed.
      (1 mark) # Experiment 1, 10000 training trials, 20 rounds, random seed 1522,
      # 8x8 grid, cat-smartness .9
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): 0.109070
 
      Train your mouse, and once trained, run the evaluation and  
-     record the mouse winning rate:
+     record the mouse winning rate: 0.419864
 
      (1 mark) # Experiment 2, 1000000 training trials, 50 rounds, random seed 1522,
      # 8x8 grid, cat-smartness .9
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): 0.229623
 
      Train your mouse, and once trained, run the evaluation and  
-     record the mouse winning rate:
+     record the mouse winning rate: 0.836088
 
      (1 mark) Would the mouse keep improving and become invincible if
-     you ran, say, 100,000,000 training rounds per batch?     
+     you ran, say, 100,000,000 training rounds per batch?
+	The mouse would improve, but it would not become invisible. Similar to
+	gradient descent, the rate of success would increase, but the amount of
+	time it would take makes it insignificant and not worth while. There are
+	also certain states where it's impossible to win, such as the cat has you
+	cornered somewhere.
 
 4 .- Using the QTable saved from Experiment 2 (NO re-training!)
 
      (1 mark) # Experiment 3 - Run the evaluation on the 8x8 grid, cat-smartness=.9,
      # but using the random seed 4289 for the game.
 	
-     Mouse Winning Rate:
+     Mouse Winning Rate:-nan
 
      (2 mark) # Experiment 4 - Run the evaluation on the 8x8 grid, cat-smartness=.9,
      # but using the random seed 31415 for the game.
 	
-     Mouse Winning Rate:
+     Mouse Winning Rate:-nan
 
-     Average rate for Experiement 3 and Experiment 4:
+     Average rate for Experiement 3 and Experiment 4: (-nan + -nan)/2 = -nan
 
      (1 mark) Compare with the rate obtained in experiment 2. What is happening here?
+	We trained assuming our static environment was 1522, but the seed changed,
+	so our QTable failed on the new seed.
 
 5 .- Understanding the effects of state space on learning ability:
 
      (1 mark) # Experiment 5 - Train your mouse on the 16x16 grid, using random seed
      # 1522, 1000000 trials, and 50 training rounds. Cat-smartness=.9
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): 0.047886
 
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): 0.114471
 
      (1 mark) Compare the final winning rate with that from Experiment 2, what can
      you say about the difference in winning rates?
+	There are far more states in experiment 5 that we need to reach, which is much
+	harder. In experiment to, it was an 8x8, that are far fewer states. We would require
+	a lot more training time. An 8x8 has 262144 states, where as a 16x16 has
+	16777216 states.
 
 6 .- (2 marks) Is standard Q-Learning a rasonable strategy for environments
      that change constantly? discuss based on the above
+	No, Q-Learning is limited to static enviroments.  Looking at the above experiments we can see 		on one environment will yield bad results when evaluated on another, which would mean to do 
+	we would have to store training on multiple environments, which would no longer be training 
+	for a changing environment.
 
 7 .- (3 marks) Explain your feature set for feature-based Q Learning, and
                explain why and how each feature is expected to contribute
 	       to helping your mouse win
+	One of our features tells us if there is a successful path to the cheese. This made
+	a difference when computing our weights, as it's very useful for the mouse to know
+	whether it can get the cheese or not.  We also have a feature that estimates our distance to 
+	the cheese, combined with the above feature we can say our estimate is closer to the true 
+	distance.  (example, if we estimate a path of length 4, but we have no path there's probably 
+	have a wall or cat in the way, as opposed to path length 4 and there is a path, our path is 
+	probably about length 4)  We also have a feature that estimates our distance to a cat to see 
+	if we're in danger or not.  We have a feature that tells use the average distance of the
+	closest cheese to all the cats to see how dangerous a cheese is.  Lastly we have a feature 
+	says how many walls are around the mouse.
 
 8 .- Carry out the following experiments:
 
@@ -108,7 +134,7 @@ but explain carefully when needed.
      # the 16x16 grid, one cat, and one cheese, cat-smartness=.9,  
      # random seed = 1522, and use 1000000 trials and 50 rounds. 
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): 0.025303
      
      Mouse Winning Rate (from evaluation after training):
 
@@ -173,24 +199,24 @@ doesn't work, or what problems exist.
 	
 			Complete/Working	Partial		Not done
 
-QLearn 
+QLearn 				x
  update
 
-Reward
+Reward				x
  function
 
-Decide
+Decide				x
  action
 
-featureEval
+featureEval			x
 
-evaluateQsa
+evaluateQsa			x
 
-maxQsa_prime
+maxQsa_prime			x
 
-Qlearn_features
+Qlearn_features			x
 
-decideAction_features
+decideAction_features		x
 
 _____________________________________________________
 
