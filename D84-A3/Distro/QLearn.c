@@ -247,7 +247,14 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
 
    /***********************************************************************************************
    * TO DO: Complete this function
-   ***********************************************************************************************/ 
+   ***********************************************************************************************/
+
+  int amountOfCheeses = 0;
+  for (int i = 0; i < 5; i++) {
+    if (cheeses[i][0] != -1)
+      amountOfCheeses++;
+  }
+
   int c_cat = 0;
   int cat_Val = 10000;
   int c_cheese = 0;
@@ -257,7 +264,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
       return -50.0;
     }
     if (mouse_pos[0][0] == cheeses[i][0] && mouse_pos[0][1] == cheeses[i][1]) {
-      return 50.0;
+      return 50.0/(1+amountOfCheeses);
     }
 
   }
@@ -369,12 +376,10 @@ int feat_QLearn_action(double gr[max_graph_size][4],double weights[25], int mous
   //observe s prime
   feat_QLearn_update(gr, weights, reward, mouse_pos, cats, cheeses, size_X, graph_size);
   maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, val, a);
-  if(0)
-  return(0);		// <--- of course, you will change this!
-  return act; //we didn't change it!
   
-  return(0);		// <--- replace this while you're at it!
-
+  if (0)
+    return(0);		// <--- replace this while you're at it!
+  return act; //we didn't change it!
 }
 
 void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
@@ -396,13 +401,15 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
     //  && (out_y) && (out_x) 5 cats and up to 5 cheese chunks, and array entries for the remaining cats/cheese
    will have a value of -1 - check this when evaluating your features!
   */
-
+  int paths[2];
   features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[1] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
   features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  // features[3] = (double)findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
-  for (int i = 4; i < 25; i++) {
+  findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size, paths);
+  features[4] = (double)paths[0];
+  features[5] = (double)paths[1];
+  for (int i = 6; i < 25; i++) {
     features[i] = 0;
   }
    
@@ -437,7 +444,8 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
    * TO DO: Complete this functionint size_X
    ***********************************************************************************************/  
  
-  *maxU = -100000.0;
+  *maxU = -(pow (max_graph_size, 3));
+  int set = 0;
   
   
   for (int a_i = 0; a_i < 4; a_i++) {
@@ -457,13 +465,18 @@ void maxQsa(double gr[max_graph_size][4],double weights[25],int mouse_pos[1][2],
       evaluateFeatures(gr, features, new_mouse, cats, cheeses, size_X, graph_size);
       //get Qsa for this move
       double maybeBetter = Qsa(weights, features);
+      fprintf(stderr, "%f..", maybeBetter);
       free(features);
 
       //make sure we have the best one
       if (maybeBetter > *maxU) {
+        set = 1;
         *maxU = maybeBetter;
         *maxA = a_i;
       }
+    }
+    if (set == 0) {
+      fprintf(stderr, "fasdfasdf  %d\n", mouse_pos[0][0] + (size_X*mouse_pos[0][1]));
     }
   }
   
@@ -535,11 +548,12 @@ double mouseWalls(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5]
   return (double)walls;
 }
 
-double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size) {
+void findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size, int *paths) {
   double amountOfPaths = 0.0;
 
   int size_X = (int)sqrt(graph_size);
-  int *pred = (int*)malloc(sizeof(int)*graph_size);
+  // int *pred = (int*)malloc(sizeof(int)*graph_size);
+  int pred[graph_size];
   int path[max_graph_size][2];
   for (int i = 0; i < graph_size; i++) {
     path[i][0] = -1;
@@ -553,8 +567,8 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
     if (cheeses[i][0] != -1)
       amountOfCheeses++;
   }
+
   // find optimial path from mouse location to every other spot
-  findDeWay(gr, path, cats, amountOfCats, cheeses, amountOfCheeses, mouse_pos, pred, graph_size);
   
   // fprintf(stderr, "start\n");
   // for (int i = 0; i < graph_size; i++) {
@@ -580,13 +594,16 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
       priority_cheese = cheese;
     }
   }
+  // int *p = (int*)malloc(sizeof(int)*max_graph_size);
+  int p[graph_size];
+  int pathLen = findDeWay(gr, path, cats, amountOfCats, cheeses, amountOfCheeses, mouse_pos, pred, graph_size, p);
+  // if (pathLen < 1)
+  //   return pathLen;
 
-  int *p;
-  
-  int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, mouse_pos, p);
-  free(p);
+  // int pathLen = traceBack2(pred, getLocation(cheeses[priority_cheese], size_X), mouse_pos[0], graph_size, path, p);
+  // free(p);
   // fprintf(stderr, "%d\n", pathLen);
-  return pathLen;
+  // exit(0);
   // return pathLen;
   
   int mansNotHOt = abs(mouse_pos[0][0] - cheeses[priority_cheese][0]) + abs(mouse_pos[0][1] - cheeses[priority_cheese][1]);
@@ -598,53 +615,89 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   int distClosestToCat = 1000;
 
   // GET CLOSEST CAT
+  // p[1];
+  // fprintf(stderr, "WEIGHT FOR..");
   for (int spot = 0; spot < pathLen; spot++) {
+    // fprintf(stderr, "but..");
     int x = p[spot]%size_X;
+    
+    // fprintf(stderr, "..%d..", p[spot]%size_X);
+    // fprintf(stderr, "..idk..");
     int y = p[spot]/size_X;
-     
+    // p[spot]/size_X;
+    // fprintf(stderr, ".. why\n");
     int loc[1][2] = {{x, y}};
     double closestCat = distCat(gr, loc, cats, cheeses, size_X, graph_size);
     if (closestCat < distClosestToCat) {
       distClosestToCat = closestCat;
     }
   }
+
+  // fprintf(stderr, "..IT\n");
   
-  free(p);
-  return amountOfPaths;
+  // free(p);
+  // free(pred);
+  // fprintf(stderr, "pred pls dund break\n");
+
+  paths[0] = pathLen;
+  paths[1] = amountOfPaths;
+  if (pathLen == -1) {
+    paths[0] = paths[1] = 0;
+  }
 }
 
-int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int path[max_graph_size][2], int mouse_pos[1][2], int *p) {
+int traceBack2(int *pred, int current, int origin[2], int graph_size, int *p) {
   int size_X = ((int)sqrt(graph_size));
   int size_Y = size_X;
 	// uses the pred array to backtrack and figure out the path we found to the goal
 	int i = 0;
-	int reversePath[max_graph_size];
+	int reversePath[graph_size];
+
+  // int mouseIndex = origin[0] + origin[1]*size_X;
 
   int goal = getLocation(origin, size_X);
+  pred[goal] = -1;
   // fprintf(stderr, "start: %d, goal %d\n", pred[current], goal);
-	while (pred[current] != -1 && current != goal) {
+  // int prevLoc = -1;
+	while (pred[current] != -1  && current != goal && i != graph_size) {//current != goal) {
     // fprintf(stderr, "%d\n", i);
+    // fprintf(stderr, "Pre: (%d, %d) \n", current%size_X, current/size_X);
+    // if (prevLoc != pred[current]) {
+    //   fprintf(stderr, "Pre: (%d, %d, %d) \n", prevLoc, pred[current], current]);
+    //   prevLoc = current;
+    // }
+    // else {
+    //   fprintf(stderr, "Pre: (%d, %d, %d) \n", prevLoc, pred[current], current]);
+    //   return 0;
+    // }
+    // fprintf(stderr, "IS IT..(%d, %d, %d)", i, current, graph_size);
 		reversePath[i] = current;
+    // fprintf(stderr, "..HERE?\n");
 		current = pred[current];
+    // fprintf(stderr, "Post: (%d, %d) \n", current%size_X, current/size_X);
+    //something's happening sometimes we don't find a path to the goal
+    // j++;
+    // if (j > max_graph_size*max_graph_size*max_graph_size) {
+    //   // fprintf(stderr, "stuck exiting...");
+    //   return 0;
+    // }
 		i++;
 	}
-
+  if (i == graph_size) {
+    return 0;
+  }
+  // exit(0);
+  // return i;
 	int x;
 	int y;
-  p = (int*)malloc(sizeof(int)*i);
+  // p = (int*)malloc(sizeof(int)*i);
 	for (int j = 0; j < i; j++) {
 		x = reversePath[j]%size_X;
 		y = reversePath[j]/size_Y;
-		// path[i - j][0] = x;
-		// path[i - j][1] = y;
     p[i - j] = x + y*size_X;
     // fprintf(stderr, "path loc: (%d, %d)\n",x, y);
 	}
-  p[0] = mouse_pos[0][0] + mouse_pos[0][1]*size_X;
-	// path[0][0] = mouse_pos[0][0];
-	// path[0][1] = mouse_pos[0][1];
-
-
+  p[0] = origin[0] + origin[1]*size_X;
 	return i;
 }
 
@@ -731,8 +784,18 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 	return heur;
 }
 
-void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size)
+int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int *p)
 {
+  
+  //declarations
+	int v = 1;
+	int queueMain[graph_size];
+	int queueIndex = 0;
+	int stackIndex = 0;
+	int *heap = (int*)malloc(sizeof(int)*(graph_size)*2);
+	double weights[graph_size];
+	int actWeights[graph_size];
+	int heap_visited[graph_size];
   int size_X = ((int)sqrt(graph_size));
   int size_Y = size_X;
 	// // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
@@ -742,54 +805,55 @@ void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int ca
 	for (int i = 0; i < graph_size; i++) {
 		visited[i] = 0;
 		pred[i] = -1;
-	}
-
-	//declarations
-	int v = 1;
-	int queueMain[graph_size];
-	int queueIndex = 0;
-	int stackIndex = 0;
-	int *heap = (int*)malloc(sizeof(int)*(graph_size)*2);
-	double weights[graph_size];
-	int actWeights[graph_size];
-	int heap_visited[graph_size];
-
-
-	//set all the initial actual weights and visited nodes to 0 for A* modes
-	for (int i = 0; i < graph_size; i++) {
-		actWeights[i] = 0;
+    actWeights[i] = 0;
 		heap_visited[i] = 0;
+    heap[i] = -1;
 	}
+  
 
 	actWeights[mouse_loc[0][0] + (mouse_loc[0][1]*size_X)] = -1;
 
 	//if A* we set all the elements in our heap to -1 and then add the first element (current location)
-	for (int i = 0; i < graph_size; i++) {
-		heap[i] = -1;
-	}
 	addHeap(heap, weights, actWeights, mouse_loc[0][0] + mouse_loc[0][1]*size_X, queueIndex, graph_size);
 	visited[mouse_loc[0][0] + (size_X*mouse_loc[0][1])] = 1;
 	queueIndex++;
 
 	int current = -1;
-
+  // fprintf(stderr, "start..");
 	while (queueIndex > 0/*cheeses > 0*/) {
 		current = extract_min(heap, weights, actWeights, queueIndex, graph_size);
-		queueIndex--;for (int i = 0; i < 5; i++) {
-    
-  }
+		queueIndex--;
 		while (heap_visited[current] == 1) {
 			current = extract_min(heap, weights, actWeights, queueIndex, graph_size);
 			queueIndex--;
 		}
 
-		heap_visited[current] = 1;
+    if (!(current <= graph_size && current >= 0)) {
+      break;
+    }
 
+		heap_visited[current] = 1;
 		int xCord = current % size_X;
 		int yCord = current / size_Y;
 
 		int catCheeseLoc = is_cat_or_cheese(xCord, yCord , cat_loc, cats, cheese_loc, cheeses);
-
+    if (catCheeseLoc == 1) {// 1 == cheese
+      int pathLen = 0;
+      //trace backthe array
+      if (mouse_loc[0][0] == xCord && mouse_loc[0][1] == yCord) {
+        path[0][0] = mouse_loc[0][0];
+        path[0][1] = mouse_loc[0][1];
+        path[1][0] = mouse_loc[0][0];
+        path[1][1] = mouse_loc[0][1];
+      }
+      else {
+        // if we find cheese, compute the proper path
+        pathLen = traceBack2(pred, current, mouse_loc[0], graph_size, p);
+      }
+      free(heap);
+      // fprintf(stderr, "..end\n");
+      return pathLen;
+    }
 		v++;
 		double *loc = gr[xCord + (yCord*size_X)];
 		
@@ -801,9 +865,17 @@ void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int ca
 		};
 
 		for (int i = 0; i < 4; i++) {
+    // fprintf(stderr, "startloop %d..", i);
 			int x = i;
+      // fprintf(stderr, "TEST..");
+      int t = loc[x];
+      // fprintf(stderr, "..ING");
 			// if valid location
-			if (loc[x]) {
+      // fprintf(stderr, "test..%d..", current);
+			if (t) {
+        int blah = 0;
+        // fprintf(stderr, "passed\n");
+        // fprintf(stderr, "startlooploc..");
 				// if we haven't visited
 				if(!visited[(adj_Cords[x][0]) + ((adj_Cords[x][1]) * size_Y)]){
 					int catCheeseLoc = is_cat_or_cheese(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cats, cheese_loc, cheeses);
@@ -818,8 +890,14 @@ void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int ca
               actWeights[adj_Cords[x][0] + ((adj_Cords[x][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
             }
             weights[(adj_Cords[x][0]) + (adj_Cords[x][1] * size_X)] = H_cost(adj_Cords[x][0], adj_Cords[x][1], cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr, graph_size);
-            addHeap(heap, weights, actWeights, (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X), queueIndex, graph_size);
-            queueIndex++;
+            int ind = (adj_Cords[x][0]) + (adj_Cords[x][1] * size_X);
+            if (ind <= graph_size && ind >= 0) {
+              blah = 1;
+              addHeap(heap, weights, actWeights, ind, queueIndex, graph_size);
+              queueIndex++;
+            }
+            // if (!blah)
+            //   fprintf(stderr, "ind %d %d\n", ind, graph_size);
           }
 				}
 				// When running UCS, and we come back to a node, see if it has faster path
@@ -827,13 +905,26 @@ void findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int ca
 					if (actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] >= 1 + actWeights[xCord + (yCord*size_Y)]) {
 						actWeights[adj_Cords[i][0] + ((adj_Cords[i][1]) * size_Y)] = 1 + actWeights[xCord + (yCord*size_Y)];
 						pred[(adj_Cords[i][0]) + adj_Cords[i][1] * size_X] = current;
-						addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex, graph_size);
-						queueIndex++;
+            int ind = (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X);
+            // fprintf(stderr, "ind %d\n", ind);
+            if (ind <= graph_size && ind >= 0) {
+              blah = 1;
+              addHeap(heap, weights, actWeights, (adj_Cords[i][0]) + (adj_Cords[i][1] * size_X), queueIndex, graph_size);
+              queueIndex++;
+            }
+            // if (!blah)
+            //   fprintf(stderr, "ind %d %d\n", ind, graph_size);
 					}
 				}
+        // fprintf(stderr, "..endlooploc\n");
 			}
+      // fprintf(stderr, "..endloop %d\n", i);
 		}
+    // fprintf(stderr, "next\n");
 	}
+  // fprintf(stderr, "..end\n");
+  // did not find cheese
+  return -1;
 }
 
 int getLocation(int coords[2], int size_Y) {
