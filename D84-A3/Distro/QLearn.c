@@ -274,7 +274,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2], int cats
   return(0);
   // return(fabs(mouse_pos[0][0] - cats[0][0]) + fabs(mouse_pos[0][1] - cats[0][1]) - (fabs(mouse_pos[0][0] - cheeses[0][0]) + fabs(mouse_pos[0][1] - cheeses[0][1])));		// <--- of course, you will change this as well!     
 }
-static int g_graph_size = 0;
+
 void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double reward, int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size)
 {
   /*
@@ -292,8 +292,6 @@ void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double 
    ***********************************************************************************************/       
 
   //create and evaluate the features array
-  // fprintf(stderr, "PACOOO..");
-  g_graph_size = graph_size;
   double * features = (double*)malloc(sizeof(double)*25);
   evaluateFeatures(gr, features, mouse_pos, cats, cheeses, size_X, graph_size);
   int *a;
@@ -407,11 +405,11 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   // features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   // features[4] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
 
-  features[2] = 1.0/(1+distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
-  features[1] = 1.0/(1+distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size));
-  features[0] = 1.0/(1+mouseWalls(gr, mouse_pos, cats, size_X));
-  features[3] = 1.0/(1+distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
-  features[4] = 1.0/(1+findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size));
+  features[2] = 1/(1+distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[1] = 1/(1+distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[0] = 1/(1+mouseWalls(gr, mouse_pos, cats, size_X));
+  features[3] = 1/(1+distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size));
+  features[4] = 1/(1+findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size));
   // double totalFeat = features[0] + features[1] + features[2] + features[3] + features[4];
   // for (int i = 0; i < 5; i++) features[i] = features[i]/totalFeat;
   for (int i = 5; i < 25; i++) {
