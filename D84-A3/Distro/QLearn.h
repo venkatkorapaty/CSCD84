@@ -30,7 +30,7 @@
 #define lambda .5			// Discount rate for future rewards
 #define max_graph_size 32*32
 
-#define numFeatures 5			// UPDATE THIS to be the number of features you have
+#define numFeatures 2			// UPDATE THIS to be the number of features you have
 
 // Function prototypes for D84 - Unit 3 - Reinforcement Learning
 void QLearn_update(int s, int a, double r, int s_new, double *QTable);
@@ -60,7 +60,7 @@ void addHeap(int *heap, double weights[max_graph_size], int actWeights[max_graph
 int traceBack2(int pred[max_graph_size], int current, int origin[2], int graph_size, int p[max_graph_size]);
 int getLocation(int coords[2], int size_Y);
 int is_cat_or_cheese(int x, int y, int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses);
-double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size);
+double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int graph_size, double *l);
 double distCatCheese(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size);
 #endif
 
