@@ -30,7 +30,7 @@
 #define lambda .5			// Discount rate for future rewards
 #define max_graph_size 32*32
 
-#define numFeatures 2			// UPDATE THIS to be the number of features you have
+#define numFeatures 3			// UPDATE THIS to be the number of features you have
 
 // Function prototypes for D84 - Unit 3 - Reinforcement Learning
 void QLearn_update(int s, int a, double r, int s_new, double *QTable);
@@ -52,7 +52,7 @@ void set_Q(double *QTable, int s, int a, double val);
 double distCheese(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size);
 double distCat(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size);
 double mouseWalls(double gr[max_graph_size][4], int mouse_pos[1][2], int cats[5][2], int size_X);
-int findDeWay(double gr[max_graph_size][4], int path[max_graph_size][2], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int p[max_graph_size]);
+int findDeWay(double gr[max_graph_size][4], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int p[max_graph_size]);
 int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[max_graph_size][4], int graph_size);
 int extract_min(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int size, int graph_size);
 void propagate(int *heap, double weights[max_graph_size], int actWeights[max_graph_size], int node, int size, int graph_size);

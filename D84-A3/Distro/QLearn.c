@@ -405,21 +405,27 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   // features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
   // features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   // features[4] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size);
-
+  for (int i = 0; i < 25; i++) {
+    features[i] = 0;
+  }
   //features[2] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   features[0] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   //features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
   //features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+  if (graph_size == 64) {
   double *l;
   double len = 0.0;
   l = &len;
   features[1] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size, l);
   features[1] = len;
+ } else {
+	features[1] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+	features[2] = mouseWalls(gr, mouse_pos, cats, size_X);
+    features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+ }
   // double totalFeat = features[0] + features[1] + features[2] + features[3] + features[4];
   // for (int i = 0; i < 5; i++) features[i] = features[i]/totalFeat;
-  for (int i = 2; i < 25; i++) {
-    features[i] = 0;
-  }
+  
    
 }
 
@@ -565,11 +571,6 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   int size_X = (int)sqrt(graph_size);
   // int *pred = (int*)malloc(sizeof(int)*graph_size);
   int pred[graph_size];
-  int path[max_graph_size][2];
-  for (int i = 0; i < graph_size; i++) {
-    path[i][0] = -1;
-    path[i][1] = -1;
-  }
   int amountOfCats = 0;
   int amountOfCheeses = 0;
   for (int i = 0; i < 5; i++) {
@@ -607,7 +608,7 @@ double findAmountPaths(double gr[max_graph_size][4], int mouse_pos[1][2], int ca
   }
   // int *p = (int*)malloc(sizeof(int)*max_graph_size);
   int p[graph_size];
-  int pathLen = findDeWay(gr, path, cats, amountOfCats, cheeses, amountOfCheeses, mouse_pos, pred, graph_size, p);
+  int pathLen = findDeWay(gr, cats, amountOfCats, cheeses, amountOfCheeses, mouse_pos, pred, graph_size, p);
   *l = 1.0/(1.0 + pathLen);
   // if (pathLen < 1)
   //   return pathLen;
@@ -679,31 +680,12 @@ int traceBack2(int *pred, int current, int origin[2], int graph_size, int *p) {
   if (i == graph_size) {
     return 0;
   }
-  // exit(0);
-  // return i;
-	int x;
-	int y;
-  // p = (int*)malloc(sizeof(int)*i);
-	for (int j = 0; j < i; j++) {
-		x = reversePath[j]%size_X;
-		y = reversePath[j]/size_Y;
-    p[i - j] = x + y*size_X;
-    // fprintf(stderr, "path loc: (%d, %d)\n",x, y);
-	}
-  p[0] = origin[0] + origin[1]*size_X;
 	return i;
 }
 
-int findDeWay(double gr_temp[max_graph_size][4], int path[max_graph_size][2], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int *p)
+int findDeWay(double gr[max_graph_size][4], int cat_loc[5][2], int cats, int cheese_loc[5][2], int cheeses, int mouse_loc[1][2], int *pred, int graph_size, int *p)
 {
-  double gr[graph_size][4];
-  for (int k = 0; k < graph_size; k++) {
-    gr[k][0] = gr_temp[k][0];
-    gr[k][1] = gr_temp[k][1];
-    gr[k][2] = gr_temp[k][2];
-    gr[k][3] = gr_temp[k][3];
-  }
-  
+
 
   //declarations
 	int v = 1;
@@ -759,14 +741,7 @@ int findDeWay(double gr_temp[max_graph_size][4], int path[max_graph_size][2], in
     if (catCheeseLoc == 1) {// 1 == cheese
       int pathLen = 0;
       //trace backthe array
-      if (mouse_loc[0][0] == xCord && mouse_loc[0][1] == yCord) {
-        path[0][0] = mouse_loc[0][0];
-        path[0][1] = mouse_loc[0][1];
-        path[1][0] = mouse_loc[0][0];
-        path[1][1] = mouse_loc[0][1];
-      }
-      else {
-        // if we find cheese, compute the proper path
+      if (!(mouse_loc[0][0] == xCord && mouse_loc[0][1] == yCord)) {
         pathLen = traceBack2(pred, current, mouse_loc[0], graph_size, p);
       }
       free(heap);
