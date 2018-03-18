@@ -420,8 +420,8 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   features[1] = len;
  } else {
 	features[1] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-	features[2] = mouseWalls(gr, mouse_pos, cats, size_X);
-    features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+	//features[2] = mouseWalls(gr, mouse_pos, cats, size_X);
+    features[2] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
  }
   // double totalFeat = features[0] + features[1] + features[2] + features[3] + features[4];
   // for (int i = 0; i < 5; i++) features[i] = features[i]/totalFeat;
