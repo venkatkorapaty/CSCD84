@@ -710,8 +710,8 @@ int findDeWay(double gr_temp[max_graph_size][4], int path[max_graph_size][2], in
 	int queueMain[graph_size];
 	int queueIndex = 0;
 	int stackIndex = 0;
-	//int *heap = (int*)malloc(sizeof(int)*(graph_size)*2);
-	int heap[max_graph_size*2];
+	int *heap = (int*)malloc(sizeof(int)*(graph_size)*2);
+	//int heap[max_graph_size*2]
 	double weights[graph_size];
 	int actWeights[graph_size];
 	int heap_visited[graph_size];
@@ -769,7 +769,7 @@ int findDeWay(double gr_temp[max_graph_size][4], int path[max_graph_size][2], in
         // if we find cheese, compute the proper path
         pathLen = traceBack2(pred, current, mouse_loc[0], graph_size, p);
       }
-      //free(heap);
+      free(heap);
       // fprintf(stderr, "..end\n");
       return pathLen;
     }
