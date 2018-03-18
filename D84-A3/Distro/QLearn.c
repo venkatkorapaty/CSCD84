@@ -302,16 +302,16 @@ void feat_QLearn_update(double gr[max_graph_size][4],double weights[25], double 
   double *max;
   double max_val = -100000.0;
   max = &max_val;
-
-  
+  double qs = Qsa(weights, features);
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, max, a);
   int new_mouse[1][2] = {{mouse_pos[0][0], mouse_pos[0][1]}};
   if (act % 2 == 0) {
     new_mouse[0][1] -= 1 - act;
   } else {
     new_mouse[0][0] += 2 - act;
   }
-  maxQsa(gr, weights, new_mouse, cats, cheeses, size_X, graph_size, max, a);
-  double qs = Qsa(weights, features);
+  evaluateFeatures(gr, features, new_mouse, cats, cheeses, size_X, graph_size);
+  max_val = Qsa(weights, features);
   // fprintf(stderr, "..WHYYY2\n");
   for (int i = 0; i < 25; i++) {
     weights[i] += alpha*(reward + (lambda * (max_val)) - qs) * features[i];
@@ -412,17 +412,22 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   features[0] = distCat(gr, mouse_pos, cats, cheeses, size_X, graph_size);
   //features[0] = mouseWalls(gr, mouse_pos, cats, size_X);
   //features[3] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
-  if (graph_size == 64) {
-  double *l;
-  double len = 0.0;
-  l = &len;
-  features[1] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size, l);
-  features[1] = len;
+  double prob_rand = (double)rand()/(double)RAND_MAX;
+  //if (graph_size == 64) {
+  
+  if (prob_rand < 0.25 || graph_size == 64) {
+	double *l;
+	double len = 0.0;
+	l = &len;
+	features[1] = findAmountPaths(gr, mouse_pos, cats, cheeses, graph_size, l);
+	features[1] = len;
  } else {
 	features[1] = distCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
 	//features[2] = mouseWalls(gr, mouse_pos, cats, size_X);
-    features[2] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
+    //features[2] = distCatCheese(gr, mouse_pos, cats, cheeses, size_X, graph_size);
  }
+ 
+ 
   // double totalFeat = features[0] + features[1] + features[2] + features[3] + features[4];
   // for (int i = 0; i < 5; i++) features[i] = features[i]/totalFeat;
   
