@@ -31,6 +31,7 @@
 
 #include <time.h>
 #include "QLearn.h"
+static double pctG = 0.0;
 
 double get_Q(double *QTable, int s, int a) {
   return *(QTable + 4*s + a);
@@ -344,6 +345,7 @@ int feat_QLearn_action(double gr[max_graph_size][4],double weights[25], int mous
 
   // srand(time(NULL));
   // fprintf(stderr, "PACOOO1...");
+  pctG = pct;
   double prob_rand = (double)rand()/(double)RAND_MAX;
   int *a;
   int act = 0;
@@ -415,7 +417,7 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   double prob_rand = (double)rand()/(double)RAND_MAX;
   //if (graph_size == 64) {
   
-  if (prob_rand < 0.25 || graph_size == 64) {
+  if ( pctG != 0 && (prob_rand < 0.25 || graph_size == 64)) {
 	double *l;
 	double len = 0.0;
 	l = &len;
