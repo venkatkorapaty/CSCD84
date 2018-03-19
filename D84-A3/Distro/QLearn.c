@@ -417,7 +417,7 @@ void evaluateFeatures(double gr[max_graph_size][4],double features[25], int mous
   double prob_rand = (double)rand()/(double)RAND_MAX;
   //if (graph_size == 64) {
   
-  if ( pctG != 0.0 && (prob_rand < 0.25 || graph_size == 64)) {
+  if (( pctG != 0.0 && (prob_rand < 0.25)) || graph_size == 64) ){
 	double *l;
 	double len = 0.0;
 	l = &len;
