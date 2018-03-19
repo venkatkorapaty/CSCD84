@@ -116,17 +116,12 @@ but explain carefully when needed.
 
 7 .- (3 marks) Explain your feature set for feature-based Q Learning, and
                explain why and how each feature is expected to contribute
-	       to helping your mouse win
-	One of our features tells us if there is a successful path to the cheese. This made
-	a difference when computing our weights, as it's very useful for the mouse to know
-	whether it can get the cheese or not.  We also have a feature that estimates our distance to 
-	the cheese, combined with the above feature we can say our estimate is closer to the true 
-	distance.  (example, if we estimate a path of length 4, but we have no path there's probably 
-	have a wall or cat in the way, as opposed to path length 4 and there is a path, our path is 
-	probably about length 4)  We also have a feature that estimates our distance to a cat to see 
-	if we're in danger or not.  We have a feature that tells use the average distance of the
-	closest cheese to all the cats to see how dangerous a cheese is.  Lastly we have a feature 
-	says how many walls are around the mouse.
+	       to helping your mouse win.
+	One feature is estimated distance to cat and the other is we also use A* for distance
+	to the cheese. These features are useful because tells the mouse that a cat approximately
+	being close is bad and closing the distance from the cheese is good. For bigger map sizes,
+	16x16 and 32x32, we randomly run A*, as it becomes computationally expensive for more bigger
+	maps since we need to run more iterations to learn properly.
 
 8 .- Carry out the following experiments:
 
@@ -193,7 +188,8 @@ but explain carefully when needed.
 	state space isn't too large, making it computationally infeasible, and you expect
 	the environment to not change. Feature-based Q-Learning doesn't suffer from
 	high possible state spaces and still preserves most of its robustness when state space
-	increases.
+	increases. A tradeoff for using feature-based Q-learning is that if you don't have
+	meaningful and informative features, it may fall short.
 
 10 . - (2 marks) We obviously can not train an expensive robot by trial and error,
       How would you implement feature-based Q-learning for a mobile bot so you
