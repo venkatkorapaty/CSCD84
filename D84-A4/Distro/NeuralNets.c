@@ -120,6 +120,14 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input), dou
    * TO DO: Complete this function. You will need to implement logistic() in order for this to work
    *        with a logistic activation function.
    ******************************************************************************************************/
+
+  for (int i = 0; i < OUTPUTS; i++) {
+    double sum = 0.0;
+    for (int j = 0; j < INPUTS; j++) {
+      sum += sample[j]*weights_io[j][i];
+    }
+    activations[i] = sigmoid(sum);
+  }
   
 }
 
@@ -152,7 +160,13 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     *        the network. You will need to find a way to figure out which sigmoid function you're
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
-   
+   for (int i = 0; i < INPUTS; i++) {
+     for (int j = 0; j < OUTPUTS; j++) {
+       double derivative = dLog(sumStuff(sample, weights_io, activations, j));
+       weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
+     }
+   }
+
 }
 
 int train_2layer_net(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS])
@@ -304,5 +318,20 @@ double logistic(double input)
 {
  // This function returns the value of the logistic function evaluated on input
  // TO DO: Implement this function!
- return(0);		// <--- Should return the value of the logistic function on the input 
+
+
+ return 1.0/(1.0 + exp(-1*input));		// <--- Should return the value of the logistic function on the input 
+}
+
+double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], double activations[OUTPUTS], int output)
+{
+  double sum = 0.0;
+  for (int i = 0; i < OUTPUTS; i++) {
+    sum += sample[i]*weights_io[i][output];
+  }
+  return sum;
+}
+
+double dLog(double input) {
+  return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
 }
