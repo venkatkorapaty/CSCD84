@@ -61,8 +61,29 @@ int train_1layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
   *          You will need to complete feedforward_1layer(), backprop_1layer(), and logistic() in order to
   *          be able to complete this function.
   ***********************************************************************************************************/
+  // for (int i = 0; i < INPUTS; i++) {
+  //   for (int j = 0; j < OUTPUTS; j++) {
+  //     weights_io[i][j] = (double)rand()/(double)RAND_MAX - 0.5;
+  //   }
+  // }
 
+  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
+  backprop_1layer(sample, activations, sigmoid, label, weights_io);
+
+  // int y_h = classify_1layer(sample, label, sigmoid, weights_io);
+
+  int classification = 0;
+  for (int cls = 0; cls < OUTPUTS; cls++) {
+    fprintf(stderr, "%d: (%f, %f)\n", cls, activations[classification], activations[cls]);
+    if (activations[classification] < activations[cls])
+      classification = cls;
+  }
+
+  free(activations);
+  if(0)
   return(0);		// <--- This should return the class for this sample
+  return classification;
 }
 
 int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double input), double weights_io[INPUTS][OUTPUTS])
@@ -92,8 +113,20 @@ int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
   *          You will need to complete feedforward_1layer(), and logistic() in order to
   *          be able to complete this function.
   ***********************************************************************************************************/
- 
+  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
+
+  int classification = 0;
+  for (int cls = 0; cls < OUTPUTS; cls++) {
+    if (activations[classification] < activations[cls])
+      classification = cls;
+  }
+
+  free(activations);
+
+  if(0)
   return(0);   	// <---	This should return the class for this sample
+  return classification;
 }
 
 void feedforward_1layer(double sample[785], double (*sigmoid)(double input), double weights_io[INPUTS][OUTPUTS], double activations[OUTPUTS])
@@ -126,7 +159,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input), dou
     for (int j = 0; j < INPUTS; j++) {
       sum += sample[j]*weights_io[j][i];
     }
-    activations[i] = sigmoid(sum);
+    activations[i] = sigmoid(sum*SIGMOID_SCALE);
   }
   
 }
@@ -162,8 +195,9 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     * ************************************************************************************************/
    for (int i = 0; i < INPUTS; i++) {
      for (int j = 0; j < OUTPUTS; j++) {
-       double derivative = dLog(sumStuff(sample, weights_io, activations, j));
-       weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
+        double derivative = dLog(sumStuff(sample, weights_io, activations, j), sigmoid);
+      //  weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
+        weights_io[i][j] += ALPHA * (derivative * (label - activations[j]) * sample[i]);
      }
    }
 
@@ -332,6 +366,8 @@ double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], double a
   return sum;
 }
 
-double dLog(double input) {
-  return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
+double dLog(double input, double (*sigmoid)(double input)) {
+  // return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
+  double s = sigmoid(input);
+  return s * (1 - s);
 }
