@@ -183,26 +183,28 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     *        the network. You will need to find a way to figure out which sigmoid function you're
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
-  double *(activation_derivative)(double input);
+  double (*activation_derivative)(double);
 
+  // Method for determining which derivative to use
   double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
   double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
 
   if (distToLogistic < distToTanh) {
-    // activation_derivative = dLog;
-    // fprintf(stderr, "LOGIS\n");
+    activation_derivative = &dLog;
   }
   else {
-    // fprintf(stderr, "TANH\n");
+    activation_derivative = &dTanh;
   }
 
+  // Calculate adjustment in weights
   double weights_update[INPUTS][OUTPUTS];
   for (int i = 0; i < INPUTS; i++) {
     for (int j = 0; j < OUTPUTS; j++) {
-      double derivative = dLog(sumStuff(sample, weights_io, j), sigmoid);
+      double derivative = activation_derivative(sumStuff(sample, weights_io, j));
       weights_update[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * sample[i];
     }
   }
+  // Add it to weights
   for (int i = 0; i < INPUTS; i++) {
     for (int j = 0; j < OUTPUTS; j++) {
       weights_io[i][j] += weights_update[i][j];
@@ -373,8 +375,12 @@ double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int outp
   return sum;
 }
 
-double dLog(double input, double (*sigmoid)(double input)) {
+double dTanh(double input) {
+  return 1 - pow(tanh(input), 2);
+}
+
+double dLog(double input) {
   // return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
-  double s = sigmoid(input);
+  double s = logistic(input);
   return s * (1 - s);
 }

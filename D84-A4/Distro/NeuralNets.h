@@ -42,7 +42,8 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
 int classify_1layer(double sample[INPUTS], int label, double (*sigmoid)(double input), double weights_io[INPUTS][OUTPUTS]);
 int classify_2layer(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS]);
 double logistic(double input);
-double dLog(double input, double (*sigmoid)(double input));
+double dLog(double input);
+double dTanh(double input);
 double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int output);
 // Note that hyperbolic tangent is already provided in math.h as tanh()!
 
