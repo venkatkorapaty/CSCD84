@@ -73,18 +73,18 @@ int train_1layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
 
   // int y_h = classify_1layer(sample, label, sigmoid, weights_io);
 
-  int classification = 0;
-  for (int cls = 0; cls < OUTPUTS; cls++) {
-    fprintf(stderr, "Activations. %f\n", activations[cls]);
-    if (activations[classification] < activations[cls])
-      classification = cls;
-  }
+  // int classification = 0;
+  // for (int cls = 0; cls < OUTPUTS; cls++) {
+  //   // fprintf(stderr, "Activations. %f\n", activations[cls]);
+  //   if (activations[classification] < activations[cls])
+  //     classification = cls;
+  // }
 
   free(activations);
-  fprintf(stderr, "return: %d\n", classification);
+  // fprintf(stderr, "return: %d\n", classification);
   // if(0)
   // return(0);		// <--- This should return the class for this sample
-  return classification;
+  return classify_1layer(sample, label, sigmoid, weights_io);
 }
 
 int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double input), double weights_io[INPUTS][OUTPUTS])
@@ -193,14 +193,29 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     *        the network. You will need to find a way to figure out which sigmoid function you're
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
-   for (int i = 0; i < INPUTS; i++) {
-     for (int j = 0; j < OUTPUTS; j++) {
-        double derivative = dLog(sumStuff(sample, weights_io, j), sigmoid);
-      //  weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
-        // fprintf(stderr, "%d, %d, %f\n", label, j, activations[j]);
-        weights_io[i][j] += ALPHA * derivative * ((double)label - activations[j]) * sample[i];
-     }
-   }
+  //  for (int i = 0; i < INPUTS; i++) {
+  //    for (int j = 0; j < OUTPUTS; j++) {
+  //       double derivative = dLog(sumStuff(sample, weights_io, j), sigmoid);
+  //     //  weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
+  //       // // fprintf(stderr, "%d, %d, %f\n", label, j, activations[j]);
+  //       weights_io[i][j] += ALPHA * derivative * (pow(j - activations[j], 2)) * sample[i];
+  //    }
+  //  }
+  double errorCont[10];
+  for (int i = 0; i < OUTPUTS; i++) {
+    double ec = 0.0;
+    for (int j = 0; j < INPUTS; j++) {
+      double derivative = dLog(sumStuff(sample, weights_io, i), sigmoid);
+      ec = derivative * pow(1 - activations[i], 2);
+      errorCont[i] += ec*weights_io[j][i];
+    }
+
+    for (int j = 0; j < INPUTS; j++) {
+      double derivative = dLog(sumStuff(sample, weights_io, i), sigmoid);
+      weights_io[j][i] += ALPHA * derivative * sample[j] * errorCont[i];
+      // fprintf(stderr, "%f\n", weights_io[j][i]);
+    }
+  }
 }
 
 int train_2layer_net(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS])
