@@ -75,14 +75,15 @@ int train_1layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
 
   int classification = 0;
   for (int cls = 0; cls < OUTPUTS; cls++) {
-    //fprintf(stderr, "%d: (%f, %f)\n", cls, activations[classification], activations[cls]);
+    fprintf(stderr, "Activations. %f\n", activations[cls]);
     if (activations[classification] < activations[cls])
       classification = cls;
   }
 
   free(activations);
-  if(0)
-  return(0);		// <--- This should return the class for this sample
+  fprintf(stderr, "return: %d\n", classification);
+  // if(0)
+  // return(0);		// <--- This should return the class for this sample
   return classification;
 }
 
@@ -123,9 +124,8 @@ int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
   }
 
   free(activations);
-
-  if(0)
-  return(0);   	// <---	This should return the class for this sample
+  // if(0)
+  // return(0);   	// <---	This should return the class for this sample
   return classification;
 }
 
@@ -159,7 +159,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input), dou
     for (int j = 0; j < INPUTS; j++) {
       sum += sample[j]*weights_io[j][i];
     }
-    activations[i] = sigmoid(sum*SIGMOID_SCALE);
+    activations[i] = sigmoid(sum);
   }
   
 }
@@ -195,12 +195,12 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     * ************************************************************************************************/
    for (int i = 0; i < INPUTS; i++) {
      for (int j = 0; j < OUTPUTS; j++) {
-        double derivative = dLog(sumStuff(sample, weights_io, activations, j), sigmoid);
+        double derivative = dLog(sumStuff(sample, weights_io, j), sigmoid);
       //  weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
-        weights_io[i][j] += ALPHA * derivative * (label - activations[j]) * activations[j];
+        // fprintf(stderr, "%d, %d, %f\n", label, j, activations[j]);
+        weights_io[i][j] += ALPHA * derivative * ((double)label - activations[j]) * sample[i];
      }
    }
-
 }
 
 int train_2layer_net(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS])
@@ -354,10 +354,10 @@ double logistic(double input)
  // TO DO: Implement this function!
 
 
- return 1.0/(1.0 + exp(-1*input));		// <--- Should return the value of the logistic function on the input 
+ return 1.0/(1.0 + exp(-1*input*SIGMOID_SCALE));		// <--- Should return the value of the logistic function on the input 
 }
 
-double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], double activations[OUTPUTS], int output)
+double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int output)
 {
   double sum = 0.0;
   for (int i = 0; i < OUTPUTS; i++) {

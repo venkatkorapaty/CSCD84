@@ -43,7 +43,7 @@ int classify_1layer(double sample[INPUTS], int label, double (*sigmoid)(double i
 int classify_2layer(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS]);
 double logistic(double input);
 double dLog(double input, double (*sigmoid)(double input));
-double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], double activations[OUTPUTS], int output);
+double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int output);
 // Note that hyperbolic tangent is already provided in math.h as tanh()!
 
 // If you need to add any function prototypes yourself, you can do so *below* this line.
