@@ -149,7 +149,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input), dou
     for (int j = 0; j < INPUTS; j++) {
       sum += sample[j]*weights_io[j][i];
     }
-    activations[i] = sigmoid(sum);
+    activations[i] = sigmoid(sum*SIGMOID_SCALE);
   }
   
 }
@@ -363,7 +363,7 @@ double logistic(double input)
  // TO DO: Implement this function!
 
 
- return 1.0/(1.0 + exp(-1*input*SIGMOID_SCALE));		// <--- Should return the value of the logistic function on the input 
+ return 1.0/(1.0 + exp(-1*input));		// <--- Should return the value of the logistic function on the input 
 }
 
 double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int output)
@@ -376,11 +376,11 @@ double sumStuff(double sample[785], double weights_io[INPUTS][OUTPUTS], int outp
 }
 
 double dTanh(double input) {
-  return 1 - pow(tanh(input), 2);
+  return 1 - pow(tanh(input*SIGMOID_SCALE), 2);
 }
 
 double dLog(double input) {
   // return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
-  double s = logistic(input);
+  double s = logistic(input*SIGMOID_SCALE);
   return s * (1 - s);
 }
