@@ -75,7 +75,7 @@ int train_1layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
 
   int classification = 0;
   for (int cls = 0; cls < OUTPUTS; cls++) {
-    fprintf(stderr, "%d: (%f, %f)\n", cls, activations[classification], activations[cls]);
+    //fprintf(stderr, "%d: (%f, %f)\n", cls, activations[classification], activations[cls]);
     if (activations[classification] < activations[cls])
       classification = cls;
   }
@@ -197,7 +197,7 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
      for (int j = 0; j < OUTPUTS; j++) {
         double derivative = dLog(sumStuff(sample, weights_io, activations, j), sigmoid);
       //  weights_io[i][j] += ALPHA * (derivative * weights_io[i][j] * (label - activations[j]) * derivative * activations[j]);
-        weights_io[i][j] += ALPHA * (derivative * (label - activations[j]) * sample[i]);
+        weights_io[i][j] += ALPHA * derivative * (label - activations[j]) * activations[j];
      }
    }
 
