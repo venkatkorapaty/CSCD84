@@ -183,6 +183,18 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     *        the network. You will need to find a way to figure out which sigmoid function you're
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
+  double *(activation_derivative)(double input);
+
+  double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
+  double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
+
+  if (distToLogistic < distToTanh) {
+    // activation_derivative = dLog;
+    // fprintf(stderr, "LOGIS\n");
+  }
+  else {
+    // fprintf(stderr, "TANH\n");
+  }
 
   double weights_update[INPUTS][OUTPUTS];
   for (int i = 0; i < INPUTS; i++) {
