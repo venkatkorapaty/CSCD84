@@ -198,10 +198,11 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
 
   // Calculate adjustment in weights
   double weights_update[INPUTS][OUTPUTS];
-  for (int i = 0; i < INPUTS; i++) {
-    for (int j = 0; j < OUTPUTS; j++) {
+  for (int j = 0; j < OUTPUTS; j++) {
+    double sum = sumStuff(sample, weights_io, j);
+    for (int i = 0; i < INPUTS; i++) {
       // double derivative = activation_derivative(sumStuff(sample, weights_io, j));
-      double derivative = activation_derivative(sample[i] * weights_io[i][j]);
+      double derivative = activation_derivative(sum);
       weights_update[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * sample[i];
     }
   }
@@ -416,31 +417,35 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
 
   // Calculate adjustment in weights
   double weights_update2[units][OUTPUTS];
-  for (int i = 0; i < units; i++) {
-    for (int j = 0; j < OUTPUTS; j++) {
-      double derivative = activation_derivative(h_activations[i]*weights_ho[i][j], units);
+  for (int j = 0; j < OUTPUTS; j++) {
+    double sum = sumStuff(h_activations, weights_ho, j);
+    for (int i = 0; i < units; i++){
+      double derivative = activation_derivative(sum, units);
       weights_update2[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * h_activations[i];
     }
   }
   
 
+  
+
+  // Calculate adjustment in weights
+  double weights_update[INPUTS][units];
+  for (int j = 0; j < units; j++) {
+    double sum = sumStuff2(sample, weights_ih, j);
+    for (int i = 0; i < INPUTS; i++){
+      double derivative = activation_derivative2(sum);
+      double ec = 0.0;
+      for (int k = 0; k < OUTPUTS; k++) {
+        ec += weights_ho[j][k] *  activation_derivative(h_activations[i]*weights_ho[j][k], units) * h_activations[k];
+      }
+      weights_update[i][j] = ALPHA * derivative * ec * sample[i];
+    }
+  }
+
   // Add it to weights
   for (int i = 0; i < units; i++) {
     for (int j = 0; j < OUTPUTS; j++) {
       weights_ho[i][j] += weights_update2[i][j];
-    }
-  }
-
-  // Calculate adjustment in weights
-  double weights_update[INPUTS][units];
-  for (int i = 0; i < INPUTS; i++) {
-    for (int j = 0; j < units; j++) {
-      double derivative = activation_derivative2(sample[i]* weights_ih[i][j]);
-      double ec = 0.0;
-      for (int k = 0; k < OUTPUTS; k++) {
-        ec += weights_ho[j][k] * activation_derivative(h_activations[i]*weights_ho[i][j], units) * ((double)(label==k) - activations[k]);
-      }
-      weights_update[i][j] = ALPHA * derivative * ec * sample[i];
     }
   }
 
