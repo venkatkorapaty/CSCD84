@@ -213,7 +213,7 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     double sum = sumStuff(sample, weights_io, j);
     for (int i = 0; i < INPUTS; i++) {
       // double derivative = activation_derivative(sumStuff(sample, weights_io, j));
-      double derivative = activation_derivative(sum);
+      double derivative = derivativeCalc(sigmoid, sum*SIGMOID_SCALE);
       weights_update[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * sample[i];
     }
   }
@@ -375,7 +375,7 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input), 
     // for (int j = 0; j < INPUTS; j++) {
     //   sum += sample[j]*weights_ih[j][i];
     // }
-    h_activations[i] = sigmoid(sum*(SIGMOID_SCALE*(MAX_HIDDEN/units)));
+    h_activations[i] = sigmoid(sum*(SIGMOID_SCALE));
   }
 
   for (int i = 0; i < OUTPUTS; i++) {
@@ -438,13 +438,14 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
     activation_derivative2 = &dTanh;
   }
 
-
+  double sums_l[OUTPUTS];
   // Calculate adjustment in weights
   double weights_update2[units][OUTPUTS];
   for (int j = 0; j < OUTPUTS; j++) {
     double sum = sumStuff3(h_activations, weights_ho, j, units);
+    sums_l[j] = sum;
     for (int i = 0; i < units; i++){
-      double derivative = activation_derivative(sum, units);
+      double derivative = derivativeCalc(sigmoid, (SIGMOID_SCALE*(MAX_HIDDEN/units))*sum);
       weights_update2[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * h_activations[i];
     }
   }
@@ -457,10 +458,10 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
   for (int j = 0; j < units; j++) {
     double sum = sumStuff2(sample, weights_ih, j);
     for (int i = 0; i < INPUTS; i++){
-      double derivative = activation_derivative2(sum);
+      double derivative = derivativeCalc(sigmoid, sum*SIGMOID_SCALE);
       double ec = 0.0;
       for (int k = 0; k < OUTPUTS; k++) {
-        ec += weights_ho[j][k] * ((double)(k==label) - activations[k]) * activation_derivative(sumStuff3(h_activations, weights_ho, k, units), units);
+        ec += weights_ho[j][k] * ((double)(k==label) - activations[k]) * derivativeCalc(sigmoid, sums_l[k]*(SIGMOID_SCALE*(MAX_HIDDEN/units)));
       }
       weights_update[i][j] = ALPHA * derivative * ec * sample[i];
     }
@@ -498,7 +499,7 @@ double sumStuff(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int o
   return sum;
 }
 
-double sumStuff3(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int output, int units)
+double sumStuff3(double sample[INPUTS], double weights_io[MAX_HIDDEN][OUTPUTS], int output, int units)
 {
   double sum = 0.0;
   for (int i = 0; i < units; i++) {
@@ -524,6 +525,11 @@ double dLog(double input) {
   // return (exp(-1*input)/ (pow(1 + exp(-1*input), 2)));
   double s = logistic(input*SIGMOID_SCALE);
   return s * (1 - s);
+}
+
+double derivativeCalc(double (*sigmoid)(double input), double input) {
+  double h = 0.00002;
+  return (sigmoid(input + h) - sigmoid(input))/h;
 }
 
 double dTanh2(double input, int units) {
