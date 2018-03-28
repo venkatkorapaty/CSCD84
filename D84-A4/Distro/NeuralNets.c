@@ -457,7 +457,7 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
   for (int j = 0; j < units; j++) {
     double sum = sumStuff2(sample, weights_ih, j);
     for (int i = 0; i < INPUTS; i++){
-      double derivative = activation_derivative(sum, units);
+      double derivative = activation_derivative2(sum);
       double ec = 0.0;
       for (int k = 0; k < OUTPUTS; k++) {
         ec += weights_ho[j][k] * ((double)(k==label) - activations[k]) * activation_derivative(sumStuff3(h_activations, weights_ho, k, units), units);
