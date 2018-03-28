@@ -48,6 +48,7 @@ double dLog2(double input, int units);
 double dTanh2(double input, int units);
 double sumStuff(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int output);
 double sumStuff2(double sample[INPUTS], double weights_io[INPUTS][MAX_HIDDEN], int output);
+double sumStuff3(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int output, int units);
 // Note that hyperbolic tangent is already provided in math.h as tanh()!
 
 // If you need to add any function prototypes yourself, you can do so *below* this line.

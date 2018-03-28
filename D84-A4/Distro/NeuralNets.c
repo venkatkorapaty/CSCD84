@@ -67,14 +67,24 @@ int train_1layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
   //   }
   // }
 
-  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  // double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  double activations[OUTPUTS];
   feedforward_1layer(sample, sigmoid, weights_io, activations);
   backprop_1layer(sample, activations, sigmoid, label, weights_io);
 
-  free(activations);
+  // free(activations);
   // if(0)
   // return(0);		// <--- This should return the class for this sample
-  return classify_1layer(sample, label, sigmoid, weights_io);
+  int classification = 0;
+  for (int cls = 0; cls < OUTPUTS; cls++) {
+    if (activations[classification] < activations[cls])
+      classification = cls;
+  }
+
+  // free(activations);
+  // if(0)
+  // return(0);   	// <---	This should return the class for this sample
+  return classification;
 }
 
 int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double input), double weights_io[INPUTS][OUTPUTS])
@@ -104,7 +114,8 @@ int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
   *          You will need to complete feedforward_1layer(), and logistic() in order to
   *          be able to complete this function.
   ***********************************************************************************************************/
-  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  // double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  double activations[OUTPUTS];
   feedforward_1layer(sample, sigmoid, weights_io, activations);
 
   int classification = 0;
@@ -113,7 +124,7 @@ int classify_1layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
       classification = cls;
   }
 
-  free(activations);
+  // free(activations);
   // if(0)
   // return(0);   	// <---	This should return the class for this sample
   return classification;
@@ -145,10 +156,10 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input), dou
    ******************************************************************************************************/
 
   for (int i = 0; i < OUTPUTS; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < INPUTS; j++) {
-      sum += sample[j]*weights_io[j][i];
-    }
+    double sum = sumStuff(sample, weights_io, i);
+    // for (int j = 0; j < INPUTS; j++) {
+    //   sum += sample[j]*weights_io[j][i];
+    // }
     activations[i] = sigmoid(sum*SIGMOID_SCALE);
   }
   
@@ -248,20 +259,31 @@ int train_2layer_net(double sample[INPUTS],int label,double (*sigmoid)(double in
   *          You will need to complete feedforward_2layer(), backprop_2layer(), and logistic() in order to
   *          be able to complete this function.
   ***********************************************************************************************************/
-  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
-  double *h_activations = (double*)malloc(sizeof(double)*MAX_HIDDEN);
+  // double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  // double *h_activations = (double*)malloc(sizeof(double)*MAX_HIDDEN);
+  double activations[OUTPUTS];
+  double h_activations[MAX_HIDDEN];
   feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations, activations, units);
   backprop_2layer(sample, h_activations, activations, sigmoid, label, weights_ih, weights_ho, units);
 
 
-  free(activations);
-  free(h_activations);
+  // free(activations);
+  // free(h_activations);
   // if(0)
   // return(0);		// <--- This should return the class for this sample
-  return classify_2layer(sample, label, sigmoid, units, weights_ih, weights_ho);
+  int classification = 0;
+  for (int cls = 0; cls < OUTPUTS; cls++) {
+    if (activations[classification] < activations[cls])
+      classification = cls;
+  }
+
+  // free(activations);
+  // if(0)
+  // return(0);   	// <---	This should return the class for this sample
+  return classification;
   
 
-  return(0);		// <--- Should return the class for this sample  
+  // return(0);		// <--- Should return the class for this sample  
 }
 
 int classify_2layer(double sample[INPUTS],int label,double (*sigmoid)(double input), int units, double weights_ih[INPUTS][MAX_HIDDEN], double weights_ho[MAX_HIDDEN][OUTPUTS])
@@ -294,8 +316,10 @@ int classify_2layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
   *          You will need to complete feedforward_2layer(), and logistic() in order to
   *          be able to complete this function.
   ***********************************************************************************************************/
-  double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
-  double *h_activations = (double*)malloc(sizeof(double)*MAX_HIDDEN);
+  // double *activations = (double*)malloc(sizeof(double)*OUTPUTS);
+  // double *h_activations = (double*)malloc(sizeof(double)*MAX_HIDDEN);
+  double activations[OUTPUTS];
+  double h_activations[MAX_HIDDEN];
   feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations, activations, units);
 
   int classification = 0;
@@ -304,11 +328,11 @@ int classify_2layer(double sample[INPUTS],int label,double (*sigmoid)(double inp
       classification = cls;
   }
 
-  free(activations);
+  // free(activations);
   // if(0)
   // return(0);   	// <---	This should return the class for this sample
   return classification;
-  return(0);		// <--- Should return the class for this sample  
+  // return(0);		// <--- Should return the class for this sample  
 }
 
 
@@ -347,18 +371,18 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input), 
    **************************************************************************************************/
   
   for (int i = 0; i < units; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < INPUTS; j++) {
-      sum += sample[j]*weights_ih[j][i];
-    }
-    h_activations[i] = sigmoid(sum*SIGMOID_SCALE);
+    double sum = sumStuff2(sample, weights_ih, i);
+    // for (int j = 0; j < INPUTS; j++) {
+    //   sum += sample[j]*weights_ih[j][i];
+    // }
+    h_activations[i] = sigmoid(sum*(SIGMOID_SCALE*(MAX_HIDDEN/units)));
   }
 
   for (int i = 0; i < OUTPUTS; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < units; j++) {
-      sum += h_activations[j]*weights_ho[j][i];
-    }
+    double sum = sumStuff3(h_activations, weights_ho, i, units);
+    // for (int j = 0; j < units; j++) {
+    //   sum += h_activations[j]*weights_ho[j][i];
+    // }
     activations[i] = sigmoid(sum*(SIGMOID_SCALE*(MAX_HIDDEN/units)));
   }
 
@@ -418,7 +442,7 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
   // Calculate adjustment in weights
   double weights_update2[units][OUTPUTS];
   for (int j = 0; j < OUTPUTS; j++) {
-    double sum = sumStuff(h_activations, weights_ho, j);
+    double sum = sumStuff3(h_activations, weights_ho, j, units);
     for (int i = 0; i < units; i++){
       double derivative = activation_derivative(sum, units);
       weights_update2[i][j] = ALPHA * derivative * ((double)(j==label) - activations[j]) * h_activations[i];
@@ -433,27 +457,24 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
   for (int j = 0; j < units; j++) {
     double sum = sumStuff2(sample, weights_ih, j);
     for (int i = 0; i < INPUTS; i++){
-      double derivative = activation_derivative2(sum);
+      double derivative = activation_derivative(sum, units);
       double ec = 0.0;
       for (int k = 0; k < OUTPUTS; k++) {
-        ec += weights_ho[j][k] *  activation_derivative(h_activations[i]*weights_ho[j][k], units) * h_activations[k];
+        ec += weights_ho[j][k] * ((double)(k==label) - activations[k]) * activation_derivative(sumStuff3(h_activations, weights_ho, k, units), units);
       }
       weights_update[i][j] = ALPHA * derivative * ec * sample[i];
     }
   }
 
   // Add it to weights
-  for (int i = 0; i < units; i++) {
-    for (int j = 0; j < OUTPUTS; j++) {
-      weights_ho[i][j] += weights_update2[i][j];
-    }
-  }
-
-  
-  // Add it to weights
   for (int i = 0; i < INPUTS; i++) {
-    for (int j = 0; j < units; j++) {
-      weights_ih[i][j] += weights_update[i][j];
+    for (int j = 0; j < INPUTS; j++) {
+      if (j < units) {
+        weights_ih[i][j] += weights_update[i][j];
+      }
+      if (i < units && j < OUTPUTS) {
+        weights_ho[i][j] += weights_update2[i][j];
+      }
     }
   }
 
@@ -471,7 +492,16 @@ double logistic(double input)
 double sumStuff(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int output)
 {
   double sum = 0.0;
-  for (int i = 0; i < OUTPUTS; i++) {
+  for (int i = 0; i < INPUTS; i++) {
+    sum += sample[i]*weights_io[i][output];
+  }
+  return sum;
+}
+
+double sumStuff3(double sample[INPUTS], double weights_io[INPUTS][OUTPUTS], int output, int units)
+{
+  double sum = 0.0;
+  for (int i = 0; i < units; i++) {
     sum += sample[i]*weights_io[i][output];
   }
   return sum;
