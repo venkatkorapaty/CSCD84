@@ -194,18 +194,18 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     *        the network. You will need to find a way to figure out which sigmoid function you're
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
-  double (*activation_derivative)(double);
+  // double (*activation_derivative)(double);
 
-  // Method for determining which derivative to use
-  double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
-  double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
+  // // Method for determining which derivative to use
+  // double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
+  // double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
 
-  if (distToLogistic < distToTanh) {
-    activation_derivative = &dLog;
-  }
-  else {
-    activation_derivative = &dTanh;
-  }
+  // if (distToLogistic < distToTanh) {
+  //   activation_derivative = &dLog;
+  // }
+  // else {
+  //   activation_derivative = &dTanh;
+  // }
 
   // Calculate adjustment in weights
   double weights_update[INPUTS][OUTPUTS];
@@ -422,21 +422,21 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
     *        using. Then use the procedure discussed in lecture to compute weight updates.
     * ************************************************************************************************/
 
-  double (*activation_derivative)(double, int);
-  double (*activation_derivative2)(double);
+  // double (*activation_derivative)(double, int);
+  // double (*activation_derivative2)(double);
 
-  // Method for determining which derivative to use
-  double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
-  double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
+  // // Method for determining which derivative to use
+  // double distToLogistic = fabs(sigmoid(0.55) - logistic(0.55));
+  // double distToTanh = fabs(sigmoid(0.55) - tanh(0.55));
 
-  if (distToLogistic < distToTanh) {
-    activation_derivative = &dLog2;
-    activation_derivative2 = &dLog;
-  }
-  else {
-    activation_derivative = &dTanh2;
-    activation_derivative2 = &dTanh;
-  }
+  // if (distToLogistic < distToTanh) {
+  //   activation_derivative = &dLog2;
+  //   activation_derivative2 = &dLog;
+  // }
+  // else {
+  //   activation_derivative = &dTanh2;
+  //   activation_derivative2 = &dTanh;
+  // }
 
   double sums_l[OUTPUTS];
   // Calculate adjustment in weights
