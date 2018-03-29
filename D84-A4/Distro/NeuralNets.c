@@ -215,10 +215,34 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS], double 
     for (int i = 0; i < INPUTS; i++) {
       // double derivative = activation_derivative(sumStuff(sample, weights_io, j));
       weights_update[i][j] = derivative * sample[i];
+      i++;
+      weights_update[i][j] = derivative * sample[i];
+      i++;
+      weights_update[i][j] = derivative * sample[i];
+      i++;
+      weights_update[i][j] = derivative * sample[i];
+      i++;
+      weights_update[i][j] = derivative * sample[i];
     }
   }
   // Add it to weights
   for (int i = 0; i < INPUTS; i++) {
+    for (int j = 0; j < OUTPUTS; j++) {
+      weights_io[i][j] += weights_update[i][j];
+    }
+    i++;
+    for (int j = 0; j < OUTPUTS; j++) {
+      weights_io[i][j] += weights_update[i][j];
+    }
+    i++;
+    for (int j = 0; j < OUTPUTS; j++) {
+      weights_io[i][j] += weights_update[i][j];
+    }
+    i++;
+    for (int j = 0; j < OUTPUTS; j++) {
+      weights_io[i][j] += weights_update[i][j];
+    }
+    i++;
     for (int j = 0; j < OUTPUTS; j++) {
       weights_io[i][j] += weights_update[i][j];
     }
@@ -466,16 +490,17 @@ void backprop_2layer(double sample[INPUTS],double h_activations[MAX_HIDDEN], dou
     for (int k = 0; k < OUTPUTS; k++) {
         ec += weights_ho[j][k] * sums_l[k];
     }
+    double x = derivative * ec;
     for (int i = 0; i < INPUTS; i++){
-      weights_update[i][j] = derivative * ec * sample[i];
+      weights_update[i][j] = x * sample[i];
       i++;
-      weights_update[i][j] = derivative * ec * sample[i];
+      weights_update[i][j] = x * sample[i];
       i++;
-      weights_update[i][j] = derivative * ec * sample[i];
+      weights_update[i][j] = x * sample[i];
       i++;
-      weights_update[i][j] = derivative * ec * sample[i];
+      weights_update[i][j] = x * sample[i];
       i++;
-      weights_update[i][j] = derivative * ec * sample[i];
+      weights_update[i][j] = x * sample[i];
     }
   }
 
