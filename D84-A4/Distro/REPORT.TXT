@@ -252,23 +252,23 @@ doesn't work, or what problems exist.
 	
         	Complete/Working	Partial		Not done
 
-Logistic
+Logistic			x
  activation
  
-Tanh
+Tanh				x
  activation
 
-1L Feed-forward  
+1L Feed-forward  	x
 
-1L Backprop
+1L Backprop			x
 
-1L Classify
+1L Classify			x
 
-2L Feed-forward
+2L Feed-forward		x
 
-2L Backprop
+2L Backprop			x
 
-2L Classify
+2L Classify			x
 _____________________________________________________
 
 Marking:
