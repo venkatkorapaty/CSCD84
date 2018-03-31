@@ -10,16 +10,16 @@ mark.
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Bisesar, Shevlin
 
 
 Student Name 2 (last, first):
 
-Student number 1:
+Student number 1: 1001307766
 
 Student number 2:
 
-UTORid 1:
+UTORid 1: bisesars
 
 UTORid 2:
 
@@ -29,7 +29,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-    Signed: _(student 1 name)__      _(student 2 name)_
+    Signed: _Shevlin Bisesar__      _(student 2 name)_
 
 
 (-5 marks for failing to provide the identifying
@@ -43,40 +43,185 @@ but explain carefully when needed.
                function. 
 
 	       Copy/paste the reported classification rates for:
+
 	 	
 	       Training data (last training round):
+				Digit 0, correct classification rate=0.929889
+				Digit 1, correct classification rate=0.965157
+				Digit 2, correct classification rate=0.784585
+				Digit 3, correct classification rate=0.839216
+				Digit 4, correct classification rate=0.878914
+				Digit 5, correct classification rate=0.638636
+				Digit 6, correct classification rate=0.922131
+				Digit 7, correct classification rate=0.891304
+				Digit 8, correct classification rate=0.773663
+				Digit 9, correct classification rate=0.742004
+				Average correct classification rate: 0.836550
 
 	       Testing data:
+				Digit 0, correct classification rate=0.959184
+				Digit 1, correct classification rate=0.970044
+				Digit 2, correct classification rate=0.792636
+				Digit 3, correct classification rate=0.863366
+				Digit 4, correct classification rate=0.877800
+				Digit 5, correct classification rate=0.653587
+				Digit 6, correct classification rate=0.921712
+				Digit 7, correct classification rate=0.880350
+				Digit 8, correct classification rate=0.780287
+				Digit 9, correct classification rate=0.790882
+				Average correct classification rate: 0.848985
 
 2 .- (1 marks) Repeat the process using the hyperbolic tangent activation
 	       function.
+		   
+		   Training Data:
+				Digit 0, correct classification rate=0.934043
+				Digit 1, correct classification rate=0.984014
+				Digit 2, correct classification rate=0.776151
+				Digit 3, correct classification rate=0.844860
+				Digit 4, correct classification rate=0.881288
+				Digit 5, correct classification rate=0.704641
+				Digit 6, correct classification rate=0.940928
+				Digit 7, correct classification rate=0.871094
+				Digit 8, correct classification rate=0.754639
+				Digit 9, correct classification rate=0.777344
+				Average correct classification rate: 0.846900
+				
+			Testing Data:
+				Digit 0, correct classification rate=0.958163
+				Digit 1, correct classification rate=0.970044
+				Digit 2, correct classification rate=0.776163
+				Digit 3, correct classification rate=0.890099
+				Digit 4, correct classification rate=0.894094
+				Digit 5, correct classification rate=0.691704
+				Digit 6, correct classification rate=0.917537
+				Digit 7, correct classification rate=0.849222
+				Digit 8, correct classification rate=0.767967
+				Digit 9, correct classification rate=0.842418
+				Average correct classification rate: 0.855741
 
 
 3 .- (1 marks) Which type of activation function yielded the best classification
 	       results? which one learned faster?
+		   The hyperbolic tangent function yielded both the best classification and it learned faster.
 
 4 .- (1 marks) Train a 2-layer network with hyperbolic-tangent activation, using
 	       150 hidden units. Report the classification rates on training and
 	       testing data just as for 1) and 2).	       
+		   
+		Training Data:
+			Digit 0, correct classification rate=0.952577
+			Digit 1, correct classification rate=0.966102
+			Digit 2, correct classification rate=0.901437
+			Digit 3, correct classification rate=0.893971
+			Digit 4, correct classification rate=0.912951
+			Digit 5, correct classification rate=0.923937
+			Digit 6, correct classification rate=0.966292
+			Digit 7, correct classification rate=0.942446
+			Digit 8, correct classification rate=0.916667
+			Digit 9, correct classification rate=0.933063
+			Average correct classification rate: 0.930944
+			
+		Testing Data:
+			Digit 0, correct classification rate=0.976531
+			Digit 1, correct classification rate=0.977093
+			Digit 2, correct classification rate=0.903101
+			Digit 3, correct classification rate=0.918812
+			Digit 4, correct classification rate=0.917515
+			Digit 5, correct classification rate=0.906951
+			Digit 6, correct classification rate=0.957203
+			Digit 7, correct classification rate=0.915370
+			Digit 8, correct classification rate=0.915811
+			Digit 9, correct classification rate=0.944500
+			Average correct classification rate: 0.933288
 	       
 5 .- (1 marks) Same as 4), except use 10 hidden units instead
 
+		Training Data:
+			Digit 0, correct classification rate=0.971537
+			Digit 1, correct classification rate=0.956284
+			Digit 2, correct classification rate=0.856275
+			Digit 3, correct classification rate=0.820268
+			Digit 4, correct classification rate=0.902542
+			Digit 5, correct classification rate=0.815965
+			Digit 6, correct classification rate=0.957198
+			Digit 7, correct classification rate=0.898129
+			Digit 8, correct classification rate=0.844156
+			Digit 9, correct classification rate=0.814042
+			Average correct classification rate: 0.883640
+		
+		Testing Data:
+			Digit 0, correct classification rate=0.979592
+			Digit 1, correct classification rate=0.977093
+			Digit 2, correct classification rate=0.847868
+			Digit 3, correct classification rate=0.868317
+			Digit 4, correct classification rate=0.912424
+			Digit 5, correct classification rate=0.869955
+			Digit 6, correct classification rate=0.941545
+			Digit 7, correct classification rate=0.875486
+			Digit 8, correct classification rate=0.809035
+			Digit 9, correct classification rate=0.884044
+			Average correct classification rate: 0.896536
+
 6 .- (1 marks) Same as 5), except use 3 hidden units instead
+
+		Training Data:
+			Digit 0, correct classification rate=0.224101
+			Digit 1, correct classification rate=0.993355
+			Digit 2, correct classification rate=0.039623
+			Digit 3, correct classification rate=0.000000
+			Digit 4, correct classification rate=0.000000
+			Digit 5, correct classification rate=0.000000
+			Digit 6, correct classification rate=0.768627
+			Digit 7, correct classification rate=0.949020
+			Digit 8, correct classification rate=0.000000
+			Digit 9, correct classification rate=0.000000
+			Average correct classification rate: 0.297473
+		
+		Testing Data:
+			Digit 0, correct classification rate=0.000000
+			Digit 1, correct classification rate=0.993833
+			Digit 2, correct classification rate=0.000000
+			Digit 3, correct classification rate=0.000000
+			Digit 4, correct classification rate=0.000000
+			Digit 5, correct classification rate=0.000000
+			Digit 6, correct classification rate=0.970772
+			Digit 7, correct classification rate=0.911479
+			Digit 8, correct classification rate=0.000000
+			Digit 9, correct classification rate=0.000000
+			Average correct classification rate: 0.287608
 
 7 .- (4 marks) Comment on the experiments in 4, 5, and 6, and give your conclusion
 	       regarding the effect of the number of hidden units on classification
 	       accuracy. 
-
+		
+			If the number of units in the hidden layer is too low, it sends too little information to the outer layer, which then skews the results
+			making it harder to classify the result correctly.  If the number is very high, we get better results but the success rate gained is not that great compared to the amount of time
+			we have to spend doing the extra computations.
+		
 	       What is the network with 3 hidden telling you about this classification
 	       problem?
+		   
+		   It's telling us that we can only recognize 3 numbers (2, 6 and 7), so perhaps the 3 units contained in the hidden layer became features that recognize some common thing in those numbers
 
 8 .- (5 marks) Train the best performing network you can. Use any activation function
 	       you wish, and set the number of hidden units so as to achieve the best
 	       performance.
 
-	       Number of hidden units used:
+	       Number of hidden units used: 785
 
 	       Classification rate on testing data:
+				Digit 0, correct classification rate=0.989796
+				Digit 1, correct classification rate=0.989427
+				Digit 2, correct classification rate=0.968023
+				Digit 3, correct classification rate=0.972277
+				Digit 4, correct classification rate=0.960285
+				Digit 5, correct classification rate=0.961883
+				Digit 6, correct classification rate=0.969729
+				Digit 7, correct classification rate=0.959144
+				Digit 8, correct classification rate=0.967146
+				Digit 9, correct classification rate=0.958375
+				Average correct classification rate: 0.969609
 
 9 .- (5 marks) Describe how you would build a network to play the cat
 	        and mouse game (move the mouse to help it survive).
