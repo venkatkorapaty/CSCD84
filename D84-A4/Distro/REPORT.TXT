@@ -13,15 +13,15 @@ ________________________________________________
 Student Name 1 (last, first): Bisesar, Shevlin
 
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Korapaty, Venkat
 
 Student number 1: 1001307766
 
-Student number 2:
+Student number 2: 1001365060
 
 UTORid 1: bisesars
 
-UTORid 2:
+UTORid 2: korapaty
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -29,7 +29,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-    Signed: _Shevlin Bisesar__      _(student 2 name)_
+    Signed: _Shevlin Bisesar__      _Venkat Korapaty_
 
 
 (-5 marks for failing to provide the identifying
@@ -232,6 +232,18 @@ but explain carefully when needed.
 		  neurons and what they encode)
 		- Describe the error function
 		- How many layers should you use?
+
+	We would do it similar to reinforcement learning with Feature-based Q-Learning:
+	Our input layer would be features of our data. So, if we want
+	to train the mouse on a dynamic environment, we would need to get
+	features about our current state that the mouse/cheese(s)/cat(s) are in.
+	If we selected n features, we would need an input layer of size of n.
+	Our output layer would have size 5. Each output would have the following meaning:
+	go up, right, left, down, stay there.
+	Our error function would measure whether making a certain move minimizes the amount
+	of cheese we have left. So, we could look at minimizing numCheeseLeft*(distToCheeseFromMouse)^2.
+	The number of layers shouldn't be too many, as there's only so much information we can gain from
+	our features, 2 at most should suffice.
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
